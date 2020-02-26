@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<!--TODO: Suoni, prevenzione click doppi/accidentali, statistiche -->
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+<meta name="theme-color" id="theme-color" content="#000000"/>
+<link rel="shortcut icon" href="favicon.ico" />
+<link rel="icon" type="image/png" href="favicon.png" />
+<title>Il Ciarnuro Round Timer</title>
+<style type="text/css">
+/*---BASIC STUFF AND FONTS---*/
+@font-face {
+	font-family: 'Xolonium';
+	src: url("fonts/xolonium-regular.woff") format("woff");
+}
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	src: url("fonts/opensans-regular.woff") format('woff');
+}
+@font-face {
+	font-family: 'Open Sans Bold';
+	font-style: bold;
+	src: url("fonts/opensans-bold.woff") format('woff');
+}
+@font-face {
+	font-family: 'Vera Mono Timer';
+	font-style: normal;
+	src: url("fonts/veramono-timer-regular.woff") format('woff');
+}
+html,body{
+    margin:0;
+    padding:0;
+    border:none;
+    overflow:hidden;
+    background:#000000;
+    color:#FFFFFF;
+    text-shadow:0.05em 0.05em 0.125em #000000;
+    font-family:'Open Sans',sans-serif;
+}
+#loadOverlay{
+    position:fixed;
+    top:0; left:0; width:100vw; height:100vh;
+    z-index:99999;
+    background:#000000;
+    display:none;
+}
+*{
+    box-sizing:border-box;
+}
+::-moz-focus-inner { 
+  border: 0;
+  padding: 0;
+}
+.bold{
+    font-weight:bold;
+}
+/*---CLICK EFFECT---*/
+div.clickEffect{
+	position:fixed;
+	box-sizing:border-box;
+	border-style:solid;
+	border-color:#FFFFFF;
+	border-radius:50%;
+	animation:clickEffect 0.2s ease-out;
+	z-index:99999;
+}
+@keyframes clickEffect{
+	0%{
+		opacity:1;
+		width:0.5em; height:0.5em;
+		margin:-0.25em;
+		border-width:0.5em;
+	}
+	100%{
+		opacity:0.2;
+		width:5em; height:5em;
+		margin:-2.5em;
+		border-width:0.03em;
+	}
+}
+/*---SLIDES SYSTEM----*/
+div.slide{
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background:#000000;
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
+}
+div.slide > div.upper{
+    position:absolute;
+    top:0; left:0; width:100%; height:calc(100% - 4em);
+    overflow:auto;
+}
+div.slide > div.lower{
+    position:absolute;
+    bottom:0; left:0; width:100%; height:4em;
+    overflow-x:auto;
+    overflow-y:hidden;
+    line-height:4em;
+    box-shadow: 0 0 1em 0.1em rgba(0,0,0,0.5);
+    background: rgba(170,170,170,0.5);
+    backdrop-filter: blur(5em);
+    white-space: nowrap;
+    text-align:center;
+}
+div.slide > div.lower > *.left{
+    float:left;
+}
+div.slide > div.lower > *.right{
+    float:right;
+}
+div.slide > div.full{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    overflow:auto;
+}
+div.slide > div > div.content{
+    width:100%;
+    max-width:60em;
+    margin:0 auto;
+    padding:0 1em;
+}
+div.slide.visible{
+    animation: fadeIn 0.4s linear;
+    z-index:99;
+}
+div.slide.invisible{
+    animation: fadeOut 0.4s linear;
+    top:1000vh;
+    z-index:1;
+}
+@keyframes fadeIn{
+    0%{
+        opacity:0;
+    }
+    100%{
+        opacity:1;
+    }
+}
+@keyframes fadeOut{
+    0%{
+        opacity:1;
+        top:0;
+        z-index:99;
+    }
+    100%{
+        opacity:0;
+        top:0;
+        z-index:99;
+    }
+}
+div.title{
+    display:block;
+    font-size:2em;
+    margin:0 0 0.5em 0;
+    padding: 0.5em 0 0.1em 0;
+    border-bottom:0.1em solid #FFFFFF;
+    font-family:'Xolonium',sans-serif;
+}
+/*---FORMS---*/
+form{
+    display:block;
+    text-align:center;
+}
+form > div.entry{
+    display:block;
+    margin:1em 0;
+    width:100%;
+}
+form > div.entry > div.entryName{
+    display:inline-block;
+    left:0; width:25%;
+    padding-right:1em;
+    text-align:left;
+}
+form > div.entry > *.entryValue{
+    display:inline-block;
+    right:0; width:70%;
+}
+@media all and (max-width: 40em){
+    form > div.entry > div.entryName,form > div.entry > *.entryValue{
+        display:block;
+        width:100%;
+        margin:0;
+    }
+}
+form > div.actions{
+    display:block;
+    width:100%;
+    padding: 0; margin:1em 0;
+    text-align:center;
+}
+input[type="text"],input[type="date"],select{
+    background:rgba(64,64,64,0.5);
+    color:#FFFFFF;
+    border:none;
+    border-bottom:0.2em solid #606060;
+    border-radius:0 0 0.2em 0.2em;
+    padding:0.5em 1em;
+    transition: border 0.1s linear;
+}
+input[type="text"]:active,input[type="text"]:focus,input[type="date"]:active,input[type="date"]:focus,select:focus{
+    border-bottom:0.2em solid #8080FF;
+    background:rgba(64,64,64,0.5);
+}
+input[type="text"]:disabled,input[type="date"]:disabled,select:disabled{
+    background:rgba(64,64,64,0.35);
+    color:#AAAAAA;
+}
+option{
+    background:#000000;
+    color:#FFFFFF;
+}
+input[type="button"]{
+    min-width:8em;
+    padding: 0.7em 2em;
+    margin:0.5em;
+    color:#FFFFFF;
+    background:#404040;
+    border:none;
+    border-radius:0.1em;
+    border-bottom:0.2em solid #202020;
+    box-shadow: 0 0.1em 0.4em 0.1em rgba(64,64,64,0.2);
+    transition:background 0.1s linear, border 0.1s linear;
+    text-transform:uppercase;
+    font-family: 'Open Sans Bold', 'Open Sans', sans-serif;
+    font-weight:bold;
+    cursor:pointer;
+}
+input[type="button"].small{
+    min-width:3em;
+    padding:0.7em 1em;
+}
+input[type="button"]:focus{
+    background:#404040;
+    border-bottom:0.2em solid #8080FF;
+}
+input[type="button"]:active{
+    background:#808080;
+    border-bottom:0.2em solid #8080FF;
+}
+/*---LISTS---*/
+div.list > div.entry{
+    display:flex;
+	align-items:center;
+	min-height:5em;
+	width:100%;
+	border-bottom:1px solid #CCCCCC;
+	color:#FFFFFF;
+	overflow:hidden;
+	word-wrap:break-word;
+	position:relative;
+}
+div.list > div.entry > div.rightButtons{
+	position:relative;
+	width:5em;
+	left:1.5em;
+	text-align:right;
+}
+div.list > div.entry > div.content{
+	position:relative;
+	width:calc(100% - 10em);
+	left:1.5em;
+	line-height:1.25em;
+}
+div.list > div.entry > img.icon{
+	position:relative;
+	left:0.5em;
+	height:3em;
+	width:3em;
+	border:0.15em solid #404040;
+}
+div.list > div.entry > img.icon.important{
+    border:0.15em solid #FFFF80;
+}
+div.list > div.entry > div.clickOverlay{
+	position:absolute;
+	top:0; left:0; width:100%; height:100%;
+	cursor:pointer;
+	border:none;
+	transition:border 0.1s linear;
+}
+div.list > div.entry > div.clickOverlay:focus{
+    border:0.15em solid #8080FF;
+}
+div.list > div.entry > div.rightButtons > a.button{
+	display:inline-block;
+	width:2.3em;
+	height:2.3em;
+	vertical-align:middle;
+	cursor:pointer;
+	border:0.15em solid #404040;
+	transition:border 0.1s linear;
+}
+div.list > div.entry > div.rightButtons > a.button:focus{
+    border:0.15em solid #8080FF;
+}
+div.list > div.entry > div.rightButtons > a.button.edit{
+    background:url('pics/edit.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
+div.list > div.entry > div.rightButtons > a.button.remove{
+    background:url('pics/remove.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
+div.list > div.entry > div.content > div.small{
+    font-size:0.85em;
+    color:#FFFFFFAA;
+}
+/*---MODALS---*/
+div.modal{
+    display:flex;
+    position:fixed;
+    top:0; left:0; width:100vw; height: 100vh;
+    background:rgba(0,0,0,0.35);
+    backdrop-filter: blur(0.4em);
+}
+div.modal > div.window{
+    background:#303030;
+    width:100%;
+    max-width:40em;
+    padding:1em 1em 0.5em 1em;;
+    box-shadow:0 0 10em 10em rgba(0,0,0,0.15), 0 0 0.5em 0.5em rgba(0,0,0,0.15);
+    border-radius:0.2em;
+    margin:auto auto;
+}
+div.modal > div.window > div.message{
+    margin-bottom:3em;
+}
+div.modal > div.window > div.buttons{
+    text-align:right;
+}
+div.modal.visible{
+    animation: modalFadeIn linear 0.2s;
+    z-index:999;
+}
+div.modal.invisible{
+    animation: modalFadeOut linear 0.2s;
+    top:1000vh;
+    z-index:1;
+}
+@keyframes modalFadeIn{
+    0%{
+        opacity:0;
+    }
+    100%{
+        opacity:1;
+    }
+}
+@keyframes modalFadeOut{
+    0%{
+        opacity:1;
+        top:0;
+        z-index:999;
+    }
+    100%{
+        opacity:0;
+        top:0;
+        z-index:999;
+    }
+}
+/*---TIMERS---*/
+div.mainTimerContainer{
+    display:block;
+    width:100%;
+    text-align:center;
+    margin:2em 0 1em 0;
+    padding:0 0 1em 0;
+    border-bottom:0.2em solid #FFFFFF;
+}
+div.smallTimers{
+    display:block;
+    width:100%;
+    text-align:center;
+}
+div.smallTimerContainer{
+    display:inline-block;
+    width:10em;
+    text-align:center;
+    border-right:0.1em solid #FFFFFF;
+    overflow:hidden;
+}
+div.smallTimerContainer:last-of-type{
+    border:none;
+}
+div.timer{
+    font-family:'Vera Mono Timer',monospace;
+    text-align:center;
+    overflow:show;
+    white-space:nowrap;
+    font-size:1.35em;
+}
+div.mainTimerContainer > div.timer{
+    font-size:3em;
+}
+div.smallTimerContainer > div.timerName{
+    font-size:1.05em;
+    text-align:center;
+}
+div.banner{
+    text-align:center;
+    font-size:1.25em;
+    margin-bottom:1em;
+    font-weight:bold;
+}
+</style>
+<script type="text/javascript">
+/*---BASIC FUNCTIONS---*/
+function I(id){return document.getElementById(id);}
+var leaveConfirmRequired=false;
+window.onbeforeunload=function(){
+    return leaveConfirmRequired?true:null;
+}
+String.prototype.isBlank=function(){
+	return !this || /^\s*$/.test(this);
+}
+/*---SLIDES SYSTEM---*/
+function toSlide(id){
+    id=I(id);
+    if(!id){console.error("Slide not found"); return;}
+    var slides=document.getElementsByClassName("slide");
+    for(var i=0;i<slides.length;i++){
+        slides[i].className="slide invisible";
+    }
+    id.className="slide visible";
+}
+/*---MODALS---*/
+function showModal(message,buttons){
+    try{
+        var m=document.createElement("div");
+        m.className="modal visible";
+        var w=document.createElement("div");
+        w.className="window";
+        var d=document.createElement("div");
+        d.className="message";
+        d.innerText=message;
+        w.appendChild(d);
+        d=document.createElement("div");
+        d.className="buttons";
+        for(var i=0;i<buttons.length;i++){
+            var b=document.createElement("input");
+            b.type="button";
+            b.value=buttons[i].text;
+            b.onclick=function(modal,action){
+                return function(){
+                    try{
+                        if(!action()) return;
+                    }catch(t){
+                        console.error("Button action exception: "+t);
+                        return;
+                    }
+                    modal.className="modal invisible";
+                    modal.onanimationend=function(thisModal){return function(){I("modalContainer").removeChild(thisModal);}}(modal);
+                }
+            }(m,buttons[i].action);
+            d.appendChild(b);
+        }
+        w.appendChild(d);
+        m.appendChild(w);
+        I("modalContainer").appendChild(m);
+        d.childNodes[0].focus();
+    }catch(t){
+        console.log("Failed to generate modal: "+x);
+    }
+}
+/*---FOCUS TRAP---*/
+var focusTrapEnabled=true, FOCUS_TRAP_MODE=1; //0=no trapping, 1=unfocus if not current slide/modal, 2=always force focus on an element inside current slide/modal if possible
+window.onblur=function(){focusTrapEnabled=false;}
+window.onfocus=function(){focusTrapEnabled=true;}
+setInterval(function(){
+    if(FOCUS_TRAP_MODE==0||!focusTrapEnabled) return;
+    var modals=I("modalContainer");
+    var trapInside=null;
+    if(modals.childNodes.length==0){
+        if(document.activeElement===document.body) return;
+        trapInside=document.getElementsByClassName("slide visible")[0];
+    }else{
+        trapInside=modals.childNodes[modals.childNodes.length-1];
+    }
+    if(!trapInside.contains(document.activeElement)){
+        document.activeElement.blur();
+        if(FOCUS_TRAP_MODE==2){
+            try{trapInside.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="button"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), div.clickOverlay[tabIndex="0"]')[0].focus();}catch(e){trapInside.focus();}
+        }
+    }
+},1);
+/*---SOUND FX SYSTEM---*/
+var playSoundFx=null;
+var soundSystemStarted=false;
+var SILENCE="data:audio/ogg;base64,T2dnUwACAAAAAAAAAAAZC122AAAAAHl54HIBE09wdXNIZWFkAQE4AYC7AAAAAABPZ2dTAAAAAAAAAAAAABkLXbYBAAAAO0wNlAE+T3B1c1RhZ3MNAAAATGF2ZjU4LjI5LjEwMAEAAAAdAAAAZW5jb2Rlcj1MYXZjNTguNTQuMTAwIGxpYm9wdXNPZ2dTAAT4EwAAAAAAABkLXbYCAAAANBo2TwYHBgcIBgcIC/H5FoXgCAp4sw7GCAs9kdEogAgKwL+y735ICAp4sw7GCArAv7Lu4w==";
+function initSoundSystem(){
+    if(soundSystemStarted) return;
+    var a=document.createElement("audio");
+    a.src=SILENCE;
+    a.onended=function(){
+        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx);
+        playSoundFx=null;
+        a.play();
+    };
+    a.onerror=function(){
+        a.src=SILENCE;
+        a.play();
+    };
+    a.play();
+    soundSystemStarted=true;
+}
+/*---BASIC GAME STUFF---*/
+var currentGameDate=null,roundDuration=ROUNDDURATION_DEFAULT,maxRounds=MAXROUNDS_DEFAULT;
+var RACES={
+    "umani":{
+        name:"Umani",
+        ages:[4,13,26,50,80,136]
+    },
+    "krentoriani":{
+        name:"Krentoriani",
+        ages:[6,15,22,56,72,102]
+    },
+    "sauniArcaici":{
+        name:"Sauni arcaici",
+        ages:[14,20,39,68,94,123]
+    },
+    "sauniEletti":{
+        name:"Sauni eletti",
+        ages:[15,22,41,76,105,140]
+    },
+    "quark":{
+        name:"Qüark",
+        ages:[18,73,138,259,302,352]
+    },
+    "pravosianiGuerrieri":{
+        name:"Pravosiani guerrieri",
+        ages:[3,7,12,37,53,69]
+    },
+    "pravosianiGuidespirituali":{
+        name:"Pravosiani guide spirituali",
+        ages:[11,22,59,169,197,242]
+    },
+    "veriSyviar":{
+        name:"Veri Syviar",
+        ages:[12,25,73,189,220,252]
+    },
+    "ivosiani":{
+        name:"Ivosiani",
+        ages:[6,15,22,56,72,102]
+    }
+};
+var AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
+var players=[];
+var playerIdCtr=1;
+function Player(playerName,characterName,race,dob,team,firstPlayer){
+    this.playerId=playerIdCtr++;
+    this.playerName=playerName;
+    this.characterName=characterName;
+    this.race=race;
+    this.dob=dob;
+    this.team=team;
+    this.firstPlayer=firstPlayer;
+    this.alwaysPlayedSolo=team==null;
+    this.timePlayed=0;
+}
+Player.prototype={
+    constructor:Player,
+    getAge:function(){
+        return new Date(currentGameDate-this.dob).getFullYear()-1970;
+    },
+    isOldEnoughToPlay:function(){
+        return this.getAge()>=RACES[this.race].ages[0];
+    },
+    isSenile:function(){
+        return this.getAge()>=RACES[this.race].ages[RACES[this.race].ages.length-1];
+    },
+    getAgeTier:function(){
+        var ages=RACES[this.race].ages, a=this.getAge();
+        var i;
+        for(i=0;i<ages.length;i++){
+            if(a<ages[i]) return i;
+        }
+        return i;
+    },
+    getAgeTierName:function(){
+        var t=this.getAgeTier();
+        return t==-1?null:AGE_NAMES[t];
+    },
+    reset:function(){
+        this.alwaysPlayedSolo=this.team==0;
+        this.timePlayed=0;
+    }
+}
+function getPlayersByTeamId(id){
+    var ret=[];
+    for(var i=0;i<players.length;i++) if(players[i].team==id) ret.push(players[i]);
+    return ret;
+}
+var teams=[];
+var teamIdCtr=1;
+function Team(teamName){
+    this.teamId=teamIdCtr++;
+    this.teamName=teamName;
+}
+function getTeamById(id){
+    for(var i=0;i<teams.length;i++) if(teams[i].teamId==id) return teams[i];
+    return null;
+}
+function saveConfigToLocalStorage(){
+    try{
+        var state={
+            version:1,
+            currentGameDate:currentGameDate.toISOString().split("T")[0],
+            roundDuration:roundDuration,
+            maxRounds:maxRounds,
+            teams:[],
+            teamIdCtr:teamIdCtr,
+            players:[],
+            playerIdCtr:playerIdCtr
+        };
+        for(var i=0;i<teams.length;i++){
+            state.teams[i]={
+                teamId:teams[i].teamId,
+                teamName:teams[i].teamName
+            };
+        }
+        for(var i=0;i<players.length;i++){
+            state.players[i]={
+                playerId:players[i].playerId,
+                playerName:players[i].playerName,
+                characterName:players[i].characterName,
+                race:players[i].race,
+                dob:players[i].dob.toISOString().split("T")[0],
+                team:players[i].team,
+                firstPlayer:players[i].firstPlayer
+            }
+        }
+        localStorage.ciarnuro=JSON.stringify(state);
+    }catch(t){console.log("Config not saved: "+t);}
+}
+function loadConfigFromLocalStorage(){
+    try{
+        if(!localStorage.ciarnuro) return;
+        var state=JSON.parse(localStorage.ciarnuro);
+        if(state.version!=1) return;
+        currentGameDate=new Date(state.currentGameDate);
+        roundDuration=Number(state.roundDuration);
+        maxRounds=Number(state.maxRounds);
+        teams=[];
+        for(var i=0;i<state.teams.length;i++){
+            var t=state.teams[i];
+            var n=new Team(t.teamName);
+            n.teamId=Number(t.teamId);
+            teams.push(n);
+        }
+        teamIdCtr=Number(state.teamIdCtr);
+        players=[];
+        for(var i=0;i<state.players.length;i++){
+            var p=state.players[i];
+            var n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer);
+            n.playerId=Number(p.playerId);
+            players.push(n);
+        }
+        playerIdCtr=Number(state.playerIdCtr);
+    }catch(t){console.log("Config not loaded: "+t);}
+}
+/*---WELCOME SCREEN---*/
+function newGame(){
+    initSoundSystem();
+    leaveConfirmRequired=true;
+    loadConfigFromLocalStorage();
+    I("maxRounds").value=maxRounds;
+    I("roundDuration").value=roundDuration;
+    if(currentGameDate!=null) I("startDate").value=currentGameDate.toISOString().split("T")[0];
+    checkMaxRounds();
+    checkRoundDuration();
+    checkStartDate(false);
+    toSlide("gameOptions");
+}
+function welcomeToPreviousGames(){
+    showModal("Non ancora implementato",[{text:"Ok",action:function(){return true}}]);
+}
+/*---NEW GAME SCREEN---*/
+var MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
+var ROUNDDURATION_MIN=10, ROUNDDURATION_MAX=1000, ROUNDDURATION_STEP=5, ROUNDDURATION_DEFAULT=10;
+function checkMaxRounds(){
+    var v;
+    try{
+        v=Number(I("maxRounds").value);
+        if(isNaN(v)) throw "";
+        if(v%MAXROUNDS_STEP!=0) v-=v%MAXROUNDS_STEP;
+        if(v<MAXROUNDS_MIN) v=MAXROUNDS_MIN; else if(v>MAXROUNDS_MAX) v=MAXROUNDS_MAX;
+    }catch(t){
+        v=MAXROUNDS_DEFAULT;
+    }
+    I("maxRounds").value=v;
+    return true;
+}
+function decMaxRounds(){
+    try{
+        var v=Number(I("maxRounds").value);
+        if(isNaN(v)) throw "";
+        v-=MAXROUNDS_STEP;
+        I("maxRounds").value=v;
+    }catch(t){}
+    checkMaxRounds();
+}
+function incMaxRounds(){
+    try{
+        var v=Number(I("maxRounds").value);
+        if(isNaN(v)) throw "";
+        v+=MAXROUNDS_STEP;
+        I("maxRounds").value=v;
+    }catch(t){}
+    checkMaxRounds();
+}
+function checkRoundDuration(){
+    var v;
+    try{
+        v=Number(I("roundDuration").value);
+        if(isNaN(v)) throw "";
+        if(v%ROUNDDURATION_STEP!=0) v-=v%ROUNDDURATION_STEP;
+        if(v<ROUNDDURATION_MIN) v=ROUNDDURATION_MIN; else if(v>ROUNDDURATION_MAX) v=ROUNDDURATION_MAX;
+    }catch(t){
+        v=ROUNDDURATION_DEFAULT;
+    }
+    I("roundDuration").value=v;
+    return true;
+}
+function decRoundDuration(){
+    try{
+        var v=Number(I("roundDuration").value);
+        if(isNaN(v)) throw "";
+        v-=ROUNDDURATION_STEP;
+        I("roundDuration").value=v;
+    }catch(t){}
+    checkRoundDuration();
+}
+function incRoundDuration(){
+    try{
+        var v=Number(I("roundDuration").value);
+        if(isNaN(v)) throw "";
+        v+=ROUNDDURATION_STEP;
+        I("roundDuration").value=v;
+    }catch(t){}
+    checkRoundDuration();
+}
+function checkStartDate(showError){
+    try{
+        var d=new Date(I("startDate").value);
+        if(!(d instanceof Date)||isNaN(d)) throw "";
+        return true;
+    }catch(e){
+        if(showError){
+            showModal("La data di inizio non è valida",[{text:"Ok",action:function(){I("startDate").focus();return true;}}]);
+        }else{
+            I("startDate").value=new Date();
+        }
+        return false;
+    }
+}
+function gameOptionsToWelcomeScreen(){
+    leaveConfirmRequired=false;
+    toSlide("welcome");
+}
+function gameOptionsToPlayerManagement(){
+    if(checkRoundDuration()&&checkMaxRounds()&&checkStartDate(true)){
+        roundDuration=Number(I("roundDuration").value);
+        maxRounds=Number(I("maxRounds").value);
+        currentGameDate=new Date(I("startDate").value);
+        populatePlayersAndTeamsList();
+        ingamePlayerManagement=false;
+        toSlide("playerManagement");
+    }
+}
+/*---PLAYER MANAGEMENT---*/
+function populatePlayersAndTeamsList(){
+    var list=I("players");
+    list.innerHTML="";
+    for(var i=0;i<players.length;i++){
+        var p=players[i];
+        var d=document.createElement("div");
+        d.className="entry";
+        var x=document.createElement("img");
+        x.className="icon"+(p.firstPlayer?" important":"");
+        x.src="pics/races/"+p.race+".png";
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.innerText=p.playerName;
+        var s=document.createElement("div");
+        s.className="small";
+        s.innerText=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        x.appendChild(s);
+        var s=document.createElement("div");
+        s.className="small";
+        s.innerText=p.team==0?"Solo":getTeamById(p.team).teamName;
+        x.appendChild(s);
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="rightButtons";
+        s=document.createElement("a");
+        s.className="button edit";
+        s.onclick=function(p){
+            return function(){
+                preparePlayerEditForm(p);
+                toSlide("editPlayer");     
+            }
+        }(p);
+        x.appendChild(s);
+        s=document.createElement("a");
+        s.className="button remove";
+        s.onclick=function(p){
+            return function(){
+                showModal("Sei sicuro di voler rimuovere "+p.playerName+"?",[
+                {text:"Si",action:function(){
+                    players.splice(players.indexOf(p),1);
+                    populatePlayersAndTeamsList();
+                    return true;
+                }},
+                {text:"No",action:function(){
+                    return true;
+                }}]);
+            }
+        }(p);
+        x.appendChild(s);
+        d.appendChild(x);
+        list.appendChild(d);
+    }
+    var d=document.createElement("div");
+    d.className="entry";
+    var x=document.createElement("img");
+    x.className="icon";
+    x.src="pics/addPlayer.png";
+    d.appendChild(x);
+    x=document.createElement("div");
+    x.className="content";
+    x.innerText="Nuovo giocatore";
+    d.appendChild(x);
+    x=document.createElement("div");
+    x.className="clickOverlay";
+    x.tabIndex="0";
+    x.onclick=function(){
+        preparePlayerEditForm(null);
+        toSlide("editPlayer");
+    };
+    x.onkeypress=function(e){
+        if(e.keyCode==13) x.onclick(); //pressed enter
+    }
+    d.appendChild(x);
+    list.appendChild(d);
+    list=I("teams");
+    list.innerHTML="";
+    for(var i=0;i<teams.length;i++){
+        var t=teams[i];
+        var d=document.createElement("div");
+        d.className="entry";
+        var x=document.createElement("img");
+        x.className="icon";
+        x.src="pics/addTeam.png";
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.innerText=t.teamName;
+        var s=document.createElement("div");
+        s.className="small";
+        s.innerText=getPlayersByTeamId(t.teamId).length+" giocatori";
+        x.appendChild(s);
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="rightButtons";
+        s=document.createElement("a");
+        s.className="button edit";
+        s.onclick=function(t){
+            return function(){
+                prepareTeamEditForm(t);
+                toSlide("editTeam");    
+            }
+        }(t);
+        x.appendChild(s);
+        s=document.createElement("a");
+        s.className="button remove";
+        s.onclick=function(t){
+            return function(){
+                showModal("Sei sicuro di voler rimuovere "+t.teamName+"?",[
+                {text:"Si",action:function(){
+                    var p=getPlayersByTeamId(t.teamId);
+                    for(var i=0;i<p.length;i++){
+                        p[i].team=0;
+                    }
+                    teams.splice(teams.indexOf(t),1);
+                    populatePlayersAndTeamsList();
+                    return true;
+                }},
+                {text:"No",action:function(){
+                    return true;
+                }}]);
+            }
+        }(t);
+        x.appendChild(s);
+        d.appendChild(x);
+        list.appendChild(d);
+    }
+    var d=document.createElement("div");
+    d.className="entry";
+    var x=document.createElement("img");
+    x.className="icon";
+    x.src="pics/addTeam.png";
+    d.appendChild(x);
+    x=document.createElement("div");
+    x.className="content";
+    x.innerText="Nuova squadra";
+    d.appendChild(x);
+    x=document.createElement("div");
+    x.className="clickOverlay";
+    x.tabIndex="0";
+    x.onclick=function(){
+        prepareTeamEditForm(null);
+        toSlide("editTeam");
+    };
+    x.onkeypress=function(e){
+        if(e.keyCode==13) x.onclick(); //pressed enter
+    }
+    d.appendChild(x);
+    list.appendChild(d);
+}
+var ingamePlayerManagement=false;
+var teamBeingEdited=null;
+function prepareTeamEditForm(team){
+    teamBeingEdited=team;
+    if(team==null){
+        I("teamName").value="";
+    }else{
+        I("teamName").value=team.teamName;
+    }
+    I("teamName").focus();
+}
+function checkAndSaveTeam(){
+    var n=I("teamName").value.trim();
+    if(n.isBlank()){
+        showModal("Il nome della squadra non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    if(teamBeingEdited==null){
+        var team=new Team(n);
+        teams.push(team);
+    }else{
+        teamBeingEdited.teamName=n;
+    }
+    populatePlayersAndTeamsList();
+    toSlide("playerManagement");
+}
+function cancelTeamEdit(){
+    toSlide("playerManagement");
+}
+var playerBeingEdited=null;
+function preparePlayerEditForm(player){
+    playerBeingEdited=player;
+    var t=I("team");
+    t.innerHTML="";
+    var x=document.createElement("option");
+    x.innerText="Solo";
+    x.value="solo";
+    t.appendChild(x);
+    for(var i=0;i<teams.length;i++){
+        x=document.createElement("option");
+        x.innerText=teams[i].teamName;
+        x.value=teams[i].teamId;
+        t.appendChild(x);
+    }
+    if(player==null){
+        I("playerName").value="";
+        I("characterName").value="";
+        I("dob").value="";
+        I("team").value="solo";
+        I("race").value=I("race").childNodes[0].value;
+        I("firstPlayer").value="n";
+        I("dob").disabled=undefined;
+        I("race").disabled=undefined;
+        I("firstPlayer").value="n";
+    }else{
+        I("playerName").value=player.playerName;
+        I("characterName").value=player.characterName;
+        I("dob").value=player.dob.toISOString().split("T")[0];
+        I("team").value=player.team==0?"solo":player.team;
+        I("race").value=player.race;
+        I("firstPlayer").value=player.firstPlayer;
+        if(ingamePlayerManagement){
+            I("dob").disabled="true";
+            I("race").disabled="true";
+        }
+        I("firstPlayer").value=player.firstPlayer?"y":"n";
+    }
+}
+function checkAndSavePlayer(){
+    var pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value=="y";
+    if(pn.isBlank()){
+        showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    if(cn.isBlank()){
+        showModal("Il nome del personaggio non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    if(dob.isBlank()){
+        showModal("La data di nascita non può essere vuota",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    try{
+        var d=new Date(dob);
+        if(!(d instanceof Date)||isNaN(d)) throw "";
+        if(new Date(currentGameDate-d).getFullYear()-1970>=RACES[race].ages[RACES[race].ages.length-1]){
+            showModal("La data di nascita non è valida, il personaggio è già morto",[{text:"Ok",action:function(){return true;}}]);
+            return;
+        }
+        dob=d;
+    }catch(t){
+        showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    if(fp){
+        for(var i=0;i<players.length;i++) players[i].firstPlayer=false;
+    }
+    if(playerBeingEdited==null){
+        var p=new Player(pn,cn,race,new Date(dob),team=="solo"?0:Number(team),fp);
+        players.push(p);
+    }else{
+        playerBeingEdited.playerName=pn;
+        playerBeingEdited.characterName=cn;
+        if(!ingamePlayerManagement){
+            playerBeingEdited.dob=dob;
+            playerBeingEdited.race=race;
+        }
+        playerBeingEdited.team=team=="solo"?0:Number(team);
+        playerBeingEdited.firstPlayer=fp;
+    }
+    populatePlayersAndTeamsList();
+    toSlide("playerManagement");
+}
+function cancelPlayerEdit(){
+    toSlide("playerManagement");
+}
+function playerManagementToGameOptions(){
+    toSlide("gameOptions");
+}
+function playerManagementToGame(){
+    if(players.length==0){
+        showModal("Non ci sono giocatori",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    for(var i=0;i<players.length;i++){
+        if(players[i].team!=0) players[i].alwaysSolo=false;
+    }
+    if(ingamePlayerManagement){
+        toSlide("endRound");
+    }else{
+        saveConfigToLocalStorage();
+        initGame();
+        toSlide("gameTimer");
+    }
+}
+/*---DATE CHANGE---*/
+function prepareDateChangeForm(){
+    I("newDate").value=currentGameDate.toISOString().split("T")[0];
+}
+function cancelDateChange(){
+    toSlide("endRound");
+}
+function checkAndChangeDate(){
+    try{
+        var d=new Date(I("newDate").value);
+        if(d-currentGameDate<0){
+            showModal("La data inserita è nel passato",[{text:"Ok",action:function(){return true}}]);
+            return;
+        }else{
+            var prevAges=[];
+            for(var i=0;i<players.length;i++){
+                prevAges[i]=players[i].getAgeTier();
+            }
+            currentGameDate=d;
+            I("ageChanges").innerHTML="";
+            var showAgeChangesScreen=false;
+            for(var i=0;i<players.length;i++){
+                if(players[i].getAgeTier()!=prevAges[i]){
+                    showAgeChangesScreen=true;
+                    var e=document.createElement("li");
+                    var d=document.createElement("span");
+                    d.className="bold";
+                    d.innerText=players[i].characterName+": ";
+                    e.appendChild(d);
+                    d=document.createElement("span");
+                    d.innerText=players[i].getAgeTierName();
+                    e.appendChild(d);
+                    I("ageChanges").appendChild(e);
+                    showAgeChangesScreen=true;
+                }
+            }
+            if(showAgeChangesScreen){
+                toSlide("dateChange2");
+            }else{
+                toSlide("endRound");
+            }
+        }
+    }catch(e){
+        console.log(e);
+        showModal("La data inserita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true}}]);
+        return;
+    }
+}
+function cancelChangeDate(){
+    toSlide("endRound");
+}
+function dateChangeToEndRound(){
+    toSlide("endRound");
+}
+/*---MAIN LOGIC---*/
+var schedule=[];
+var timePerPlayerMs=0;
+var scheduleTPtr=0;
+function doPlayerSchedule(){
+    scheduleTPtr=0;
+    var plist=[];
+    //put first player at the beginning of plist
+    for(var i=0;i<players.length;i++){
+        if(players[i].firstPlayer){
+            plist.push(players[i]);
+            break;
+        }
+    }
+    //add the rest of the players by add order
+    for(var i=0;i<players.length;i++){
+        if(players[i]!=plist[0]) plist.push(players[i]);
+    }
+    //group players by team, except solo players
+    for(var i=0;i<plist.length;i++){
+        if(plist[i].team!=0){ //if player is in a team, put the rest of the team after him, sorted by add order
+            for(var j=i+1;j<plist.length;j++){
+                if(plist[i].team==plist[j].team){
+                    var x=plist[j];
+                    plist.splice(j,1);
+                    plist.splice(i+1,0,x);
+                    i++;
+                }
+            }
+        }
+    }
+    //remove players that aren't old enough to play
+    for(var i=0;i<plist.length;i++){
+        if(!plist[i].isOldEnoughToPlay()){
+            plist.splice(i,1);
+            i--;
+        }
+    }
+    //build schedule
+    schedule=[];
+    if(plist.length==0) return;
+    timePerPlayerMs=(roundDuration*60*1000)/(plist.length!=0?plist.length:1);
+    var t=0;
+    for(var i=0;i<plist.length;i++){
+        schedule[i]={
+            start:t,
+            end:t+timePerPlayerMs,
+            player:plist[i],
+            teamTime:plist[i].team==0?timePerPlayerMs:(getPlayersByTeamId(plist[i].team).length*timePerPlayerMs) //this field is only used to speed up calculations later
+        };
+        t+=timePerPlayerMs;
+    }
+}
+function getCurrentScheduleEntry(){
+    for(var i=0;i<schedule.length;i++){
+        if(scheduleTPtr>=schedule[i].start&&scheduleTPtr<schedule[i].end) return schedule[i];
+    }
+    return null;
+}
+function getNextScheduleEntry(){
+    for(var i=0;i<schedule.length-1;i++){
+        if(scheduleTPtr>=schedule[i].start&&scheduleTPtr<schedule[i].end) return schedule[i+1];
+    }
+    return null;
+}
+function msToMMSS(ms){
+    if(ms<0) ms=0;
+    var s=~~(ms/1000), m=~~(s/60);
+    s%=60;
+    return (m<10?("0"+m):m)+":"+(s<10?("0"+s):s);
+}
+var TICK_MS=100;
+var STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4;
+var gameState=STATE_NOTPLAYING;
+var currentRound=1;
+var prevTS=-1;
+var ghostTime=0,combatTime=0;
+var COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
+var combatType=COMBATTYPE_INPUT;
+var totalCombatTime=[null,0,0,0], totalPlayedTime=0;
+var lastTickPlayer=null;
+setInterval(function(){
+    var ts=Date.now(),tsdiff=0;
+    if(prevTS==-1){
+        prevTS=ts;
+        return;
+    }else{
+        tsdiff=ts-prevTS;
+        prevTS=ts;
+    }
+    if(gameState==STATE_NOTPLAYING){
+        return;
+    }
+    if(gameState==STATE_GAME){
+        scheduleTPtr+=tsdiff;
+        totalPlayedTime+=tsdiff;
+        I("roundNumber").innerText=currentRound;
+        I("mainTimer").innerText=msToMMSS(roundDuration*60*1000-scheduleTPtr);
+        I("roundTDuration").innerText=msToMMSS(roundDuration*60*1000);
+        var e=getCurrentScheduleEntry();
+        if(e!=null){
+            if(e.player!=lastTickPlayer){
+                //todo:play sfx
+                if(e.player.isSenile()) I("senilityCheckRequired").style.display=""; else I("senilityCheckRequired").style.display="none";
+                if(e.player.team!=0){
+                    I("teamTContainer").style.display="";
+                    I("teamTDuration").innerText=msToMMSS(e.teamTime);
+                }else I("teamTContainer").style.display="none";
+                I("playerAndCharacterName").innerText=e.player.playerName+" - "+e.player.characterName;
+                I("gtTeamName").innerText=e.player.team==0?"Solo":getTeamById(e.player.team).teamName;
+            }
+            I("playerTDuration").innerText=msToMMSS(e.end-scheduleTPtr);
+            e.player.timePlayed+=tsdiff;
+            lastTickPlayer=e.player;
+        }else{
+            stopRound();
+        }
+        return;
+    }
+    if(gameState==STATE_GHOSTTIME){
+        I("ghostTimeTimer").innerText=msToMMSS(ghostTime);
+        ghostTime+=tsdiff;
+        totalPlayedTime+=tsdiff;
+        return;
+    }
+    if(gameState==STATE_COMBAT_INPUT){
+        totalPlayedTime+=tsdiff;
+        return;
+    }
+    if(gameState==STATE_COMBAT_RUNNING){
+        I("combatTimeTimer").innerText=msToMMSS(combatTime);
+        combatTime+=tsdiff;
+        totalCombatTime[combatType]+=tsdiff;
+        totalPlayedTime+=tsdiff;
+        return;
+    }
+    if(gameState==STATE_ENDROUND){
+        return;
+    }
+},TICK_MS);
+function initGame(){
+    totalPlayedTime=0;
+    currentRound=1;
+    ghostTime=0;
+    combatTime=0;
+    doPlayerSchedule();
+    gameState=STATE_GAME;
+    randomizeGameTimerBackground();
+    toSlide("gameTimer");
+}
+function randomizeGameTimerBackground(){
+    I("gameTimer").style.backgroundImage="url('pics/backgrounds/game"+(~~(Math.random()*7)+1)+".jpg')";
+}
+function stopRound(){
+    if(currentRound==maxRounds){
+        gameState=STATE_NOTPLAYING;
+        stopGame();
+    }else{
+        I("endRoundNumber").innerText=currentRound;
+        gameState=STATE_ENDROUND;
+        toSlide("endRound");
+    }
+}
+function nextPlayer(){
+    var e=getNextScheduleEntry();
+    if(e!=null){
+        scheduleTPtr=e.start;
+    }else stopRound();
+}
+function nextPlayerWithTime(){
+    var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
+    if(c!=null&&e!=null){
+        c.end=e.start=scheduleTPtr;
+    } else stopRound();
+}
+function beginGhostTime(){
+    gameState=STATE_GHOSTTIME;
+    toSlide("ghostTime");
+}
+function endGhostTime(){
+    gameState=STATE_GAME;
+    toSlide("gameTimer");
+}
+function beginCombat(){
+    gameState=STATE_COMBAT_INPUT;
+    combatType=0;
+    combatTime=0;
+    I("combatTypeButtonsContainer").style.display="";
+    I("combatTypeTitle").innerText="";
+    toSlide("combat");
+}
+function setCombatType(type){
+    gameState=STATE_COMBAT_RUNNING;
+    combatType=type;
+    I("combatTypeButtonsContainer").style.display="none";
+    I("combatTypeTitle").innerText=combatType==COMBATTYPE_NARRATIVE?"Narrato":combatType==COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
+}
+function endCombat(){
+    gameState=STATE_GAME;
+    toSlide("gameTimer");
+}
+function senilityCheckPassed(){
+    document.activeElement.blur();
+    I("senilityCheckRequired").style.display="none";
+}
+function senilityCheckFailed(){
+    var e=getCurrentScheduleEntry();
+    if(e!=null){
+        players.splice(players.indexOf(e.player),1);
+    }
+    nextPlayer();
+}
+function nextRound(){
+    if(players.length==0){
+        showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    currentRound++;
+    combatTime=0;
+    doPlayerSchedule();
+    gameState=STATE_GAME;
+    randomizeGameTimerBackground();
+    toSlide("gameTimer");
+}
+function stopGame(askConfirm){
+    if(askConfirm){
+        showModal("Vuoi terminare la partita?",[{text:"Si",action:function(){stopGame();return true}},{text:"No",action:function(){return true}}]);
+    }else{
+        gameState=STATE_NOTPLAYING;
+        for(var i=0;i<players.length;i++) players[i].reset();
+        saveConfigToLocalStorage();
+        toSlide("endGame");
+    }
+}
+function endRoundToDateChange(){
+    I("newDate").value=currentGameDate.toISOString().split("T")[0];
+    toSlide("dateChange");
+}
+function endRoundToPlayerManagement(){
+    ingamePlayerManagement=true;
+    populatePlayersAndTeamsList();
+    toSlide("playerManagement");
+}
+function endGameToWelcome(){
+    leaveConfirmRequired=false;
+    toSlide("welcome");
+}
+</script>
+</head>
+<body>
+<div class="slide visible" id="nojs">
+    Enable javascript you tinfoilhatter
+</div>
+<div id="loadOverlay"></div>
+<div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
+    <div class="full">
+        <div class="content">
+            <img src="pics/logo.png" alt="Logo" style="display:block;width:100%;height:auto;"/>
+            <div style="text-align:center">
+                <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita"></input><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"></input>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="slide invisible" id="gameOptions" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Nuova partita</div>
+            <form action="javascript:gameOptionsToPlayerManagement()">
+                <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/></div></div>
+                <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/></div></div>
+                <div class="entry"><div class="entryName">Data di inizio</div><input type="date" id="startDate" class="entryValue" value="2062-01-01" min="0000-01-01" max="9999-01-01"/></div>
+                <input type="submit" tabIndex="4" style="display:none" />
+            </form>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Indietro" onclick="gameOptionsToWelcomeScreen()"/><input type="button" value="Avanti" onclick="gameOptionsToPlayerManagement()" />
+    </div>
+</div>
+<div class="slide invisible" id="playerManagement" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Squadre</div>
+            <div id="teams" class="list"></div>
+            <div class="title" style="margin-top:2em;">Giocatori</div>
+            <div id="players" class="list"></div>
+            <div style="height:5em">&nbsp;</div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Conferma" onclick="playerManagementToGame()" />
+    </div>
+</div>
+<div class="slide invisible" id="editTeam" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Dettagli squadra</div>
+            <form action="javascript:checkAndSaveTeam()">
+                <div class="entry"><div class="entryName">Nome squadra</div><input type="text" class="entryValue" id="teamName" value=""/></div>
+                <input type="submit" style="display:none" />
+            </form>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Annulla" onclick="cancelTeamEdit()"/><input type="button" value="Conferma" onclick="checkAndSaveTeam()" />
+    </div>
+</div>
+<div class="slide invisible" id="editPlayer" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Dettagli giocatore</div>
+            <form action="javascript:checkAndSavePlayer()">
+                <div class="entry"><div class="entryName">Nome giocatore</div><input type="text" class="entryValue" id="playerName" value=""/></div>
+                <div class="entry"><div class="entryName">Nome personaggio</div><input type="text" class="entryValue" id="characterName" value=""/></div>
+                <div class="entry"><div class="entryName">Data di nascita</div><input type="date" class="entryValue" id="dob" value=""/></div>
+                <div class="entry"><div class="entryName">Specie</div><select class="entryValue" id="race"><script type="text/javascript">
+                    var raceSelect=I("race");
+                    raceSelect.innerHTML="";
+                    var ids=Object.keys(RACES);
+                    for(var i=0;i<ids.length;i++){
+                        var o=document.createElement("option");
+                        o.value=ids[i];
+                        o.innerText=RACES[ids[i]].name;
+                        raceSelect.appendChild(o);
+                    }
+                    raceSelect.value=raceSelect.childNodes[0].value;
+                </script></select></div>
+                <div class="entry"><div class="entryName">Squadra</div><select class="entryValue" id="team" value="solo"><option value="solo">Solo</option></select></div>
+                <div class="entry"><div class="entryName">Primo giocatore</div><select class="entryValue" id="firstPlayer" value="y"><option value="y">Si</option><option value="n">No</option></select></div>
+                <input type="submit" style="display:none" />
+            </form>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Annulla" onclick="cancelPlayerEdit()"/><input type="button" value="Conferma" onclick="checkAndSavePlayer()" />
+    </div>
+</div>
+<div class="slide invisible" id="gameTimer">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Turno <span id="roundNumber"></span></div>
+            <div class="banner"><span id="playerAndCharacterName"></span><br/><span id="gtTeamName"></span></div>
+            <div class="mainTimerContainer">
+                <div class="timer" id="mainTimer">00:00</div>
+            </div>
+            <div class="smallTimers">
+                <div class="smallTimerContainer">
+                    <div class="timer" id="playerTDuration">00:00</div>
+                    <div class="timerName">Giocatore</div>
+                </div>
+                <div class="smallTimerContainer" id="teamTContainer">
+                    <div class="timer" id="teamTDuration">00:00</div>
+                    <div class="timerName">Squadra</div>
+                </div>
+                <div class="smallTimerContainer">
+                    <div class="timer" id="roundTDuration">00:00</div>
+                    <div class="timerName">Turno</div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:2em">
+                <input type="button" value="Passa turno" onclick="nextPlayer()"/><input type="button" value="Passa turno e tempo" onclick="nextPlayerWithTime()" />
+            </div>
+            <div style="text-align:center">
+                <input type="button" value="Tempo fantasma" onclick="beginGhostTime()"/><input type="button" value="Combattimento" onclick="beginCombat()"/>
+            </div>
+            <div class="banner" id="senilityCheckRequired" style="text-align:center;margin-top:2em">
+                Deve eseguire test di senilità<br/>
+                <input type="button" value="Passato" onclick="senilityCheckPassed()"/><input type="button" value="Fallito" onclick="senilityCheckFailed()"/>
+            </div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Termina turno" onclick="stopRound()"/>
+    </div>
+</div>
+<div class="slide invisible" id="ghostTime" style="background-image:url('pics/backgrounds/ghostTime.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Tempo fantasma</div>
+            <div class="mainTimerContainer">
+                <div class="timer" id="ghostTimeTimer">00:00</div>
+            </div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Fine tempo fantasma" onclick="endGhostTime()"/>
+    </div>
+</div>
+<div class="slide invisible" id="combat" style="background-image:url('pics/backgrounds/combat.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Combattimento <span id="combatTypeTitle"></span></div>
+            <div class="mainTimerContainer" id="combatTimeContainer">
+                <div class="timer" id="combatTimeTimer">00:00</div>
+            </div>
+            <div id="combatTypeButtonsContainer" style="text-align:center">
+                <input type="button" value="Tattico" onclick="setCombatType(COMBATTYPE_TACTICAL)"/><input type="button" value="Narrato" onclick="setCombatType(COMBATTYPE_NARRATIVE)"/><input type="button" value="Entrambi" onclick="setCombatType(COMBATTYPE_BOTH)"/>
+            </div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Fine combattimento" onclick="endCombat()"/>
+    </div>
+</div>
+<div class="slide invisible" id="endRound" style="background-image:url('pics/backgrounds/endRound.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Fine turno <span id="endRoundNumber"></span></div>
+            <div id="combatTypeButtonsContainer" style="text-align:center">
+                <input type="button" value="Scorri tempo" onclick="endRoundToDateChange()"/><input type="button" value="Gestione squadre e giocatori" onclick="endRoundToPlayerManagement()"/>
+            </div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Termina partita" onclick="stopGame(true)"/><input type="button" value="Prossimo turno" onclick="nextRound()"/>
+    </div>
+</div>
+<div class="slide invisible" id="dateChange" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Scorri tempo</div>
+            <form action="javascript:checkAndChangeDate()">
+                <div class="entry"><div class="entryName">Nuova data</div><input type="date" min="0000-01-01" max="9999-01-01" class="entryValue" id="newDate" value=""/></div>
+                <input type="submit" style="display:none" />
+            </form>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Annulla" onclick="cancelChangeDate()"/><input type="button" value="Conferma" onclick="checkAndChangeDate()" />
+    </div>
+</div>
+<div class="slide invisible" id="dateChange2" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Scorri tempo</div>
+            Questi personaggi hanno avuto uno scatto di età:
+            <ul id="ageChanges"></ul>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Continua" onclick="dateChangeToEndRound()" />
+    </div>
+</div>
+<div class="slide invisible" id="endGame" style="background-image:url('pics/backgrounds/endGame.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Fine partita</div>
+            TODO: Statistiche non ancora implementate
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Continua" onclick="endGameToWelcome()" />
+    </div>
+</div>
+<div id="modalContainer"></div>
+<script type="text/javascript">
+    toSlide("welcome");
+    I("loadOverlay").style.display="block";
+    setTimeout(function(){
+        document.body.removeChild(I("loadOverlay"));
+    },500);
+</script>
+<script type="text/javascript">
+    var ua=navigator.userAgent;
+    if(/Firefox.(\d+)/i.test(ua)&&/Android|iPhone|iPad|iPod|Windows Phone|Mobile|Tablet/i.test(ua)){ //mobile firefox date picker sucks
+        var dates=document.querySelectorAll('input[type="date"');
+        for(var i=0;i<dates.length;i++){
+            dates[i].type="text";
+            dates[i].placeholder="YYYY-MM-DD";
+        }
+    }
+</script>
+</body>
+</html>
