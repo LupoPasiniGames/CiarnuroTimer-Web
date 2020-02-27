@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--TODO: Suoni, prevenzione click doppi/accidentali, statistiche -->
+<!--TODO: statistiche -->
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
@@ -44,7 +44,6 @@ html,body{
     top:0; left:0; width:100vw; height:100vh;
     z-index:99999;
     background:#000000;
-    display:none;
 }
 *{
     box-sizing:border-box;
@@ -55,30 +54,6 @@ html,body{
 }
 .bold{
     font-weight:bold;
-}
-/*---CLICK EFFECT---*/
-div.clickEffect{
-	position:fixed;
-	box-sizing:border-box;
-	border-style:solid;
-	border-color:#FFFFFF;
-	border-radius:50%;
-	animation:clickEffect 0.2s ease-out;
-	z-index:99999;
-}
-@keyframes clickEffect{
-	0%{
-		opacity:1;
-		width:0.5em; height:0.5em;
-		margin:-0.25em;
-		border-width:0.5em;
-	}
-	100%{
-		opacity:0.2;
-		width:5em; height:5em;
-		margin:-2.5em;
-		border-width:0.03em;
-	}
 }
 /*---SLIDES SYSTEM----*/
 div.slide{
@@ -319,6 +294,7 @@ div.modal{
     display:flex;
     position:fixed;
     top:0; left:0; width:100vw; height: 100vh;
+    padding:1em;
     background:rgba(0,0,0,0.35);
     backdrop-filter: blur(0.4em);
 }
@@ -430,6 +406,11 @@ function toSlide(id){
         slides[i].className="slide invisible";
     }
     id.className="slide visible";
+    I("modalContainer").innerHTML="";
+}
+function getCurrentSlide(){
+    var s=document.getElementsByClassName("slide visible");
+    if(s.length==0) return null; else return s[0];
 }
 /*---MODALS---*/
 function showModal(message,buttons){
@@ -440,7 +421,7 @@ function showModal(message,buttons){
         w.className="window";
         var d=document.createElement("div");
         d.className="message";
-        d.innerText=message;
+        d.textContent=message;
         w.appendChild(d);
         d=document.createElement("div");
         d.className="buttons";
@@ -450,6 +431,7 @@ function showModal(message,buttons){
             b.value=buttons[i].text;
             b.onclick=function(modal,action){
                 return function(){
+                    
                     try{
                         if(!action()) return;
                     }catch(t){
@@ -467,7 +449,7 @@ function showModal(message,buttons){
         I("modalContainer").appendChild(m);
         d.childNodes[0].focus();
     }catch(t){
-        console.log("Failed to generate modal: "+x);
+        console.error("Failed to generate modal: "+x);
     }
 }
 /*---FOCUS TRAP---*/
@@ -480,7 +462,8 @@ setInterval(function(){
     var trapInside=null;
     if(modals.childNodes.length==0){
         if(document.activeElement===document.body) return;
-        trapInside=document.getElementsByClassName("slide visible")[0];
+        trapInside=getCurrentSlide();
+        if(trapInside==null) return;
     }else{
         trapInside=modals.childNodes[modals.childNodes.length-1];
     }
@@ -500,7 +483,7 @@ function initSoundSystem(){
     var a=document.createElement("audio");
     a.src=SILENCE;
     a.onended=function(){
-        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx);
+        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx+".opus");
         playSoundFx=null;
         a.play();
     };
@@ -638,7 +621,7 @@ function saveConfigToLocalStorage(){
             }
         }
         localStorage.ciarnuro=JSON.stringify(state);
-    }catch(t){console.log("Config not saved: "+t);}
+    }catch(t){console.error("Config not saved: "+t);}
 }
 function loadConfigFromLocalStorage(){
     try{
@@ -664,10 +647,11 @@ function loadConfigFromLocalStorage(){
             players.push(n);
         }
         playerIdCtr=Number(state.playerIdCtr);
-    }catch(t){console.log("Config not loaded: "+t);}
+    }catch(t){console.error("Config not loaded: "+t);}
 }
 /*---WELCOME SCREEN---*/
 function newGame(){
+    if(getCurrentSlide().id!=="welcome") return;
     initSoundSystem();
     leaveConfirmRequired=true;
     loadConfigFromLocalStorage();
@@ -680,6 +664,7 @@ function newGame(){
     toSlide("gameOptions");
 }
 function welcomeToPreviousGames(){
+    if(getCurrentSlide().id!=="welcome") return;
     showModal("Non ancora implementato",[{text:"Ok",action:function(){return true}}]);
 }
 /*---NEW GAME SCREEN---*/
@@ -699,6 +684,7 @@ function checkMaxRounds(){
     return true;
 }
 function decMaxRounds(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     try{
         var v=Number(I("maxRounds").value);
         if(isNaN(v)) throw "";
@@ -708,6 +694,7 @@ function decMaxRounds(){
     checkMaxRounds();
 }
 function incMaxRounds(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     try{
         var v=Number(I("maxRounds").value);
         if(isNaN(v)) throw "";
@@ -730,6 +717,7 @@ function checkRoundDuration(){
     return true;
 }
 function decRoundDuration(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     try{
         var v=Number(I("roundDuration").value);
         if(isNaN(v)) throw "";
@@ -739,6 +727,7 @@ function decRoundDuration(){
     checkRoundDuration();
 }
 function incRoundDuration(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     try{
         var v=Number(I("roundDuration").value);
         if(isNaN(v)) throw "";
@@ -748,6 +737,7 @@ function incRoundDuration(){
     checkRoundDuration();
 }
 function checkStartDate(showError){
+    if(getCurrentSlide().id!=="gameOptions") return false;
     try{
         var d=new Date(I("startDate").value);
         if(!(d instanceof Date)||isNaN(d)) throw "";
@@ -762,16 +752,19 @@ function checkStartDate(showError){
     }
 }
 function gameOptionsToWelcomeScreen(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     leaveConfirmRequired=false;
     toSlide("welcome");
 }
 function gameOptionsToPlayerManagement(){
+    if(getCurrentSlide().id!=="gameOptions") return;
     if(checkRoundDuration()&&checkMaxRounds()&&checkStartDate(true)){
         roundDuration=Number(I("roundDuration").value);
         maxRounds=Number(I("maxRounds").value);
         currentGameDate=new Date(I("startDate").value);
         populatePlayersAndTeamsList();
         ingamePlayerManagement=false;
+        I("playerManagementToGameOptions").style.display="";
         toSlide("playerManagement");
     }
 }
@@ -789,14 +782,14 @@ function populatePlayersAndTeamsList(){
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
-        x.innerText=p.playerName;
+        x.textContent=p.playerName;
         var s=document.createElement("div");
         s.className="small";
-        s.innerText=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
         x.appendChild(s);
         var s=document.createElement("div");
         s.className="small";
-        s.innerText=p.team==0?"Solo":getTeamById(p.team).teamName;
+        s.textContent=p.team==0?"Solo":getTeamById(p.team).teamName;
         x.appendChild(s);
         d.appendChild(x);
         x=document.createElement("div");
@@ -805,6 +798,7 @@ function populatePlayersAndTeamsList(){
         s.className="button edit";
         s.onclick=function(p){
             return function(){
+                if(getCurrentSlide().id!=="playerManagement") return;
                 preparePlayerEditForm(p);
                 toSlide("editPlayer");     
             }
@@ -814,6 +808,7 @@ function populatePlayersAndTeamsList(){
         s.className="button remove";
         s.onclick=function(p){
             return function(){
+                if(getCurrentSlide().id!=="playerManagement") return;
                 showModal("Sei sicuro di voler rimuovere "+p.playerName+"?",[
                 {text:"Si",action:function(){
                     players.splice(players.indexOf(p),1);
@@ -837,12 +832,13 @@ function populatePlayersAndTeamsList(){
     d.appendChild(x);
     x=document.createElement("div");
     x.className="content";
-    x.innerText="Nuovo giocatore";
+    x.textContent="Nuovo giocatore";
     d.appendChild(x);
     x=document.createElement("div");
     x.className="clickOverlay";
     x.tabIndex="0";
     x.onclick=function(){
+        if(getCurrentSlide().id!=="playerManagement") return;
         preparePlayerEditForm(null);
         toSlide("editPlayer");
     };
@@ -863,10 +859,10 @@ function populatePlayersAndTeamsList(){
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
-        x.innerText=t.teamName;
+        x.textContent=t.teamName;
         var s=document.createElement("div");
         s.className="small";
-        s.innerText=getPlayersByTeamId(t.teamId).length+" giocatori";
+        s.textContent=getPlayersByTeamId(t.teamId).length+" giocatori";
         x.appendChild(s);
         d.appendChild(x);
         x=document.createElement("div");
@@ -875,6 +871,7 @@ function populatePlayersAndTeamsList(){
         s.className="button edit";
         s.onclick=function(t){
             return function(){
+                if(getCurrentSlide().id!=="playerManagement") return;
                 prepareTeamEditForm(t);
                 toSlide("editTeam");    
             }
@@ -884,6 +881,7 @@ function populatePlayersAndTeamsList(){
         s.className="button remove";
         s.onclick=function(t){
             return function(){
+                if(getCurrentSlide().id!=="playerManagement") return;
                 showModal("Sei sicuro di voler rimuovere "+t.teamName+"?",[
                 {text:"Si",action:function(){
                     var p=getPlayersByTeamId(t.teamId);
@@ -911,12 +909,13 @@ function populatePlayersAndTeamsList(){
     d.appendChild(x);
     x=document.createElement("div");
     x.className="content";
-    x.innerText="Nuova squadra";
+    x.textContent="Nuova squadra";
     d.appendChild(x);
     x=document.createElement("div");
     x.className="clickOverlay";
     x.tabIndex="0";
     x.onclick=function(){
+        if(getCurrentSlide().id!=="playerManagement") return;
         prepareTeamEditForm(null);
         toSlide("editTeam");
     };
@@ -938,6 +937,7 @@ function prepareTeamEditForm(team){
     I("teamName").focus();
 }
 function checkAndSaveTeam(){
+    if(getCurrentSlide().id!=="editTeam") return;
     var n=I("teamName").value.trim();
     if(n.isBlank()){
         showModal("Il nome della squadra non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
@@ -953,6 +953,7 @@ function checkAndSaveTeam(){
     toSlide("playerManagement");
 }
 function cancelTeamEdit(){
+    if(getCurrentSlide().id!=="editTeam") return;
     toSlide("playerManagement");
 }
 var playerBeingEdited=null;
@@ -961,12 +962,12 @@ function preparePlayerEditForm(player){
     var t=I("team");
     t.innerHTML="";
     var x=document.createElement("option");
-    x.innerText="Solo";
+    x.textContent="Solo";
     x.value="solo";
     t.appendChild(x);
     for(var i=0;i<teams.length;i++){
         x=document.createElement("option");
-        x.innerText=teams[i].teamName;
+        x.textContent=teams[i].teamName;
         x.value=teams[i].teamId;
         t.appendChild(x);
     }
@@ -995,6 +996,7 @@ function preparePlayerEditForm(player){
     }
 }
 function checkAndSavePlayer(){
+    if(getCurrentSlide().id!=="editPlayer") return;
     var pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value=="y";
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
@@ -1013,6 +1015,10 @@ function checkAndSavePlayer(){
         if(!(d instanceof Date)||isNaN(d)) throw "";
         if(new Date(currentGameDate-d).getFullYear()-1970>=RACES[race].ages[RACES[race].ages.length-1]){
             showModal("La data di nascita non è valida, il personaggio è già morto",[{text:"Ok",action:function(){return true;}}]);
+            return;
+        }
+        if(currentGameDate-d<0){
+            showModal("La data di nascita non è valida, il personaggio non è ancora nato",[{text:"Ok",action:function(){return true;}}]);
             return;
         }
         dob=d;
@@ -1040,16 +1046,27 @@ function checkAndSavePlayer(){
     toSlide("playerManagement");
 }
 function cancelPlayerEdit(){
+    if(getCurrentSlide().id!=="editPlayer") return;
     toSlide("playerManagement");
 }
 function playerManagementToGameOptions(){
+    if(getCurrentSlide().id!=="playerManagement") return;
     toSlide("gameOptions");
 }
+function checkPlayerAges(){
+    for(var i=0;i<players.length;i++){
+        if(players[i].isOldEnoughToPlay()) return true;
+    }
+    showModal("Tutti i giocatori sono troppo giovani per giocare",[{text:"Ok",action:function(){return true;}}]);
+    return false;
+}
 function playerManagementToGame(){
+    if(getCurrentSlide().id!=="playerManagement") return;
     if(players.length==0){
         showModal("Non ci sono giocatori",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
+    if(!checkPlayerAges()) return;
     for(var i=0;i<players.length;i++){
         if(players[i].team!=0) players[i].alwaysSolo=false;
     }
@@ -1065,10 +1082,8 @@ function playerManagementToGame(){
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISOString().split("T")[0];
 }
-function cancelDateChange(){
-    toSlide("endRound");
-}
 function checkAndChangeDate(){
+    if(getCurrentSlide().id!=="dateChange") return;
     try{
         var d=new Date(I("newDate").value);
         if(d-currentGameDate<0){
@@ -1088,10 +1103,10 @@ function checkAndChangeDate(){
                     var e=document.createElement("li");
                     var d=document.createElement("span");
                     d.className="bold";
-                    d.innerText=players[i].characterName+": ";
+                    d.textContent=players[i].characterName+": ";
                     e.appendChild(d);
                     d=document.createElement("span");
-                    d.innerText=players[i].getAgeTierName();
+                    d.textContent=players[i].getAgeTierName();
                     e.appendChild(d);
                     I("ageChanges").appendChild(e);
                     showAgeChangesScreen=true;
@@ -1104,15 +1119,16 @@ function checkAndChangeDate(){
             }
         }
     }catch(e){
-        console.log(e);
         showModal("La data inserita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true}}]);
         return;
     }
 }
 function cancelChangeDate(){
+    if(getCurrentSlide().id!=="dateChange") return;
     toSlide("endRound");
 }
 function dateChangeToEndRound(){
+    if((getCurrentSlide().id!=="dateChange")&&(getCurrentSlide().id!=="dateChange2")) return;
     toSlide("endRound");
 }
 /*---MAIN LOGIC---*/
@@ -1211,22 +1227,22 @@ setInterval(function(){
     if(gameState==STATE_GAME){
         scheduleTPtr+=tsdiff;
         totalPlayedTime+=tsdiff;
-        I("roundNumber").innerText=currentRound;
-        I("mainTimer").innerText=msToMMSS(roundDuration*60*1000-scheduleTPtr);
-        I("roundTDuration").innerText=msToMMSS(roundDuration*60*1000);
+        I("roundNumber").textContent=currentRound;
+        I("mainTimer").textContent=msToMMSS(roundDuration*60*1000-scheduleTPtr);
+        I("roundTDuration").textContent=msToMMSS(roundDuration*60*1000);
         var e=getCurrentScheduleEntry();
         if(e!=null){
             if(e.player!=lastTickPlayer){
-                //todo:play sfx
-                if(e.player.isSenile()) I("senilityCheckRequired").style.display=""; else I("senilityCheckRequired").style.display="none";
+                if(currentRound>1||scheduleTPtr!=tsdiff) playSoundFx="nextPlayer"; //don't play sound effect for first player of the first round because we're already playing gameStarted
+                I("senilityCheckRequired").style.display=e.player.isSenile()?"":"none";
                 if(e.player.team!=0){
                     I("teamTContainer").style.display="";
-                    I("teamTDuration").innerText=msToMMSS(e.teamTime);
+                    I("teamTDuration").textContent=msToMMSS(e.teamTime);
                 }else I("teamTContainer").style.display="none";
-                I("playerAndCharacterName").innerText=e.player.playerName+" - "+e.player.characterName;
-                I("gtTeamName").innerText=e.player.team==0?"Solo":getTeamById(e.player.team).teamName;
+                I("playerAndCharacterName").textContent=e.player.playerName+" - "+e.player.characterName;
+                I("gtTeamName").textContent=e.player.team==0?"Solo":getTeamById(e.player.team).teamName;
             }
-            I("playerTDuration").innerText=msToMMSS(e.end-scheduleTPtr);
+            I("playerTDuration").textContent=msToMMSS(e.end-scheduleTPtr);
             e.player.timePlayed+=tsdiff;
             lastTickPlayer=e.player;
         }else{
@@ -1235,7 +1251,7 @@ setInterval(function(){
         return;
     }
     if(gameState==STATE_GHOSTTIME){
-        I("ghostTimeTimer").innerText=msToMMSS(ghostTime);
+        I("ghostTimeTimer").textContent=msToMMSS(ghostTime);
         ghostTime+=tsdiff;
         totalPlayedTime+=tsdiff;
         return;
@@ -1245,7 +1261,7 @@ setInterval(function(){
         return;
     }
     if(gameState==STATE_COMBAT_RUNNING){
-        I("combatTimeTimer").innerText=msToMMSS(combatTime);
+        I("combatTimeTimer").textContent=msToMMSS(combatTime);
         combatTime+=tsdiff;
         totalCombatTime[combatType]+=tsdiff;
         totalPlayedTime+=tsdiff;
@@ -1260,67 +1276,84 @@ function initGame(){
     currentRound=1;
     ghostTime=0;
     combatTime=0;
+    playSoundFx="gameStarted";
     doPlayerSchedule();
-    gameState=STATE_GAME;
     randomizeGameTimerBackground();
+    gameState=STATE_GAME;
     toSlide("gameTimer");
 }
 function randomizeGameTimerBackground(){
     I("gameTimer").style.backgroundImage="url('pics/backgrounds/game"+(~~(Math.random()*7)+1)+".jpg')";
 }
 function stopRound(){
-    if(currentRound==maxRounds){
+    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
+    if(currentRound>=maxRounds){
+        playSoundFx="endGame";
         gameState=STATE_NOTPLAYING;
         stopGame();
     }else{
-        I("endRoundNumber").innerText=currentRound;
+        playSoundFx="nextRound";
+        I("endRoundNumber").textContent=currentRound;
         gameState=STATE_ENDROUND;
         toSlide("endRound");
     }
 }
 function nextPlayer(){
+    if(gameState!=STATE_GAME) return;
     var e=getNextScheduleEntry();
     if(e!=null){
         scheduleTPtr=e.start;
     }else stopRound();
 }
 function nextPlayerWithTime(){
+    if(gameState!=STATE_GAME) return;
     var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
     if(c!=null&&e!=null){
         c.end=e.start=scheduleTPtr;
     } else stopRound();
 }
 function beginGhostTime(){
+    if(gameState!=STATE_GAME) return;
+    playSoundFx="ghostTime";
     gameState=STATE_GHOSTTIME;
     toSlide("ghostTime");
 }
 function endGhostTime(){
+    if(gameState!=STATE_GHOSTTIME) return;
     gameState=STATE_GAME;
+    playSoundFx="ghostTimeEnd";
     toSlide("gameTimer");
 }
 function beginCombat(){
+    if(gameState!=STATE_GAME) return;
     gameState=STATE_COMBAT_INPUT;
+    playSoundFx="combat";
     combatType=0;
     combatTime=0;
     I("combatTypeButtonsContainer").style.display="";
-    I("combatTypeTitle").innerText="";
+    I("combatTypeTitle").textContent="";
     toSlide("combat");
 }
 function setCombatType(type){
+    if(gameState!=STATE_COMBAT_INPUT) return;
     gameState=STATE_COMBAT_RUNNING;
     combatType=type;
     I("combatTypeButtonsContainer").style.display="none";
-    I("combatTypeTitle").innerText=combatType==COMBATTYPE_NARRATIVE?"Narrato":combatType==COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
+    I("combatTypeTitle").textContent=combatType==COMBATTYPE_NARRATIVE?"Narrato":combatType==COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
 }
 function endCombat(){
+    if(gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
     gameState=STATE_GAME;
+    playSoundFx="combatEnd";
     toSlide("gameTimer");
 }
 function senilityCheckPassed(){
+    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display=="none") return;
     document.activeElement.blur();
     I("senilityCheckRequired").style.display="none";
 }
 function senilityCheckFailed(){
+    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display=="none") return;
     var e=getCurrentScheduleEntry();
     if(e!=null){
         players.splice(players.indexOf(e.player),1);
@@ -1328,10 +1361,12 @@ function senilityCheckFailed(){
     nextPlayer();
 }
 function nextRound(){
+    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
     if(players.length==0){
         showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
+    if(!checkPlayerAges()) return;
     currentRound++;
     combatTime=0;
     doPlayerSchedule();
@@ -1340,6 +1375,7 @@ function nextRound(){
     toSlide("gameTimer");
 }
 function stopGame(askConfirm){
+    if(gameState!=STATE_ENDROUND) return;
     if(askConfirm){
         showModal("Vuoi terminare la partita?",[{text:"Si",action:function(){stopGame();return true}},{text:"No",action:function(){return true}}]);
     }else{
@@ -1350,25 +1386,30 @@ function stopGame(askConfirm){
     }
 }
 function endRoundToDateChange(){
+    if(gameState!=STATE_ENDROUND) return;
     I("newDate").value=currentGameDate.toISOString().split("T")[0];
     toSlide("dateChange");
 }
 function endRoundToPlayerManagement(){
+    if(gameState!=STATE_ENDROUND) return;
     ingamePlayerManagement=true;
     populatePlayersAndTeamsList();
+    I("playerManagementToGameOptions").style.display="none";
     toSlide("playerManagement");
 }
 function endGameToWelcome(){
+    if(getCurrentSlide().id!=="endGame") return;
     leaveConfirmRequired=false;
     toSlide("welcome");
 }
 </script>
 </head>
 <body>
-<div class="slide visible" id="nojs">
-    Enable javascript you tinfoilhatter
+<div id="loadOverlay">
+    <noscript>
+        Enable javascript you tinfoilhatter
+    </noscript>
 </div>
-<div id="loadOverlay"></div>
 <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
     <div class="full">
         <div class="content">
@@ -1406,7 +1447,7 @@ function endGameToWelcome(){
         </div>
     </div>
     <div class="lower">
-        <input type="button" value="Conferma" onclick="playerManagementToGame()" />
+        <input type="button" value="Indietro" id="playerManagementToGameOptions" onclick="playerManagementToGameOptions()" /><input type="button" value="Conferma" onclick="playerManagementToGame()" />
     </div>
 </div>
 <div class="slide invisible" id="editTeam" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
@@ -1438,7 +1479,7 @@ function endGameToWelcome(){
                     for(var i=0;i<ids.length;i++){
                         var o=document.createElement("option");
                         o.value=ids[i];
-                        o.innerText=RACES[ids[i]].name;
+                        o.textContent=RACES[ids[i]].name;
                         raceSelect.appendChild(o);
                     }
                     raceSelect.value=raceSelect.childNodes[0].value;
@@ -1476,7 +1517,7 @@ function endGameToWelcome(){
                 </div>
             </div>
             <div style="text-align:center;margin-top:2em">
-                <input type="button" value="Passa turno" onclick="nextPlayer()"/><input type="button" value="Passa turno e tempo" onclick="nextPlayerWithTime()" />
+                <input type="button" value="Prossimo giocatore" onclick="nextPlayer()"/><input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
             </div>
             <div style="text-align:center">
                 <input type="button" value="Tempo fantasma" onclick="beginGhostTime()"/><input type="button" value="Combattimento" onclick="beginCombat()"/>
@@ -1524,8 +1565,11 @@ function endGameToWelcome(){
     <div class="upper">
         <div class="content">
             <div class="title">Fine turno <span id="endRoundNumber"></span></div>
-            <div id="combatTypeButtonsContainer" style="text-align:center">
-                <input type="button" value="Scorri tempo" onclick="endRoundToDateChange()"/><input type="button" value="Gestione squadre e giocatori" onclick="endRoundToPlayerManagement()"/>
+            <div style="text-align:center">
+                <input type="button" value="Scorri tempo" onclick="endRoundToDateChange()"/>
+            </div>
+            <div style="text-align:center">
+                <input type="button" value="Gestione squadre e giocatori" onclick="endRoundToPlayerManagement()"/>
             </div>
         </div>
     </div>
@@ -1573,7 +1617,6 @@ function endGameToWelcome(){
 <div id="modalContainer"></div>
 <script type="text/javascript">
     toSlide("welcome");
-    I("loadOverlay").style.display="block";
     setTimeout(function(){
         document.body.removeChild(I("loadOverlay"));
     },500);
