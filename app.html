@@ -1708,7 +1708,7 @@ function endGameToWelcome(){
 <script type="text/javascript">
     var ua=navigator.userAgent;
     if(/Firefox.(\d+)/i.test(ua)&&/Android|iPhone|iPad|iPod|Windows Phone|Mobile|Tablet/i.test(ua)){ //mobile firefox date picker sucks
-        var dates=document.querySelectorAll('input[type="date"');
+        var dates=document.querySelectorAll('input[type="date"]');
         for(var i=0;i<dates.length;i++){
             dates[i].type="text";
             dates[i].placeholder="YYYY-MM-DD";
