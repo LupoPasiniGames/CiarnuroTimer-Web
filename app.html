@@ -55,6 +55,11 @@ html,body{
 .bold{
     font-weight:bold;
 }
+body.lowspec *{
+    transition: none !important;
+    backdrop-filter:none !important;
+    animation:none !important;
+}
 /*---SLIDES SYSTEM----*/
 div.slide{
     position:fixed;
@@ -134,6 +139,25 @@ div.title{
     padding: 0.5em 0 0.1em 0;
     border-bottom:0.1em solid #FFFFFF;
     font-family:'Xolonium',sans-serif;
+}
+/*---FLASHES---*/
+div.flashFx{
+	position:fixed;
+	top:0;left:0;
+	width:100%;height:100%;
+	z-index:99999;
+	background-color:#FFFFFF;
+	opacity:0;
+	animation:flash 0.4s linear;
+}
+body.lowspec div.flashFx{
+    opacity:1;
+}
+@keyframes flash{
+	0%{opacity:0;}
+	10%{opacity:1;}
+	60%{opacity:0.2;}
+	100%{opacity:0;}
 }
 /*---FORMS---*/
 form{
@@ -390,12 +414,22 @@ div.banner{
 <script type="text/javascript">
 /*---BASIC FUNCTIONS---*/
 function I(id){return document.getElementById(id);}
+window.requestAnimationFrame=window.requestAnimationFrame||(function(callback,element){setTimeout(callback,1000/60);});
 var leaveConfirmRequired=false;
 window.onbeforeunload=function(){
     return leaveConfirmRequired?true:null;
 }
 String.prototype.isBlank=function(){
 	return !this || /^\s*$/.test(this);
+}
+function enableLowspecMode(){
+    document.body.className="lowspec";
+}
+function disableLowspecMode(){
+    document.body.className="";
+}
+function isLowspecMode(){
+    return document.body.className==="lowspec";
 }
 /*---SLIDES SYSTEM---*/
 function toSlide(id){
@@ -411,6 +445,27 @@ function toSlide(id){
 function getCurrentSlide(){
     var s=document.getElementsByClassName("slide visible");
     if(s.length==0) return null; else return s[0];
+}
+/*---FLASHES---*/
+var flashing=false;
+function flash(color){
+	if(flashing) return; else flashing=true;
+	var f=document.createElement("div");
+	f.className="flashFx";
+	f.style.backgroundColor=color;
+	if(!isLowspecMode()){
+        f.onanimationend=function(){
+            f.parentElement.removeChild(f);
+            flashing=false;
+        }.bind(this);
+	}else{
+        setTimeout(function(){
+            f.parentElement.removeChild(f);
+            flashing=false;
+        }.bind(this),200);
+	}
+	
+	document.body.appendChild(f);
 }
 /*---MODALS---*/
 function showModal(message,buttons){
@@ -431,15 +486,19 @@ function showModal(message,buttons){
             b.value=buttons[i].text;
             b.onclick=function(modal,action){
                 return function(){
-                    
                     try{
                         if(!action()) return;
                     }catch(t){
                         console.error("Button action exception: "+t);
                         return;
                     }
-                    modal.className="modal invisible";
-                    modal.onanimationend=function(thisModal){return function(){I("modalContainer").removeChild(thisModal);}}(modal);
+                    if(!isLowspecMode()){
+                        modal.className="modal invisible";
+                        modal.onanimationend=function(thisModal){return function(){I("modalContainer").removeChild(thisModal);}}(modal);
+                    }else{
+                        I("modalContainer").removeChild(modal);
+                    }
+                    
                 }
             }(m,buttons[i].action);
             d.appendChild(b);
@@ -456,7 +515,8 @@ function showModal(message,buttons){
 var focusTrapEnabled=true, FOCUS_TRAP_MODE=1; //0=no trapping, 1=unfocus if not current slide/modal, 2=always force focus on an element inside current slide/modal if possible
 window.onblur=function(){focusTrapEnabled=false;}
 window.onfocus=function(){focusTrapEnabled=true;}
-setInterval(function(){
+function trapF(){
+    window.requestAnimationFrame(trapF);
     if(FOCUS_TRAP_MODE==0||!focusTrapEnabled) return;
     var modals=I("modalContainer");
     var trapInside=null;
@@ -473,17 +533,36 @@ setInterval(function(){
             try{trapInside.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="button"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), div.clickOverlay[tabIndex="0"]')[0].focus();}catch(e){trapInside.focus();}
         }
     }
-},1);
+}
+window.requestAnimationFrame(trapF);
 /*---SOUND FX SYSTEM---*/
 var playSoundFx=null;
 var soundSystemStarted=false;
-var SILENCE="data:audio/ogg;base64,T2dnUwACAAAAAAAAAAAZC122AAAAAHl54HIBE09wdXNIZWFkAQE4AYC7AAAAAABPZ2dTAAAAAAAAAAAAABkLXbYBAAAAO0wNlAE+T3B1c1RhZ3MNAAAATGF2ZjU4LjI5LjEwMAEAAAAdAAAAZW5jb2Rlcj1MYXZjNTguNTQuMTAwIGxpYm9wdXNPZ2dTAAT4EwAAAAAAABkLXbYCAAAANBo2TwYHBgcIBgcIC/H5FoXgCAp4sw7GCAs9kdEogAgKwL+y735ICAp4sw7GCArAv7Lu4w==";
+var SOUND_FORMAT=null;
+var SILENCE=null;
 function initSoundSystem(){
     if(soundSystemStarted) return;
+    try{
+        if(document.createElement('audio').canPlayType('audio/ogg; codecs="opus"')){
+            SOUND_FORMAT="opus";
+        }else if(document.createElement('audio').canPlayType('audio/mpeg')){
+            SOUND_FORMAT="mp3";
+        }else throw "";
+    }catch(e){
+        console.error("Browser doesn't support opus or mp3. Sound system disabled");
+        SOUND_FORMAT=null;
+        soundSystemStarted=true;
+        return;
+    }
+    if(SOUND_FORMAT==="opus"){
+        SILENCE="data:audio/ogg;base64,T2dnUwACAAAAAAAAAAAZC122AAAAAHl54HIBE09wdXNIZWFkAQE4AYC7AAAAAABPZ2dTAAAAAAAAAAAAABkLXbYBAAAAO0wNlAE+T3B1c1RhZ3MNAAAATGF2ZjU4LjI5LjEwMAEAAAAdAAAAZW5jb2Rlcj1MYXZjNTguNTQuMTAwIGxpYm9wdXNPZ2dTAAT4EwAAAAAAABkLXbYCAAAANBo2TwYHBgcIBgcIC/H5FoXgCAp4sw7GCAs9kdEogAgKwL+y735ICAp4sw7GCArAv7Lu4w=="
+    }else if(SOUND_FORMAT==="mp3"){
+        SILENCE="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAABAAAAfgAkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKStra2tra2tra2tra2tra2tra2tra2tra2ttvb29vb29vb29vb29vb29vb29vb29vb29v/////////////////////////////////AAAAAExhdmM1OC41NAAAAAAAAAAAAAAAACQDoAAAAAAAAAH4r5m7lwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+MYxAAJuAINiBDGcKEwDu7ZzmIOQAEp1ZfrP5yc/fkP1Ohjz/nPOdeDhxCbv+QLjnf/IAAgDWp2Xtt0gNE3qqiaydy8v3VC/+MYxBQKaAYhgAhEANvD9muK/lJfUdU5T0czcuj/9t/+/L2IopFgWUO7Nclt3r0e7U/O+r9f9n7PU/Zr87//5b+ziVUpSP5k/+MYxCUIEAImMAhEcEdP/////VEVOZURUVChgoIEHBMy7gIWFQz//rFRZsWF2VioskxBTUUzLjEwMKqqqqqqqqqqqqqqqqqq/+MYxD8J6iWMEAgEPKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+    }
     var a=document.createElement("audio");
     a.src=SILENCE;
     a.onended=function(){
-        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx+".opus");
+        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx+"."+SOUND_FORMAT);
         playSoundFx=null;
         a.play();
     };
@@ -796,6 +875,7 @@ function populatePlayersAndTeamsList(){
         x.className="rightButtons";
         s=document.createElement("a");
         s.className="button edit";
+        s.tabIndex=0;
         s.onclick=function(p){
             return function(){
                 if(getCurrentSlide().id!=="playerManagement") return;
@@ -806,6 +886,7 @@ function populatePlayersAndTeamsList(){
         x.appendChild(s);
         s=document.createElement("a");
         s.className="button remove";
+        s.tabIndex=0;
         s.onclick=function(p){
             return function(){
                 if(getCurrentSlide().id!=="playerManagement") return;
@@ -869,6 +950,7 @@ function populatePlayersAndTeamsList(){
         x.className="rightButtons";
         s=document.createElement("a");
         s.className="button edit";
+        s.tabIndex=0;
         s.onclick=function(t){
             return function(){
                 if(getCurrentSlide().id!=="playerManagement") return;
@@ -879,6 +961,7 @@ function populatePlayersAndTeamsList(){
         x.appendChild(s);
         s=document.createElement("a");
         s.className="button remove";
+        s.tabIndex=0;
         s.onclick=function(t){
             return function(){
                 if(getCurrentSlide().id!=="playerManagement") return;
@@ -1234,6 +1317,7 @@ setInterval(function(){
         if(e!=null){
             if(e.player!=lastTickPlayer){
                 if(currentRound>1||scheduleTPtr!=tsdiff) playSoundFx="nextPlayer"; //don't play sound effect for first player of the first round because we're already playing gameStarted
+                flash();
                 I("senilityCheckRequired").style.display=e.player.isSenile()?"":"none";
                 if(e.player.team!=0){
                     I("teamTContainer").style.display="";
@@ -1287,8 +1371,7 @@ function randomizeGameTimerBackground(){
 }
 function stopRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
-    if(currentRound>=maxRounds){
-        playSoundFx="endGame";
+    if(currentRound>=maxRounds){        
         gameState=STATE_NOTPLAYING;
         stopGame();
     }else{
@@ -1380,6 +1463,7 @@ function stopGame(askConfirm){
         showModal("Vuoi terminare la partita?",[{text:"Si",action:function(){stopGame();return true}},{text:"No",action:function(){return true}}]);
     }else{
         gameState=STATE_NOTPLAYING;
+        playSoundFx="endGame";
         for(var i=0;i<players.length;i++) players[i].reset();
         saveConfigToLocalStorage();
         toSlide("endGame");
