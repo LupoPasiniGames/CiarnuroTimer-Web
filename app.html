@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!--TODO: statistiche -->
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
@@ -670,10 +669,10 @@ function getTeamById(id){
     for(var i=0;i<teams.length;i++) if(teams[i].teamId==id) return teams[i];
     return null;
 }
+/*---MAIN IMPLEMENTATION---*/
 function saveConfigToLocalStorage(){
     try{
         var state={
-            version:1,
             currentGameDate:currentGameDate.toISOString().split("T")[0],
             roundDuration:roundDuration,
             maxRounds:maxRounds,
@@ -706,7 +705,6 @@ function loadConfigFromLocalStorage(){
     try{
         if(!localStorage.ciarnuro) return;
         var state=JSON.parse(localStorage.ciarnuro);
-        if(state.version!=1) return;
         currentGameDate=new Date(state.currentGameDate);
         roundDuration=Number(state.roundDuration);
         maxRounds=Number(state.maxRounds);
@@ -728,7 +726,6 @@ function loadConfigFromLocalStorage(){
         playerIdCtr=Number(state.playerIdCtr);
     }catch(t){console.error("Config not loaded: "+t);}
 }
-/*---WELCOME SCREEN---*/
 function newGame(){
     if(getCurrentSlide().id!=="welcome") return;
     initSoundSystem();
@@ -744,9 +741,65 @@ function newGame(){
 }
 function welcomeToPreviousGames(){
     if(getCurrentSlide().id!=="welcome") return;
-    showModal("Non ancora implementato",[{text:"Ok",action:function(){return true}}]);
+    populatePreviousGamesList();
+    toSlide("previousGames");
 }
-/*---NEW GAME SCREEN---*/
+function populatePreviousGamesList(){
+    var list=I("previousGamesList");
+    list.innerHTML="";
+    try{
+        if(!localStorage.previousGamesList) return;
+        var games=JSON.parse(localStorage.previousGamesList);
+        for(var i=0;i<games.length;i++){
+            try{
+                var e=document.createElement("div");
+                e.className="entry";
+                var c=document.createElement("div");
+                c.className="content";
+                var g=JSON.parse(localStorage[games[i]]);
+                c.textContent=g.name;
+                e.appendChild(c);
+                c=document.createElement("div"),
+                c.className="clickOverlay";
+                c.tabIndex="0";
+                c.onclick=function(g){
+                    return function(){
+                        I("reportName").textContent=g.name;
+                        I("reportBody").innerHTML=g.body;
+                        toSlide("gameReport");
+                    }
+                }(g);
+                e.appendChild(c);
+                list.appendChild(e);
+            }catch(t){}
+        }
+    }catch(t){console.error("Previous games list not loaded: "+t);}
+}
+function previousGamesToWelcome(){
+    toSlide("welcome");
+}
+function gameReportToPreviousGames(){
+    toSlide("previousGames");
+}
+function saveReportToLocalStorage(name,body){
+    try{
+        var games=[];
+        if(localStorage.previousGamesList){
+            try{
+                games=JSON.parse(localStorage.previousGamesList);
+            }catch(e){}
+        }
+        var id="g"+Date.now();
+        var report=JSON.stringify({
+            name:name,
+            body:body
+        });
+        localStorage[id]=report;
+        games.push(id);
+        localStorage.previousGamesList=JSON.stringify(games);
+        console.log(localStorage.previousGamesList);
+    }catch(t){console.error("Report not saved: "+t)}
+}
 var MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
 var ROUNDDURATION_MIN=10, ROUNDDURATION_MAX=1000, ROUNDDURATION_STEP=5, ROUNDDURATION_DEFAULT=10;
 function checkMaxRounds(){
@@ -847,7 +900,6 @@ function gameOptionsToPlayerManagement(){
         toSlide("playerManagement");
     }
 }
-/*---PLAYER MANAGEMENT---*/
 function populatePlayersAndTeamsList(){
     var list=I("players");
     list.innerHTML="";
@@ -1161,7 +1213,6 @@ function playerManagementToGame(){
         toSlide("gameTimer");
     }
 }
-/*---DATE CHANGE---*/
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISOString().split("T")[0];
 }
@@ -1214,7 +1265,6 @@ function dateChangeToEndRound(){
     if((getCurrentSlide().id!=="dateChange")&&(getCurrentSlide().id!=="dateChange2")) return;
     toSlide("endRound");
 }
-/*---MAIN LOGIC---*/
 var schedule=[];
 var timePerPlayerMs=0;
 var scheduleTPtr=0;
@@ -1691,11 +1741,33 @@ function endGameToWelcome(){
     <div class="upper">
         <div class="content">
             <div class="title">Fine partita</div>
-            TODO: Statistiche non ancora implementate
+            TODO: statistiche...
         </div>
     </div>
     <div class="lower">
         <input type="button" value="Continua" onclick="endGameToWelcome()" />
+    </div>
+</div>
+<div class="slide invisible" id="previousGames" style="background-image:url('pics/backgrounds/previousGames.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title">Partite precedenti</div>
+            <div class="list" id="previousGamesList"></div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Indietro" onclick="previousGamesToWelcome()" />
+    </div>
+</div>
+<div class="slide invisible" id="gameReport" style="background-image:url('pics/backgrounds/previousGames.jpg')">
+    <div class="upper">
+        <div class="content">
+            <div class="title" id="reportName"></div>
+            <div id="reportBody"></div>
+        </div>
+    </div>
+    <div class="lower">
+        <input type="button" value="Chiudi" onclick="gameReportToPreviousGames()" />
     </div>
 </div>
 <div id="modalContainer"></div>
