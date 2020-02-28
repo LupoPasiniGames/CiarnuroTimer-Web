@@ -72,7 +72,7 @@ window.requestAnimationFrame=window.requestAnimationFrame||(function(callback,el
 var lastTS=-1, fps=0, frames=0;
 function benchF(){
     var ts=Date.now();
-    if(lastTS==-1){
+    if(lastTS===-1){
         lastTS=ts;
     }else{
         var deltaT=ts-lastTS;
@@ -92,6 +92,13 @@ function benchF(){
         toApp();
     }
 }
+try{
+    if(document.createElement("div").onanimationend===undefined){
+        localStorage.lowspec="1";
+        localStorage.bmDone="1";
+        toApp();
+    }
+}catch(e){}
 </script>
 </head>
 <body onload="benchF()">

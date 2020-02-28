@@ -54,6 +54,9 @@ html,body{
 .bold{
     font-weight:bold;
 }
+.centered{
+    text-align:center;
+}
 body.lowspec *{
     transition: none !important;
     backdrop-filter:none !important;
@@ -416,7 +419,7 @@ function I(id){return document.getElementById(id);}
 window.requestAnimationFrame=window.requestAnimationFrame||(function(callback,element){setTimeout(callback,1000/60);});
 var leaveConfirmRequired=false;
 window.onbeforeunload=function(){
-    return leaveConfirmRequired?true:null;
+    return leaveConfirmRequired?"":undefined;
 }
 String.prototype.isBlank=function(){
 	return !this || /^\s*$/.test(this);
@@ -434,6 +437,7 @@ function isLowspecMode(){
 function toSlide(id){
     id=I(id);
     if(!id){console.error("Slide not found"); return;}
+    if(id.className.indexOf("slide")===-1){console.error("Not a slide"); return;}
     var slides=document.getElementsByClassName("slide");
     for(var i=0;i<slides.length;i++){
         slides[i].className="slide invisible";
@@ -443,7 +447,7 @@ function toSlide(id){
 }
 function getCurrentSlide(){
     var s=document.getElementsByClassName("slide visible");
-    if(s.length==0) return null; else return s[0];
+    if(s.length===0) return null; else return s[0];
 }
 /*---FLASHES---*/
 var flashing=false;
@@ -485,6 +489,7 @@ function showModal(message,buttons){
             b.value=buttons[i].text;
             b.onclick=function(modal,action){
                 return function(){
+                    if(modal.className==="modal invisible") return;
                     try{
                         if(!action()) return;
                     }catch(t){
@@ -516,19 +521,19 @@ window.onblur=function(){focusTrapEnabled=false;}
 window.onfocus=function(){focusTrapEnabled=true;}
 function trapF(){
     window.requestAnimationFrame(trapF);
-    if(FOCUS_TRAP_MODE==0||!focusTrapEnabled) return;
+    if(FOCUS_TRAP_MODE===0||!focusTrapEnabled) return;
     var modals=I("modalContainer");
     var trapInside=null;
-    if(modals.childNodes.length==0){
+    if(modals.childNodes.length===0){
         if(document.activeElement===document.body) return;
         trapInside=getCurrentSlide();
-        if(trapInside==null) return;
+        if(trapInside===null) return;
     }else{
         trapInside=modals.childNodes[modals.childNodes.length-1];
     }
     if(!trapInside.contains(document.activeElement)){
         document.activeElement.blur();
-        if(FOCUS_TRAP_MODE==2){
+        if(FOCUS_TRAP_MODE===2){
             try{trapInside.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="button"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), div.clickOverlay[tabIndex="0"]')[0].focus();}catch(e){trapInside.focus();}
         }
     }
@@ -561,7 +566,7 @@ function initSoundSystem(){
     var a=document.createElement("audio");
     a.src=SILENCE;
     a.onended=function(){
-        a.src=playSoundFx==null?SILENCE:("sfx/"+playSoundFx+"."+SOUND_FORMAT);
+        a.src=playSoundFx===null?SILENCE:("sfx/"+playSoundFx+"."+SOUND_FORMAT);
         playSoundFx=null;
         a.play();
     };
@@ -623,14 +628,14 @@ function Player(playerName,characterName,race,dob,team,firstPlayer){
     this.dob=dob;
     this.team=team;
     this.firstPlayer=firstPlayer;
-    this.alwaysPlayedSolo=team==0;
+    this.alwaysPlayedSolo=team===0;
     this.timePlayed=0;
     this.deathAge=-1;
 }
 Player.prototype={
     constructor:Player,
     getAge:function(){
-        return this.deathAge==-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
+        return this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
     },
     isOldEnoughToPlay:function(){
         return this.getAge()>=RACES[this.race].ages[0];
@@ -648,20 +653,20 @@ Player.prototype={
     },
     getAgeTierName:function(){
         var t=this.getAgeTier();
-        return t==-1?null:AGE_NAMES[t];
+        return t===-1?null:AGE_NAMES[t];
     },
     die:function(){
         this.deathAge=this.getAge();
     },
     reset:function(){
-        this.alwaysPlayedSolo=this.team==0;
+        this.alwaysPlayedSolo=this.team===0;
         this.timePlayed=0;
         this.deathAge=-1;
     }
 }
 function getPlayersByTeamId(id){
     var ret=[];
-    for(var i=0;i<players.length;i++) if(players[i].team==id) ret.push(players[i]);
+    for(var i=0;i<players.length;i++) if(players[i].team===id) ret.push(players[i]);
     return ret;
 }
 var teams=[];
@@ -671,7 +676,7 @@ function Team(teamName){
     this.teamName=teamName;
 }
 function getTeamById(id){
-    for(var i=0;i<teams.length;i++) if(teams[i].teamId==id) return teams[i];
+    for(var i=0;i<teams.length;i++) if(teams[i].teamId===id) return teams[i];
     return null;
 }
 /*---MAIN IMPLEMENTATION---*/
@@ -797,9 +802,11 @@ function populatePreviousGamesList(){
     }catch(t){console.error("Previous games list not loaded: "+t);}
 }
 function previousGamesToWelcome(){
+    if(getCurrentSlide().id!=="previousGames") return;
     toSlide("welcome");
 }
 function gameReportToPreviousGames(){
+    if(getCurrentSlide().id!=="gameReport") return;
     toSlide("previousGames");
 }
 function saveReportToLocalStorage(name,body){
@@ -949,7 +956,7 @@ function populatePlayersAndTeamsList(){
         x.appendChild(s);
         var s=document.createElement("div");
         s.className="small";
-        s.textContent=p.team==0?"Solo":getTeamById(p.team).teamName;
+        s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
         x.appendChild(s);
         d.appendChild(x);
         x=document.createElement("div");
@@ -1007,7 +1014,7 @@ function populatePlayersAndTeamsList(){
         toSlide("editPlayer");
     };
     x.onkeypress=function(e){
-        if(e.keyCode==13) x.onclick(); //pressed enter
+        if(e.keyCode===13) x.onclick(); //pressed enter
     }
     d.appendChild(x);
     list.appendChild(d);
@@ -1086,7 +1093,7 @@ function populatePlayersAndTeamsList(){
         toSlide("editTeam");
     };
     x.onkeypress=function(e){
-        if(e.keyCode==13) x.onclick(); //pressed enter
+        if(e.keyCode===13) x.onclick(); //pressed enter
     }
     d.appendChild(x);
     list.appendChild(d);
@@ -1095,7 +1102,7 @@ var ingamePlayerManagement=false;
 var teamBeingEdited=null;
 function prepareTeamEditForm(team){
     teamBeingEdited=team;
-    if(team==null){
+    if(team===null){
         I("teamName").value="";
     }else{
         I("teamName").value=team.teamName;
@@ -1109,7 +1116,7 @@ function checkAndSaveTeam(){
         showModal("Il nome della squadra non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    if(teamBeingEdited==null){
+    if(teamBeingEdited===null){
         var team=new Team(n);
         teams.push(team);
     }else{
@@ -1137,7 +1144,7 @@ function preparePlayerEditForm(player){
         x.value=teams[i].teamId;
         t.appendChild(x);
     }
-    if(player==null){
+    if(player===null){
         I("playerName").value="";
         I("characterName").value="";
         I("dob").value="";
@@ -1151,7 +1158,7 @@ function preparePlayerEditForm(player){
         I("playerName").value=player.playerName;
         I("characterName").value=player.characterName;
         I("dob").value=player.dob.toISOString().split("T")[0];
-        I("team").value=player.team==0?"solo":player.team;
+        I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
         I("firstPlayer").value=player.firstPlayer;
         if(ingamePlayerManagement){
@@ -1163,7 +1170,7 @@ function preparePlayerEditForm(player){
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    var pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value=="y";
+    var pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y";
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -1195,8 +1202,8 @@ function checkAndSavePlayer(){
     if(fp){
         for(var i=0;i<players.length;i++) players[i].firstPlayer=false;
     }
-    if(playerBeingEdited==null){
-        var p=new Player(pn,cn,race,new Date(dob),team=="solo"?0:Number(team),fp);
+    if(playerBeingEdited===null){
+        var p=new Player(pn,cn,race,new Date(dob),team==="solo"?0:Number(team),fp);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -1205,7 +1212,7 @@ function checkAndSavePlayer(){
             playerBeingEdited.dob=dob;
             playerBeingEdited.race=race;
         }
-        playerBeingEdited.team=team=="solo"?0:Number(team);
+        playerBeingEdited.team=team==="solo"?0:Number(team);
         playerBeingEdited.firstPlayer=fp;
     }
     populatePlayersAndTeamsList();
@@ -1248,7 +1255,7 @@ function checkPlayerAges(){
 }
 function playerManagementToGame(){
     if(getCurrentSlide().id!=="playerManagement") return;
-    if(players.length==0){
+    if(players.length===0){
         showModal("Non ci sono giocatori",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
@@ -1337,7 +1344,7 @@ function doPlayerSchedule(){
     for(var i=0;i<plist.length;i++){
         if(plist[i].team!=0){ //if player is in a team, put the rest of the team after him, sorted by add order
             for(var j=i+1;j<plist.length;j++){
-                if(plist[i].team==plist[j].team){
+                if(plist[i].team===plist[j].team){
                     var x=plist[j];
                     plist.splice(j,1);
                     plist.splice(i+1,0,x);
@@ -1355,7 +1362,7 @@ function doPlayerSchedule(){
     }
     //build schedule
     schedule=[];
-    if(plist.length==0) return;
+    if(plist.length===0) return;
     timePerPlayerMs=(roundDuration*60*1000)/(plist.length!=0?plist.length:1);
     var t=0;
     for(var i=0;i<plist.length;i++){
@@ -1363,7 +1370,7 @@ function doPlayerSchedule(){
             start:t,
             end:t+timePerPlayerMs,
             player:plist[i],
-            teamTime:plist[i].team==0?timePerPlayerMs:(getPlayersByTeamId(plist[i].team).length*timePerPlayerMs) //this field is only used to speed up calculations later
+            teamTime:plist[i].team===0?timePerPlayerMs:(getPlayersByTeamId(plist[i].team).length*timePerPlayerMs) //this field is only used to speed up calculations later
         };
         t+=timePerPlayerMs;
     }
@@ -1405,17 +1412,17 @@ var totalCombatTime=[0,0,0,0], totalPlayedTime=0;
 var lastTickPlayer=null;
 setInterval(function(){
     var ts=Date.now(),tsdiff=0;
-    if(prevTS==-1){
+    if(prevTS===-1){
         prevTS=ts;
         return;
     }else{
         tsdiff=ts-prevTS;
         prevTS=ts;
     }
-    if(gameState==STATE_NOTPLAYING){
+    if(gameState===STATE_NOTPLAYING){
         return;
     }
-    if(gameState==STATE_GAME){
+    if(gameState===STATE_GAME){
         scheduleTPtr+=tsdiff;
         totalPlayedTime+=tsdiff;
         I("roundNumber").textContent=currentRound;
@@ -1432,7 +1439,7 @@ setInterval(function(){
                     I("teamTDuration").textContent=msToMMSS(e.teamTime);
                 }else I("teamTContainer").style.display="none";
                 I("playerAndCharacterName").textContent=e.player.playerName+" - "+e.player.characterName;
-                I("gtTeamName").textContent=e.player.team==0?"Solo":getTeamById(e.player.team).teamName;
+                I("gtTeamName").textContent=e.player.team===0?"Solo":getTeamById(e.player.team).teamName;
             }
             I("playerTDuration").textContent=msToMMSS(e.end-scheduleTPtr);
             e.player.timePlayed+=tsdiff;
@@ -1442,17 +1449,17 @@ setInterval(function(){
         }
         return;
     }
-    if(gameState==STATE_GHOSTTIME){
+    if(gameState===STATE_GHOSTTIME){
         I("ghostTimeTimer").textContent=msToMMSS(ghostTime);
         ghostTime+=tsdiff;
         totalPlayedTime+=tsdiff;
         return;
     }
-    if(gameState==STATE_COMBAT_INPUT){
+    if(gameState===STATE_COMBAT_INPUT){
         totalPlayedTime+=tsdiff;
         return;
     }
-    if(gameState==STATE_COMBAT_RUNNING){
+    if(gameState===STATE_COMBAT_RUNNING){
         I("combatTimeTimer").textContent=msToMMSS(combatTime);
         combatTime+=tsdiff;
         totalCombatTime[combatType]+=tsdiff;
@@ -1460,7 +1467,7 @@ setInterval(function(){
         totalPlayedTime+=tsdiff;
         return;
     }
-    if(gameState==STATE_ENDROUND){
+    if(gameState===STATE_ENDROUND){
         return;
     }
 },TICK_MS);
@@ -1482,6 +1489,7 @@ function randomizeGameTimerBackground(){
 }
 function stopRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
+    lastTickPlayer=null;
     if(currentRound>=maxRounds){        
         gameState=STATE_NOTPLAYING;
         stopGame();
@@ -1533,7 +1541,7 @@ function setCombatType(type){
     gameState=STATE_COMBAT_RUNNING;
     combatType=type;
     I("combatTypeButtonsContainer").style.display="none";
-    I("combatTypeTitle").textContent=combatType==COMBATTYPE_NARRATIVE?"Narrato":combatType==COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
+    I("combatTypeTitle").textContent=combatType===COMBATTYPE_NARRATIVE?"Narrato":combatType===COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
 }
 function endCombat(){
     if(gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
@@ -1542,12 +1550,12 @@ function endCombat(){
     toSlide("gameTimer");
 }
 function senilityCheckPassed(){
-    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display=="none") return;
+    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display==="none") return;
     document.activeElement.blur();
     I("senilityCheckRequired").style.display="none";
 }
 function senilityCheckFailed(){
-    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display=="none") return;
+    if(gameState!=STATE_GAME||I("senilityCheckRequired").style.display==="none") return;
     var e=getCurrentScheduleEntry();
     if(e!=null){
         players.splice(players.indexOf(e.player),1);
@@ -1558,7 +1566,7 @@ function senilityCheckFailed(){
 }
 function nextRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
-    if(players.length==0){
+    if(players.length===0){
         showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
@@ -1622,7 +1630,7 @@ function generateReport(){
     LINE(report,"Tempo fantasma: ",msToHHMMSS(ghostTime));
     LINE(report,"Tempo in combattimento (Narrato, Tattico, Entrambi, Totale): ",msToHHMMSS(totalCombatTime[COMBATTYPE_NARRATIVE])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_TACTICAL])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_BOTH])+" = "+msToHHMMSS(totalCombatTime[0]));
     report.appendChild(document.createElement("br"));
-    LINE(report,"Elenco dei giocatori a fine partita: ",players.length==0?"Nessuno":null);
+    LINE(report,"Elenco dei giocatori a fine partita: ",players.length===0?"Nessuno":null);
     var list=document.createElement("div");
     list.className="list";
     for(var i=0;i<players.length;i++){
@@ -1642,14 +1650,14 @@ function generateReport(){
         x.appendChild(s);
         var s=document.createElement("div");
         s.className="small";
-        s.textContent=(p.team==0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        s.textContent=(p.team===0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
     }
     report.appendChild(list);
     report.appendChild(document.createElement("br"));
-    LINE(report,"Elenco dei giocatori che non ce l'hanno fatta: ",removedPlayers.length==0?"Nessuno":null);
+    LINE(report,"Elenco dei giocatori che non ce l'hanno fatta: ",removedPlayers.length===0?"Nessuno":null);
     list=document.createElement("div");
     list.className="list";
     for(var i=0;i<removedPlayers.length;i++){
@@ -1669,7 +1677,7 @@ function generateReport(){
         x.appendChild(s);
         var s=document.createElement("div");
         s.className="small";
-        s.textContent=(p.team==0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        s.textContent=(p.team===0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
@@ -1689,8 +1697,8 @@ function generateReport(){
     <div class="full">
         <div class="content">
             <img src="pics/logo.png" alt="Logo" style="display:block;width:100%;height:auto;"/>
-            <div style="text-align:center">
-                <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita"></input><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"></input>
+            <div class="centered">
+                <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
             </div>
         </div>
     </div>
@@ -1791,13 +1799,13 @@ function generateReport(){
                     <div class="timerName">Turno</div>
                 </div>
             </div>
-            <div style="text-align:center;margin-top:2em">
+            <div class="centered" style="margin-top:2em">
                 <input type="button" value="Prossimo giocatore" onclick="nextPlayer()"/><input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
             </div>
-            <div style="text-align:center">
+            <div class="centered">
                 <input type="button" value="Tempo fantasma" onclick="beginGhostTime()"/><input type="button" value="Combattimento" onclick="beginCombat()"/>
             </div>
-            <div class="banner" id="senilityCheckRequired" style="text-align:center;margin-top:2em">
+            <div class="banner" id="senilityCheckRequired" class="centered" style="margin-top:2em">
                 Deve eseguire test di senilità<br/>
                 <input type="button" value="Passato" onclick="senilityCheckPassed()"/><input type="button" value="Fallito" onclick="senilityCheckFailed()"/>
             </div>
@@ -1827,7 +1835,7 @@ function generateReport(){
             <div class="mainTimerContainer" id="combatTimeContainer">
                 <div class="timer" id="combatTimeTimer">00:00</div>
             </div>
-            <div id="combatTypeButtonsContainer" style="text-align:center">
+            <div id="combatTypeButtonsContainer" class="centered">
                 <input type="button" value="Tattico" onclick="setCombatType(COMBATTYPE_TACTICAL)"/><input type="button" value="Narrato" onclick="setCombatType(COMBATTYPE_NARRATIVE)"/><input type="button" value="Entrambi" onclick="setCombatType(COMBATTYPE_BOTH)"/>
             </div>
         </div>
@@ -1840,10 +1848,10 @@ function generateReport(){
     <div class="upper">
         <div class="content">
             <div class="title">Fine turno <span id="endRoundNumber"></span></div>
-            <div style="text-align:center">
+            <div class="centered">
                 <input type="button" value="Scorri tempo" onclick="endRoundToDateChange()"/>
             </div>
-            <div style="text-align:center">
+            <div class="centered">
                 <input type="button" value="Gestione squadre e giocatori" onclick="endRoundToPlayerManagement()"/>
             </div>
         </div>
