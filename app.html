@@ -7,11 +7,6 @@
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="icon" type="image/png" href="favicon.png" />
 <title>Il Ciarnuro Round Timer</title>
-<script type="text/javascript">
-try{
-    if(!localStorage.bmDone) location.href="index.html";
-}catch(e){}
-</script>
 <style type="text/css">
 /*---BASIC STUFF AND FONTS---*/
 @font-face {
@@ -1194,6 +1189,26 @@ function playerManagementToGameOptions(){
     toSlide("gameOptions");
 }
 function checkPlayerAges(){
+    if(!ingamePlayerManagement){
+        for(var i=0;i<players.length;i++){
+            if(players[i].getAge()<0){
+                showModal(players[i].playerName+": il personaggio "+players[i].characterName+" ha età negativa in seguito a un cambio di data",[
+                    {text:"Modifica",action:function(){
+                        preparePlayerEditForm(players[i]);
+                        toSlide("editPlayer");
+                        return true;
+                    }},
+                    {text:"Rimuovi",action:function(){
+                        players.splice(i,1);
+                        populatePlayersAndTeamsList();
+                        return true;
+                    }},
+                    {text:"Annulla",action:function(){return true;}}
+                ]);
+                return false;
+            }
+        }
+    }
     for(var i=0;i<players.length;i++){
         if(players[i].isOldEnoughToPlay()) return true;
     }
@@ -1776,6 +1791,12 @@ function endGameToWelcome(){
     </div>
 </div>
 <div id="modalContainer"></div>
+<script type="text/javascript">
+try{
+    if(!localStorage.bmDone) location.href="index.html";
+    if(localStorage.lowspec) enableLowspecMode();
+}catch(e){}
+</script>
 <script type="text/javascript">
     toSlide("welcome");
     setTimeout(function(){
