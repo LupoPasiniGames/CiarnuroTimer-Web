@@ -613,7 +613,7 @@ var RACES={
     }
 };
 var AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
-var players=[];
+var players=[], removedPlayers=[];
 var playerIdCtr=1;
 function Player(playerName,characterName,race,dob,team,firstPlayer){
     this.playerId=playerIdCtr++;
@@ -623,13 +623,14 @@ function Player(playerName,characterName,race,dob,team,firstPlayer){
     this.dob=dob;
     this.team=team;
     this.firstPlayer=firstPlayer;
-    this.alwaysPlayedSolo=team==null;
+    this.alwaysPlayedSolo=team==0;
     this.timePlayed=0;
+    this.deathAge=-1;
 }
 Player.prototype={
     constructor:Player,
     getAge:function(){
-        return new Date(currentGameDate-this.dob).getFullYear()-1970;
+        return this.deathAge==-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
     },
     isOldEnoughToPlay:function(){
         return this.getAge()>=RACES[this.race].ages[0];
@@ -649,9 +650,13 @@ Player.prototype={
         var t=this.getAgeTier();
         return t==-1?null:AGE_NAMES[t];
     },
+    die:function(){
+        this.deathAge=this.getAge();
+    },
     reset:function(){
         this.alwaysPlayedSolo=this.team==0;
         this.timePlayed=0;
+        this.deathAge=-1;
     }
 }
 function getPlayersByTeamId(id){
@@ -730,6 +735,7 @@ function newGame(){
     if(getCurrentSlide().id!=="welcome") return;
     initSoundSystem();
     leaveConfirmRequired=true;
+    I("report").innerHTML="";
     loadConfigFromLocalStorage();
     I("maxRounds").value=maxRounds;
     I("roundDuration").value=roundDuration;
@@ -750,28 +756,43 @@ function populatePreviousGamesList(){
     try{
         if(!localStorage.previousGamesList) return;
         var games=JSON.parse(localStorage.previousGamesList);
-        for(var i=0;i<games.length;i++){
+        for(var i=games.length-1;i>=0;i--){
             try{
                 var e=document.createElement("div");
                 e.className="entry";
                 var c=document.createElement("div");
                 c.className="content";
                 var g=JSON.parse(localStorage[games[i]]);
-                c.textContent=g.name;
+                c.textContent="Rapporto #"+(i+1);
+                var s=document.createElement("div");
+                s.className="small";
+                s.textContent=g.name;
+                c.appendChild(s);
                 e.appendChild(c);
                 c=document.createElement("div"),
                 c.className="clickOverlay";
                 c.tabIndex="0";
-                c.onclick=function(g){
+                c.onclick=function(g,id){
                     return function(){
                         I("reportName").textContent=g.name;
                         I("reportBody").innerHTML=g.body;
+                        I("deleteReport").onclick=function(){
+                            showModal("Cancellare questa partita?",[
+                                {text:"Si",action:function(){
+                                    deleteReport(id);
+                                    populatePreviousGamesList();
+                                    toSlide("previousGames");
+                                    return true;
+                                }},
+                                {text:"No",action:function(){return true;}}
+                            ]);
+                        };
                         toSlide("gameReport");
                     }
-                }(g);
+                }(g,games[i]);
                 e.appendChild(c);
                 list.appendChild(e);
-            }catch(t){}
+            }catch(t){console.error("Entry not generated for "+games[i]+": "+t);}
         }
     }catch(t){console.error("Previous games list not loaded: "+t);}
 }
@@ -789,7 +810,7 @@ function saveReportToLocalStorage(name,body){
                 games=JSON.parse(localStorage.previousGamesList);
             }catch(e){}
         }
-        var id="g"+Date.now();
+        var id="g"+Date.now()+~~(Math.random()*Number.MAX_SAFE_INTEGER);
         var report=JSON.stringify({
             name:name,
             body:body
@@ -799,6 +820,14 @@ function saveReportToLocalStorage(name,body){
         localStorage.previousGamesList=JSON.stringify(games);
         console.log(localStorage.previousGamesList);
     }catch(t){console.error("Report not saved: "+t)}
+}
+function deleteReport(id){
+    try{
+        var games=JSON.parse(localStorage.previousGamesList);
+        games.splice(games.indexOf(id),1);
+        localStorage.previousGamesList=JSON.stringify(games);
+        delete(localStorage[id]);
+    }catch(t){console.error("Report "+id+" not deleted: "+t)}
 }
 var MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
 var ROUNDDURATION_MIN=10, ROUNDDURATION_MAX=1000, ROUNDDURATION_STEP=5, ROUNDDURATION_DEFAULT=10;
@@ -945,6 +974,8 @@ function populatePlayersAndTeamsList(){
                 showModal("Sei sicuro di voler rimuovere "+p.playerName+"?",[
                 {text:"Si",action:function(){
                     players.splice(players.indexOf(p),1);
+                    p.die();
+                    if(ingamePlayerManagement) removedPlayers.push(p);
                     populatePlayersAndTeamsList();
                     return true;
                 }},
@@ -1355,6 +1386,13 @@ function msToMMSS(ms){
     s%=60;
     return (m<10?("0"+m):m)+":"+(s<10?("0"+s):s);
 }
+function msToHHMMSS(ms){
+    var HOUR=60*60*1000;
+    if(ms<HOUR) return msToMMSS(ms);
+    var h=ms/HOUR;
+    ms%=HOUR;
+    return (h<10?("0"+h):h)+":"+msToMMSS(ms);
+}
 var TICK_MS=100;
 var STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4;
 var gameState=STATE_NOTPLAYING;
@@ -1363,7 +1401,7 @@ var prevTS=-1;
 var ghostTime=0,combatTime=0;
 var COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
 var combatType=COMBATTYPE_INPUT;
-var totalCombatTime=[null,0,0,0], totalPlayedTime=0;
+var totalCombatTime=[0,0,0,0], totalPlayedTime=0;
 var lastTickPlayer=null;
 setInterval(function(){
     var ts=Date.now(),tsdiff=0;
@@ -1418,6 +1456,7 @@ setInterval(function(){
         I("combatTimeTimer").textContent=msToMMSS(combatTime);
         combatTime+=tsdiff;
         totalCombatTime[combatType]+=tsdiff;
+        totalCombatTime[0]+=tsdiff;
         totalPlayedTime+=tsdiff;
         return;
     }
@@ -1430,6 +1469,8 @@ function initGame(){
     currentRound=1;
     ghostTime=0;
     combatTime=0;
+    totalCombatTime=[0,0,0,0];
+    removedPlayers=[];
     playSoundFx="gameStarted";
     doPlayerSchedule();
     randomizeGameTimerBackground();
@@ -1510,6 +1551,8 @@ function senilityCheckFailed(){
     var e=getCurrentScheduleEntry();
     if(e!=null){
         players.splice(players.indexOf(e.player),1);
+        e.player.die();
+        removedPlayers.push(e.player);
     }
     nextPlayer();
 }
@@ -1534,6 +1577,7 @@ function stopGame(askConfirm){
     }else{
         gameState=STATE_NOTPLAYING;
         playSoundFx="endGame";
+        generateReport();
         for(var i=0;i<players.length;i++) players[i].reset();
         saveConfigToLocalStorage();
         toSlide("endGame");
@@ -1556,12 +1600,89 @@ function endGameToWelcome(){
     leaveConfirmRequired=false;
     toSlide("welcome");
 }
+
+function generateReport(){
+    var report=I("report");
+    var LINE=function(parent,name,value){
+        var d=document.createElement("span");
+        d.className="bold";
+        d.textContent=name;
+        parent.appendChild(d);
+        if(value!=null){
+            d=document.createElement("span");
+            d.textContent=value;
+            parent.appendChild(d);
+        }
+        parent.appendChild(document.createElement("br"));
+    }
+    report.innerHTML="";
+    LINE(report,"Date di inizio e fine: ",I("startDate").value+"  -  "+currentGameDate.toISOString().split("T")[0]);
+    LINE(report,"Turni giocati: ",currentRound+" / "+maxRounds);
+    LINE(report,"Durata partita: ",msToHHMMSS(totalPlayedTime));
+    LINE(report,"Tempo fantasma: ",msToHHMMSS(ghostTime));
+    LINE(report,"Tempo in combattimento (Narrato, Tattico, Entrambi, Totale): ",msToHHMMSS(totalCombatTime[COMBATTYPE_NARRATIVE])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_TACTICAL])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_BOTH])+" = "+msToHHMMSS(totalCombatTime[0]));
+    report.appendChild(document.createElement("br"));
+    LINE(report,"Elenco dei giocatori a fine partita: ",players.length==0?"Nessuno":null);
+    var list=document.createElement("div");
+    list.className="list";
+    for(var i=0;i<players.length;i++){
+        var p=players[i];
+        var d=document.createElement("div");
+        d.className="entry";
+        var x=document.createElement("img");
+        x.className="icon";
+        x.src="pics/races/"+p.race+".png";
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.textContent=p.playerName+" (giocato per "+msToHHMMSS(p.timePlayed)+")";
+        var s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        x.appendChild(s);
+        var s=document.createElement("div");
+        s.className="small";
+        s.textContent=(p.team==0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        x.appendChild(s);
+        d.appendChild(x);
+        list.appendChild(d);
+    }
+    report.appendChild(list);
+    report.appendChild(document.createElement("br"));
+    LINE(report,"Elenco dei giocatori che non ce l'hanno fatta: ",removedPlayers.length==0?"Nessuno":null);
+    list=document.createElement("div");
+    list.className="list";
+    for(var i=0;i<removedPlayers.length;i++){
+        var p=removedPlayers[i];
+        var d=document.createElement("div");
+        d.className="entry";
+        var x=document.createElement("img");
+        x.className="icon";
+        x.src="pics/races/"+p.race+".png";
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.textContent=p.playerName+" (giocato per "+msToHHMMSS(p.timePlayed)+")";
+        var s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.characterName+" ("+RACES[p.race].name+", morto a "+p.getAge()+" anni)";
+        x.appendChild(s);
+        var s=document.createElement("div");
+        s.className="small";
+        s.textContent=(p.team==0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        x.appendChild(s);
+        d.appendChild(x);
+        list.appendChild(d);
+    }
+    report.appendChild(list);
+    saveReportToLocalStorage("Partita del "+new Date().toISOString().split("T")[0],I("report").innerHTML);
+}
 </script>
 </head>
 <body>
 <div id="loadOverlay">
     <noscript>
-        Enable javascript you tinfoilhatter
+        Attiva JavaScript, cappello di stagnola!
     </noscript>
 </div>
 <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
@@ -1761,7 +1882,7 @@ function endGameToWelcome(){
     <div class="upper">
         <div class="content">
             <div class="title">Fine partita</div>
-            TODO: statistiche...
+            <div id="report"></div>
         </div>
     </div>
     <div class="lower">
@@ -1787,7 +1908,7 @@ function endGameToWelcome(){
         </div>
     </div>
     <div class="lower">
-        <input type="button" value="Chiudi" onclick="gameReportToPreviousGames()" />
+        <input type="button" value="Chiudi" onclick="gameReportToPreviousGames()" /><input type="button" id="deleteReport" value="Rimuovi" onclick="" />
     </div>
 </div>
 <div id="modalContainer"></div>
