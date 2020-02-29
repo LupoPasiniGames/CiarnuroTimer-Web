@@ -2018,20 +2018,19 @@ function init(){
 </div>
 <div id="modalContainer"></div>
 <script type="text/javascript">
-    var f=function(){
-        setTimeout(function(){
-            document.body.removeChild(I("loadOverlay"));
-            try{
-                if(localStorage.bmDone) throw "";
-                runBenchmark();
-                return;
-            }catch(e){}
-            try{
+    setTimeout(function(){
+        document.body.removeChild(I("loadOverlay"));
+        try{
+            if(localStorage.bmDone){
                 if(localStorage.lowspec) enableLowspecMode();
-            }catch(e){}
+                init();
+            }else  runBenchmark();
+            return;
+        }catch(e){
             init();
-        },500);
-    };f();
+        }
+        init();
+    },500);
 </script>
 <script type="text/javascript">
     var ua=navigator.userAgent;
