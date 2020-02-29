@@ -57,6 +57,9 @@ html,body{
 .centered{
     text-align:center;
 }
+a{
+    color:#FFFFFF;
+}
 body.lowspec *{
     transition: none !important;
     backdrop-filter:none !important;
@@ -470,7 +473,6 @@ function flash(color){
             flashing=false;
         }.bind(this),200);
 	}
-	
 	document.body.appendChild(f);
 }
 /*---MODALS---*/
@@ -631,7 +633,7 @@ function Player(playerName,characterName,race,dob,team,firstPlayer){
     this.dob=dob;
     this.team=team;
     this.firstPlayer=firstPlayer;
-    this.alwaysPlayedSolo=team===0;
+    this.alwaysPlayedSolo=true;
     this.timePlayed=0;
     this.deathAge=-1;
 }
@@ -712,11 +714,13 @@ function saveConfigToLocalStorage(){
             }
         }
         localStorage.ciarnuro=JSON.stringify(state);
+        localStorage.ciarnuroRTVer="1";
     }catch(t){console.error("Config not saved: "+t);}
 }
 function loadConfigFromLocalStorage(){
     try{
         if(!localStorage.ciarnuro) return;
+        if(localStorage.ciarnuroRTVer!=="1") return;
         var state=JSON.parse(localStorage.ciarnuro);
         currentGameDate=new Date(state.currentGameDate);
         roundDuration=Number(state.roundDuration);
@@ -763,6 +767,7 @@ function populatePreviousGamesList(){
     list.innerHTML="";
     try{
         if(!localStorage.previousGamesList) return;
+        if(localStorage.ciarnuroRTVer!=="1") return;
         var games=JSON.parse(localStorage.previousGamesList);
         for(var i=games.length-1;i>=0;i--){
             try{
@@ -828,7 +833,6 @@ function saveReportToLocalStorage(name,body){
         localStorage[id]=report;
         games.push(id);
         localStorage.previousGamesList=JSON.stringify(games);
-        console.log(localStorage.previousGamesList);
     }catch(t){console.error("Report not saved: "+t)}
 }
 function deleteReport(id){
@@ -1167,6 +1171,9 @@ function preparePlayerEditForm(player){
         if(ingamePlayerManagement){
             I("dob").disabled="true";
             I("race").disabled="true";
+        }else{
+            I("dob").disabled=undefined;
+            I("race").disabled=undefined;
         }
         I("firstPlayer").value=player.firstPlayer?"y":"n";
     }
@@ -1270,7 +1277,7 @@ function playerManagementToGame(){
     }
     if(!checkPlayerAges()) return;
     for(var i=0;i<players.length;i++){
-        if(players[i].team!=0) players[i].alwaysSolo=false;
+        if(players[i].team!==0) players[i].alwaysPlayedSolo=false;
     }
     if(ingamePlayerManagement){
         toSlide("endRound");
@@ -1711,6 +1718,7 @@ function generateReport(){
             <div class="centered">
                 <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
             </div>
+            <div class="centered" style="position:absolute;bottom:1em;left:0;right:0;font-size:0.75em"><a target="__blank" href="https://github.com/LupoPasiniGames">Versione 1.0-it</a></div>
         </div>
     </div>
 </div>
