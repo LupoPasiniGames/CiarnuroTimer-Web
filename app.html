@@ -424,6 +424,9 @@ window.onbeforeunload=function(){
 String.prototype.isBlank=function(){
 	return !this || /^\s*$/.test(this);
 }
+Date.prototype.toISODate=function(){
+    return this.toISOString().split("T")[0];
+}
 function enableLowspecMode(){
     document.body.className="lowspec";
 }
@@ -683,7 +686,7 @@ function getTeamById(id){
 function saveConfigToLocalStorage(){
     try{
         var state={
-            currentGameDate:currentGameDate.toISOString().split("T")[0],
+            currentGameDate:currentGameDate.toISODate(),
             roundDuration:roundDuration,
             maxRounds:maxRounds,
             teams:[],
@@ -703,7 +706,7 @@ function saveConfigToLocalStorage(){
                 playerName:players[i].playerName,
                 characterName:players[i].characterName,
                 race:players[i].race,
-                dob:players[i].dob.toISOString().split("T")[0],
+                dob:players[i].dob.toISODate(),
                 team:players[i].team,
                 firstPlayer:players[i].firstPlayer
             }
@@ -744,7 +747,7 @@ function newGame(){
     loadConfigFromLocalStorage();
     I("maxRounds").value=maxRounds;
     I("roundDuration").value=roundDuration;
-    if(currentGameDate!=null) I("startDate").value=currentGameDate.toISOString().split("T")[0];
+    if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
     checkMaxRounds();
     checkRoundDuration();
     checkStartDate(false);
@@ -1157,7 +1160,7 @@ function preparePlayerEditForm(player){
     }else{
         I("playerName").value=player.playerName;
         I("characterName").value=player.characterName;
-        I("dob").value=player.dob.toISOString().split("T")[0];
+        I("dob").value=player.dob.toISODate();
         I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
         I("firstPlayer").value=player.firstPlayer;
@@ -1256,7 +1259,13 @@ function checkPlayerAges(){
 function playerManagementToGame(){
     if(getCurrentSlide().id!=="playerManagement") return;
     if(players.length===0){
-        showModal("Non ci sono giocatori",[{text:"Ok",action:function(){return true;}}]);
+        showModal("Non ci sono giocatori",ingamePlayerManagement?[
+            {text:"Modifica",action:function(){return true;}},
+            {text:"Ignora",action:function(){
+                toSlide("endRound");
+                return true;
+            }}
+        ]:[{text:"Ok",action:function(){return true;}}]);
         return;
     }
     if(!checkPlayerAges()) return;
@@ -1272,7 +1281,7 @@ function playerManagementToGame(){
     }
 }
 function prepareDateChangeForm(){
-    I("newDate").value=currentGameDate.toISOString().split("T")[0];
+    I("newDate").value=currentGameDate.toISODate();
 }
 function checkAndChangeDate(){
     if(getCurrentSlide().id!=="dateChange") return;
@@ -1481,6 +1490,7 @@ function initGame(){
     playSoundFx="gameStarted";
     doPlayerSchedule();
     randomizeGameTimerBackground();
+    I("gtDate").textContent=currentGameDate.toISODate();
     gameState=STATE_GAME;
     toSlide("gameTimer");
 }
@@ -1575,6 +1585,7 @@ function nextRound(){
     combatTime=0;
     doPlayerSchedule();
     gameState=STATE_GAME;
+    I("gtDate").textContent=currentGameDate.toISODate();
     randomizeGameTimerBackground();
     toSlide("gameTimer");
 }
@@ -1593,7 +1604,7 @@ function stopGame(askConfirm){
 }
 function endRoundToDateChange(){
     if(gameState!=STATE_ENDROUND) return;
-    I("newDate").value=currentGameDate.toISOString().split("T")[0];
+    I("newDate").value=currentGameDate.toISODate();
     toSlide("dateChange");
 }
 function endRoundToPlayerManagement(){
@@ -1624,7 +1635,7 @@ function generateReport(){
         parent.appendChild(document.createElement("br"));
     }
     report.innerHTML="";
-    LINE(report,"Date di inizio e fine: ",I("startDate").value+"  -  "+currentGameDate.toISOString().split("T")[0]);
+    LINE(report,"Date di inizio e fine: ",I("startDate").value+"  -  "+currentGameDate.toISODate());
     LINE(report,"Turni giocati: ",currentRound+" / "+maxRounds);
     LINE(report,"Durata partita: ",msToHHMMSS(totalPlayedTime));
     LINE(report,"Tempo fantasma: ",msToHHMMSS(ghostTime));
@@ -1683,7 +1694,7 @@ function generateReport(){
         list.appendChild(d);
     }
     report.appendChild(list);
-    saveReportToLocalStorage("Partita del "+new Date().toISOString().split("T")[0],I("report").innerHTML);
+    saveReportToLocalStorage("Partita del "+new Date().toISODate(),I("report").innerHTML);
 }
 </script>
 </head>
@@ -1780,7 +1791,7 @@ function generateReport(){
 <div class="slide invisible" id="gameTimer">
     <div class="upper">
         <div class="content">
-            <div class="title">Turno <span id="roundNumber"></span></div>
+            <div class="title">Turno <span id="roundNumber"></span> - <span id="gtDate"></span></div>
             <div class="banner"><span id="playerAndCharacterName"></span><br/><span id="gtTeamName"></span></div>
             <div class="mainTimerContainer">
                 <div class="timer" id="mainTimer">00:00</div>
@@ -1916,7 +1927,7 @@ function generateReport(){
         </div>
     </div>
     <div class="lower">
-        <input type="button" value="Chiudi" onclick="gameReportToPreviousGames()" /><input type="button" id="deleteReport" value="Rimuovi" onclick="" />
+        <input type="button" value="Chiudi" onclick="gameReportToPreviousGames()" /><input type="button" id="deleteReport" value="Cancella" onclick="" />
     </div>
 </div>
 <div id="modalContainer"></div>
