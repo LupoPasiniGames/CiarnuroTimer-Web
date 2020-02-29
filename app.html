@@ -415,6 +415,33 @@ div.banner{
     margin-bottom:1em;
     font-weight:bold;
 }
+/*---BENCHMARK---*/
+#benchmark{
+    animation:zoom 10s linear infinite;
+}
+@keyframes zoom{
+    0%{
+        top:0;left:0;width:100vw;height:100vh;
+    }
+    50%{
+        top:-3vh;left:-3vw;width:106vw;height:106vh;
+    }
+    100%{
+        top:0;left:0;width:100vw;height:100vh;
+    }
+}
+#benchmarkFront{
+    backdrop-filter: blur(0.4em);
+    background:rgba(0,0,0,0.2);
+    display:flex;
+    top:0; left:0; width:100%; height:100%;
+}
+#benchmarkLogo{
+    width:100%;
+    max-width:50em;
+    height:auto;
+    margin:auto;
+}
 </style>
 <script type="text/javascript">
 /*---BASIC FUNCTIONS---*/
@@ -878,6 +905,10 @@ function incMaxRounds(){
     }catch(t){}
     checkMaxRounds();
 }
+function resetMaxRounds(){
+    if(getCurrentSlide().id!=="gameOptions") return;
+    I("maxRounds").value=MAXROUNDS_DEFAULT;
+}
 function checkRoundDuration(){
     var v;
     try{
@@ -910,6 +941,10 @@ function incRoundDuration(){
         I("roundDuration").value=v;
     }catch(t){}
     checkRoundDuration();
+}
+function resetRoundDuration(){
+    if(getCurrentSlide().id!=="gameOptions") return;
+    I("roundDuration").value=ROUNDDURATION_DEFAULT;
 }
 function checkStartDate(showError){
     if(getCurrentSlide().id!=="gameOptions") return false;
@@ -1508,7 +1543,7 @@ function stopRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
     lastTickPlayer=null;
     if(currentRound>=maxRounds){        
-        gameState=STATE_NOTPLAYING;
+        gameState=STATE_ENDROUND;
         stopGame();
     }else{
         playSoundFx="nextRound";
@@ -1703,6 +1738,44 @@ function generateReport(){
     report.appendChild(list);
     saveReportToLocalStorage("Partita del "+new Date().toISODate(),I("report").innerHTML);
 }
+
+function runBenchmark(){
+    toSlide("benchmark");
+    var lastTS=-1, fps=0, frames=0;
+    var benchF=function(){
+        var ts=Date.now();
+        if(lastTS===-1){
+            lastTS=ts;
+        }else{
+            var deltaT=ts-lastTS;
+            lastTS=ts;
+            var instFPS=1000/deltaT;
+            fps=0.9*fps+0.1*instFPS;
+        }
+        if(frames++<=fps*5){ //about 5s
+            window.requestAnimationFrame(benchF);
+        }else{
+            try{
+                if(fps<30){
+                    localStorage.lowspec="1";
+                }
+                localStorage.bmDone="1";
+            }catch(e){}
+            init();
+        }
+    }
+    try{
+        if(document.createElement("div").onanimationend===undefined){
+            localStorage.lowspec="1";
+            localStorage.bmDone="1";
+            init();
+        }else benchF();
+    }catch(e){}
+}
+function init(){
+    document.body.removeChild(I("benchmark"));
+    toSlide("welcome");
+}
 </script>
 </head>
 <body>
@@ -1710,6 +1783,11 @@ function generateReport(){
     <noscript>
         Attiva JavaScript, cappello di stagnola!
     </noscript>
+</div>
+<div class="slide invisible" id="benchmark" style="background-image:url('pics/backgrounds/welcome.jpg')">
+    <div id="benchmarkFront">
+        <img src="pics/logo.png" id="benchmarkLogo"/>
+    </div>
 </div>
 <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
     <div class="full">
@@ -1727,8 +1805,8 @@ function generateReport(){
         <div class="content">
             <div class="title">Nuova partita</div>
             <form action="javascript:gameOptionsToPlayerManagement()">
-                <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/></div></div>
-                <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/></div></div>
+                <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/><input type="button" class="small" value="Reset" onclick="resetRoundDuration()"/></div></div>
+                <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/><input type="button" class="small" value="Reset" onclick="resetMaxRounds()"/></div></div>
                 <div class="entry"><div class="entryName">Data di inizio</div><input type="date" id="startDate" class="entryValue" value="2062-01-01" min="0000-01-01" max="9999-01-01"/></div>
                 <input type="submit" tabIndex="4" style="display:none" />
             </form>
@@ -1940,16 +2018,20 @@ function generateReport(){
 </div>
 <div id="modalContainer"></div>
 <script type="text/javascript">
-try{
-    if(!localStorage.bmDone) location.href="index.html";
-    if(localStorage.lowspec) enableLowspecMode();
-}catch(e){}
-</script>
-<script type="text/javascript">
-    toSlide("welcome");
-    setTimeout(function(){
-        document.body.removeChild(I("loadOverlay"));
-    },500);
+    var f=function(){
+        setTimeout(function(){
+            document.body.removeChild(I("loadOverlay"));
+            try{
+                if(localStorage.bmDone) throw "";
+                runBenchmark();
+                return;
+            }catch(e){}
+            try{
+                if(localStorage.lowspec) enableLowspecMode();
+            }catch(e){}
+            init();
+        },500);
+    };f();
 </script>
 <script type="text/javascript">
     var ua=navigator.userAgent;
