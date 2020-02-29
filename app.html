@@ -1738,7 +1738,6 @@ function generateReport(){
     report.appendChild(list);
     saveReportToLocalStorage("Partita del "+new Date().toISODate(),I("report").innerHTML);
 }
-
 function runBenchmark(){
     toSlide("benchmark");
     var lastTS=-1, fps=0, frames=0;
@@ -2029,7 +2028,6 @@ function init(){
         }catch(e){
             init();
         }
-        init();
     },500);
 </script>
 <script type="text/javascript">
