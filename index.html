@@ -1755,8 +1755,9 @@ function runBenchmark(){
             window.requestAnimationFrame(benchF);
         }else{
             try{
-                if(fps<30){
+                if(fps<20){
                     localStorage.lowspec="1";
+                    enableLowspecMode();
                 }
                 localStorage.bmDone="1";
             }catch(e){}
