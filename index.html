@@ -450,6 +450,15 @@ div.banner{
     height:auto;
     margin:auto;
 }
+/*---"RESPONSIVE" WELCOME SCREEN---*/
+@media all and (max-width: 50em){
+    #welcome > div.full{
+        display:flex;
+    }
+    #welcome > div.full > div.content{
+        margin:auto;
+    }
+}
 </style>
 <script type="text/javascript">
 /*---BASIC FUNCTIONS---*/
@@ -1801,8 +1810,8 @@ function init(){
     </div>
 </div>
 <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
-    <div class="full" style="display:flex">
-        <div class="content" style="margin:auto">
+    <div class="full">
+        <div class="content">
             <img src="pics/logo.png" alt="Logo" style="display:block;width:100%;height:auto;"/>
             <div class="centered">
                 <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
