@@ -416,7 +416,13 @@ div.banner{
     font-weight:bold;
 }
 /*---BENCHMARK---*/
-#benchmark{
+#benchmarkBack{
+    position:absolute;
+    top:0; left:0; bottom:0; right:0;
+    background:url('pics/backgrounds/welcome.jpg');
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
     animation:zoom 10s linear infinite;
 }
 @keyframes zoom{
@@ -431,6 +437,8 @@ div.banner{
     }
 }
 #benchmarkFront{
+    position:absolute;
+    top:0; left:0; bottom:0; right:0;
     backdrop-filter: blur(0.4em);
     background:rgba(0,0,0,0.2);
     display:flex;
@@ -555,6 +563,7 @@ function trapF(){
     window.requestAnimationFrame(trapF);
     if(FOCUS_TRAP_MODE===0||!focusTrapEnabled) return;
     var modals=I("modalContainer");
+    if(modals===null) return;
     var trapInside=null;
     if(modals.childNodes.length===0){
         if(document.activeElement===document.body) return;
@@ -1751,6 +1760,7 @@ function runBenchmark(){
             var instFPS=1000/deltaT;
             fps=0.9*fps+0.1*instFPS;
         }
+        console.log(fps); //don't remove this, schroedinbug in ungoogled chromium
         if(frames++<=fps*5){ //about 5s
             window.requestAnimationFrame(benchF);
         }else{
@@ -1784,19 +1794,20 @@ function init(){
         Attiva JavaScript, cappello di stagnola!
     </noscript>
 </div>
-<div class="slide invisible" id="benchmark" style="background-image:url('pics/backgrounds/welcome.jpg')">
+<div class="slide invisible" id="benchmark">
+    <div id="benchmarkBack"></div>
     <div id="benchmarkFront">
         <img src="pics/logo.png" id="benchmarkLogo"/>
     </div>
 </div>
 <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
-    <div class="full">
-        <div class="content">
+    <div class="full" style="display:flex">
+        <div class="content" style="margin:auto">
             <img src="pics/logo.png" alt="Logo" style="display:block;width:100%;height:auto;"/>
             <div class="centered">
                 <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
             </div>
-            <div class="centered" style="position:absolute;bottom:1em;left:0;right:0;font-size:0.75em"><a target="__blank" href="https://github.com/LupoPasiniGames">Versione 1.0-it</a></div>
+            <div class="centered" style="margin:2em auto;font-size:0.75em"><a target="__blank" href="https://github.com/LupoPasiniGames">Versione 1.0-it</a></div>
         </div>
     </div>
 </div>
