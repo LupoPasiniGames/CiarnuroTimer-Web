@@ -1767,10 +1767,14 @@ function runBenchmark(){
             var deltaT=ts-lastTS;
             lastTS=ts;
             var instFPS=1000/deltaT;
+            if(instFPS===Infinity){
+                window.requestAnimationFrame(benchF);
+                return;
+            }
             fps=0.9*fps+0.1*instFPS;
         }
         console.log(fps); //don't remove this, schroedinbug in ungoogled chromium
-        if(frames++<=fps*5){ //about 5s
+        if(frames++<=fps*5){ //about 5s, at least 50 frames
             window.requestAnimationFrame(benchF);
         }else{
             try{
