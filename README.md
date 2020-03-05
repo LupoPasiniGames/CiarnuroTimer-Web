@@ -7,7 +7,7 @@ Companion app per [Il Ciarnuro](https://lupopasinigames.com) di Lupo Pasini Game
 
 ## Download
 Android: [Google Play](https://play.google.com/store/apps/details?id=com.lpg.ciarnurotimer) | [APK](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-android.apk)  
-Desktop: [Windows 7 e successivi](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-win.exe) | [GNU/Linux x64 (AppImage)](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-linux-x64.AppImage) | [MacOS](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-macos.dmg)
+Desktop: [Windows 7 e successivi](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-win.exe) | [GNU/Linux x64 (AppImage)](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-linux-x64.AppImage) | [MacOS](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-macos.dmg)  
 Altre piattaforme: [Utilizza direttamente nel browser](https://lupopasinigames.com/CiarnuroRT/webapp) (richiede un browser moderno)
 
 ## Technical notes
