@@ -6,15 +6,12 @@ Companion app per [Il Ciarnuro](https://lupopasinigames.com) di Lupo Pasini Game
 [Formato PDF](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-manuale-it.pdf)
 
 ## Download
-Android: [Google Play](https://play.google.com/store/apps/details?id=com.lpg.ciarnurotimer) | [APK](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-android.apk)  
-Desktop: [Windows 7 e successivi](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-win.exe) | [GNU/Linux x64 (AppImage)](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-linux-x64.AppImage) | [MacOS](https://lupopasinigames.com/CiarnuroRT/downloads/CiarnuroRT-macos.dmg)  
-Altre piattaforme: [Utilizza direttamente nel browser](https://lupopasinigames.com/CiarnuroRT/webapp) (richiede un browser moderno)
+[Utilizza direttamente nel browser](https://lupopasinigames.com/CiarnuroRT/webapp) (richiede un browser moderno)
 
-## Technical notes
-This repository contains the implementation of the app, developed using web technologies. The app can run directly in the browser, and is used as a base to create the Android and Desktop versions using WebView and Electron respectively. Once installed, these versions can run completely offline.
+Questa applicazione è una PWA, puoi installarla direttamente dal browser e può funzionare offline.
 
 ## License
-Copyright (C) 2020 Lupo Pasini Games
+Copyright (C) 2020-2022 Lupo Pasini Games
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

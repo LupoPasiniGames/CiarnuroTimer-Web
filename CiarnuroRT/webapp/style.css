@@ -1,0 +1,455 @@
+/*---BASIC STUFF AND FONTS---*/
+@font-face {
+	font-family: 'Xolonium';
+	src: url("fonts/xolonium-regular.woff");
+}
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	src: url("fonts/opensans-regular.woff");
+}
+@font-face {
+	font-family: 'Open Sans';
+	font-style: bold;
+	src: url("fonts/opensans-bold.woff");
+}
+@font-face {
+	font-family: 'Vera Mono Timer';
+	font-style: normal;
+	src: url("fonts/veramono-timer-regular.woff");
+}
+html,body{
+    margin:0;
+    padding:0;
+    border:none;
+    overflow:hidden;
+    background:#000000;
+    color:#FFFFFF;
+    text-shadow:0.05em 0.05em 0.125em #000000;
+    font-family:'Open Sans',sans-serif;
+}
+#loadOverlay{
+    position:fixed;
+    top:0; left:0; width:100vw; height:100vh;
+    z-index:99999;
+    background:#000000;
+}
+*{
+    box-sizing:border-box;
+}
+::-moz-focus-inner { 
+  border: 0;
+  padding: 0;
+}
+.bold{
+    font-weight:bold;
+}
+.centered{
+    text-align:center;
+}
+a{
+    color:#FFFFFF;
+}
+body.lowspec *{
+    transition: none !important;
+    backdrop-filter:none !important;
+    animation:none !important;
+}
+/*---SLIDES SYSTEM---*/
+div.slide{
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background:#000000;
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
+}
+div.slide > div.upper{
+    position:absolute;
+    top:0; left:0; width:100%; height:calc(100% - 4em);
+    overflow:auto;
+}
+div.slide > div.lower{
+    position:absolute;
+    bottom:0; left:0; width:100%; height:4em;
+    overflow-x:auto;
+    overflow-y:hidden;
+    line-height:4em;
+    box-shadow: 0 0 1em 0.1em rgba(0,0,0,0.5);
+    background: rgba(170,170,170,0.5);
+    backdrop-filter: blur(5em);
+    white-space: nowrap;
+    text-align:center;
+}
+div.slide > div.lower > *.left{
+    float:left;
+}
+div.slide > div.lower > *.right{
+    float:right;
+}
+div.slide > div.full{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    overflow:auto;
+}
+div.slide > div > div.content{
+    width:100%;
+    max-width:60em;
+    margin:0 auto;
+    padding:0 1em;
+}
+div.slide.visible{
+    animation: fadeIn 0.3s linear;
+    z-index:99;
+}
+div.slide.invisible{
+    animation: fadeOut 0.3s linear;
+    top:1000vh;
+    z-index:1;
+}
+@keyframes fadeIn{
+    /* animation removed because it looks better */
+    0%{
+        z-index:1;
+    }
+    100%{
+        z-index:1;
+    }
+}
+@keyframes fadeOut{
+    0%{
+        opacity:1;
+        top:0;
+        z-index:99;
+    }
+    100%{
+        opacity:0;
+        top:0;
+        z-index:99;
+    }
+}
+div.title{
+    display:block;
+    font-size:2em;
+    margin:0 0 0.5em 0;
+    padding: 0.5em 0 0.1em 0;
+    border-bottom:0.1em solid #FFFFFF;
+    font-family:'Xolonium',sans-serif;
+}
+/*---FLASHES---*/
+div.flashFx{
+	position:fixed;
+	top:0;left:0;
+	width:100%;height:100%;
+	z-index:99999;
+	background-color:#FFFFFF;
+	opacity:0;
+	animation:flash 0.4s linear;
+}
+body.lowspec div.flashFx{
+    opacity:1;
+}
+@keyframes flash{
+	0%{opacity:0;}
+	10%{opacity:1;}
+	60%{opacity:0.2;}
+	100%{opacity:0;}
+}
+/*---FORMS---*/
+form{
+    display:block;
+    text-align:center;
+}
+form > div.entry{
+    display:block;
+    margin:1em 0;
+    width:100%;
+}
+form > div.entry > div.entryName{
+    display:inline-block;
+    left:0; width:25%;
+    padding-right:1em;
+    text-align:left;
+}
+form > div.entry > *.entryValue{
+    display:inline-block;
+    right:0; width:70%;
+}
+@media all and (max-width: 40em){
+    form > div.entry > div.entryName,form > div.entry > *.entryValue{
+        display:block;
+        width:100%;
+        margin:0;
+    }
+}
+form > div.actions{
+    display:block;
+    width:100%;
+    padding: 0; margin:1em 0;
+    text-align:center;
+}
+input[type="text"],input[type="date"],select{
+    background:rgba(64,64,64,0.5);
+    color:#FFFFFF;
+    border:none;
+    border-bottom:0.2em solid #606060;
+    backdrop-filter:blur(0.35em);
+    border-radius:0 0 0.2em 0.2em;
+    padding:0.5em 1em;
+    transition: border 0.1s linear;
+}
+input[type="text"]:active,input[type="text"]:focus,input[type="date"]:active,input[type="date"]:focus,select:focus{
+    border-bottom:0.2em solid #8080FF;
+    background:rgba(64,64,64,1);
+}
+input[type="text"]:disabled,input[type="date"]:disabled,select:disabled{
+    background:rgba(96,96,96,1);
+    color:#AAAAAA;
+}
+option{
+    background:#000000;
+    color:#FFFFFF;
+}
+input[type="button"]{
+    min-width:8em;
+    padding: 0.7em 2em;
+    margin:0.5em;
+    color:#FFFFFF;
+    background:rgba(64,64,64,0.7);
+    border:none;
+    border-radius:0.1em;
+    border-bottom:0.2em solid #202020;
+    box-shadow: 0 0.1em 0.4em 0.1em rgba(64,64,64,0.2);
+    backdrop-filter:blur(0.35em);
+    transition:background 0.1s linear, border 0.1s linear;
+    text-transform:uppercase;
+    font-family: 'Open Sans', sans-serif;
+    font-weight:bold;
+    cursor:pointer;
+}
+input[type="button"].small{
+    min-width:3em;
+    padding:0.7em 1em;
+}
+input[type="button"]:focus{
+    background:#404040;
+    border-bottom:0.2em solid #8080FF;
+}
+input[type="button"]:active{
+    background:#808080;
+    border-bottom:0.2em solid #8080FF;
+}
+/*---LISTS---*/
+div.list > div.entry{
+    display:flex;
+	align-items:center;
+	min-height:5em;
+	width:100%;
+	border-bottom:1px solid #CCCCCC;
+	color:#FFFFFF;
+	overflow:hidden;
+	word-wrap:break-word;
+	position:relative;
+}
+div.list > div.entry > div.rightButtons{
+	position:relative;
+	width:5em;
+	left:1.5em;
+	text-align:right;
+}
+div.list > div.entry > div.content{
+	position:relative;
+	width:calc(100% - 10em);
+	left:1.5em;
+	line-height:1.25em;
+}
+div.list > div.entry > img.icon{
+	position:relative;
+	left:0.5em;
+	height:3em;
+	width:3em;
+	border:0.15em solid #404040;
+}
+div.list > div.entry > img.icon.important{
+    border:0.15em solid #FFFF80;
+}
+div.list > div.entry > div.clickOverlay{
+	position:absolute;
+	top:0; left:0; width:100%; height:100%;
+	cursor:pointer;
+	border:none;
+	transition:border 0.1s linear;
+}
+div.list > div.entry > div.clickOverlay:focus{
+    border:0.15em solid #8080FF;
+}
+div.list > div.entry > div.rightButtons > a.button{
+	display:inline-block;
+	width:2.3em;
+	height:2.3em;
+    margin-left:0.2em;
+	vertical-align:middle;
+	cursor:pointer;
+	border:0.15em solid #404040;
+	transition:border 0.1s linear;
+}
+div.list > div.entry > div.rightButtons > a.button:focus{
+    border:0.15em solid #8080FF;
+}
+div.list > div.entry > div.rightButtons > a.button.edit{
+    background:url('pics/edit.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
+div.list > div.entry > div.rightButtons > a.button.remove{
+    background:url('pics/remove.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
+div.list > div.entry > div.content > div.small{
+    font-size:0.85em;
+    color:#FFFFFFAA;
+}
+/*---MODALS---*/
+div.modal{
+    display:flex;
+    position:fixed;
+    top:0; left:0; width:100vw; height: 100vh;
+    padding:1em;
+    background:rgba(0,0,0,0.35);
+    backdrop-filter: blur(0.4em);
+}
+div.modal > div.window{
+    background:#303030;
+    width:100%;
+    max-width:40em;
+    padding:1em 1em 0.5em 1em;;
+    box-shadow:0 0 10em 10em rgba(0,0,0,0.15), 0 0 0.5em 0.5em rgba(0,0,0,0.15);
+    border-radius:0.2em;
+    margin:auto auto;
+}
+div.modal > div.window > div.message{
+    margin-bottom:3em;
+}
+div.modal > div.window > div.buttons{
+    text-align:right;
+}
+div.modal.visible{
+    animation: modalFadeIn linear 0.2s;
+    z-index:999;
+}
+div.modal.invisible{
+    animation: modalFadeOut linear 0.2s;
+    top:1000vh;
+    z-index:1;
+}
+@keyframes modalFadeIn{
+    0%{
+        opacity:0;
+    }
+    100%{
+        opacity:1;
+    }
+}
+@keyframes modalFadeOut{
+    0%{
+        opacity:1;
+        top:0;
+        z-index:999;
+    }
+    100%{
+        opacity:0;
+        top:0;
+        z-index:999;
+    }
+}
+/*---TIMERS---*/
+div.mainTimerContainer{
+    display:block;
+    width:100%;
+    text-align:center;
+    margin:2em 0 1em 0;
+    padding:0 0 1em 0;
+    border-bottom:0.2em solid #FFFFFF;
+}
+div.smallTimers{
+    display:block;
+    width:100%;
+    text-align:center;
+}
+div.smallTimerContainer{
+    display:inline-block;
+    width:10em;
+    text-align:center;
+    border-right:0.1em solid #FFFFFF;
+    overflow:hidden;
+}
+div.smallTimerContainer:last-of-type{
+    border:none;
+}
+div.timer{
+    font-family:'Vera Mono Timer',monospace;
+    text-align:center;
+    overflow:show;
+    white-space:nowrap;
+    font-size:1.35em;
+}
+div.mainTimerContainer > div.timer{
+    font-size:3em;
+}
+div.smallTimerContainer > div.timerName{
+    font-size:1.05em;
+    text-align:center;
+}
+div.banner{
+    text-align:center;
+    font-size:1.25em;
+    margin-bottom:1em;
+    font-weight:bold;
+}
+/*---BENCHMARK---*/
+#benchmarkBack{
+    position:absolute;
+    top:0; left:0; bottom:0; right:0;
+    background:url('pics/backgrounds/welcome.jpg');
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
+    animation:zoom 10s linear infinite;
+}
+@keyframes zoom{
+    0%{
+        top:0;left:0;width:100vw;height:100vh;
+    }
+    50%{
+        top:-3vh;left:-3vw;width:106vw;height:106vh;
+    }
+    100%{
+        top:0;left:0;width:100vw;height:100vh;
+    }
+}
+#benchmarkFront{
+    position:absolute;
+    top:0; left:0; bottom:0; right:0;
+    backdrop-filter: blur(0.4em);
+    background:rgba(0,0,0,0.2);
+    display:flex;
+    top:0; left:0; width:100%; height:100%;
+}
+#benchmarkLogo{
+    width:100%;
+    max-width:50em;
+    height:auto;
+    margin:auto;
+}
+/*---"RESPONSIVE" WELCOME SCREEN---*/
+@media all and (max-width: 50em){
+    #welcome > div.full{
+        display:flex;
+    }
+    #welcome > div.full > div.content{
+        margin:auto;
+    }
+} 
