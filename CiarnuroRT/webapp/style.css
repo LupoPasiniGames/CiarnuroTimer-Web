@@ -5,17 +5,16 @@
 }
 @font-face {
 	font-family: 'Open Sans';
-	font-style: normal;
+	font-weight: normal;
 	src: url("fonts/opensans-regular.woff");
 }
 @font-face {
 	font-family: 'Open Sans';
-	font-style: bold;
+	font-weight: bold;
 	src: url("fonts/opensans-bold.woff");
 }
 @font-face {
 	font-family: 'Vera Mono Timer';
-	font-style: normal;
 	src: url("fonts/veramono-timer-regular.woff");
 }
 html,body{
