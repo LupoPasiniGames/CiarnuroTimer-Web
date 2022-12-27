@@ -1,4 +1,4 @@
-const cacheName='ciarnurortpwa-v11';
+const cacheName='ciarnurortpwa-v12';
 const appFiles=[
     'index.html',
     'ciarnurort.js',

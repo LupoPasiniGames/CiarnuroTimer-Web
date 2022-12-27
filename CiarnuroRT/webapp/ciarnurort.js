@@ -25,15 +25,6 @@ String.prototype.isBlank=function(){
 Date.prototype.toISODate=function(){
     return this.toISOString().split("T")[0];
 }
-function enableLowspecMode(){
-    document.body.className="lowspec";
-}
-function disableLowspecMode(){
-    document.body.className="";
-}
-function isLowspecMode(){
-    return document.body.className==="lowspec";
-}
 /*---SLIDES SYSTEM---*/
 function toSlide(id){
     id=I(id);
@@ -57,17 +48,10 @@ function flash(color){
 	var f=document.createElement("div");
 	f.className="flashFx";
 	f.style.backgroundColor=color;
-	if(!isLowspecMode()){
-        f.onanimationend=function(){
-            f.parentElement.removeChild(f);
-            flashing=false;
-        }.bind(this);
-	}else{
-        setTimeout(function(){
-            f.parentElement.removeChild(f);
-            flashing=false;
-        }.bind(this),200);
-	}
+	f.onanimationend=function(){
+        f.parentElement.removeChild(f);
+        flashing=false;
+    }.bind(this);
 	document.body.appendChild(f);
 }
 /*---MODALS---*/
@@ -96,12 +80,8 @@ function showModal(message,buttons){
                         console.error("Button action exception: "+t);
                         return;
                     }
-                    if(!isLowspecMode()){
-                        modal.className="modal invisible";
-                        modal.onanimationend=function(thisModal){return function(){I("modalContainer").removeChild(thisModal);}}(modal);
-                    }else{
-                        I("modalContainer").removeChild(modal);
-                    }
+                    modal.className="modal invisible";
+                    modal.onanimationend=function(thisModal){return function(){I("modalContainer").removeChild(thisModal);}}(modal);
                     
                 }
             }(m,buttons[i].action);
@@ -1305,50 +1285,6 @@ function generateReport(){
     report.appendChild(list);
     saveReportToLocalStorage("Partita del "+new Date().toISODate(),I("report").innerHTML);
 }
-function runBenchmark(){
-    if(SKIP_BENCHMARK){
-        init();
-        return;
-    }
-    toSlide("benchmark");
-    var lastTS=-1, fps=0, frames=0;
-    var benchF=function(){
-        var ts=Date.now();
-        if(lastTS===-1){
-            lastTS=ts;
-        }else{
-            var deltaT=ts-lastTS;
-            lastTS=ts;
-            var instFPS=1000/deltaT;
-            if(instFPS===Infinity){
-                window.requestAnimationFrame(benchF);
-                return;
-            }
-            fps=0.9*fps+0.1*instFPS;
-        }
-        console.log(fps); //don't remove this, schroedinbug in chromium
-        if(frames++<=fps*5){ //about 5s, at least 50 frames
-            window.requestAnimationFrame(benchF);
-        }else{
-            try{
-                if(fps<20){
-                    localStorage.lowspec="1";
-                    enableLowspecMode();
-                }
-                localStorage.bmDone="1";
-            }catch(e){}
-            init();
-        }
-    }
-    try{
-        if(document.createElement("div").onanimationend===undefined){
-            localStorage.lowspec="1";
-            localStorage.bmDone="1";
-            init();
-        }else benchF();
-    }catch(e){}
-}
 function init(){
-    document.body.removeChild(I("benchmark"));
     toSlide("welcome");
 }

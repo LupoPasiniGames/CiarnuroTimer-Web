@@ -49,11 +49,6 @@ html,body{
 a{
     color:#FFFFFF;
 }
-body.lowspec *{
-    transition: none !important;
-    backdrop-filter:none !important;
-    animation:none !important;
-}
 /*---SLIDES SYSTEM---*/
 div.slide{
     position:fixed;
@@ -144,9 +139,6 @@ div.flashFx{
 	background-color:#FFFFFF;
 	opacity:0;
 	animation:flash 0.4s linear;
-}
-body.lowspec div.flashFx{
-    opacity:1;
 }
 @keyframes flash{
 	0%{opacity:0;}
