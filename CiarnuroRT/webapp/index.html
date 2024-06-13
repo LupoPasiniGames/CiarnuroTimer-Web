@@ -82,15 +82,15 @@
                         <div class="entry"><div class="entryName">Data di nascita</div><input type="date" class="entryValue" id="dob" value=""/></div>
                         <div class="entry"><div class="entryName">Specie</div><select class="entryValue" id="race"></select></div>
                         <script type="text/javascript">
-                            let raceSelect=I("race");
+                            var raceSelect=I("race");
                             raceSelect.innerHTML="";
-                            let ids=Object.keys(RACES);
-                            Array.from(ids).forEach(element => {
-                                let o=document.createElement("option");
-                                o.value=element;
-                                o.textContent=RACES[element].name;
+                            var ids=Object.keys(RACES);
+                            for(var i=0;i<ids.length;i++){
+                                var o=document.createElement("option");
+                                o.value=ids[i];
+                                o.textContent=RACES[ids[i]].name;
                                 raceSelect.appendChild(o);
-                            });
+                            }
                             raceSelect.value=raceSelect.childNodes[0].value;
                         </script>
                         <div class="entry"><div class="entryName">Squadra</div><select class="entryValue" id="team" value="solo"><option value="solo">Solo</option></select></div>
@@ -253,13 +253,13 @@
             },500);
         </script>
         <script type="text/javascript">
-            let ua=navigator.userAgent;
+            var ua=navigator.userAgent;
             if(/Firefox.(\d+)/i.test(ua)&&/Android|iPhone|iPad|iPod|Windows Phone|Mobile|Tablet/i.test(ua)){ //mobile firefox date picker sucks
-                let dates=document.querySelectorAll('input[type="date"]');
-                Array.from(dates).forEach(d => {
-                    d.type="text";
-                    d.placeholder="YYYY-MM-DD";
-                });
+                var dates=document.querySelectorAll('input[type="date"]');
+                for(var i=0;i<dates.length;i++){
+                    dates[i].type="text";
+                    dates[i].placeholder="YYYY-MM-DD";
+                }
             }
         </script>
     </body>
