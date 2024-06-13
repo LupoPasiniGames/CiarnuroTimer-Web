@@ -32,9 +32,9 @@ function toSlide(id){
     if(!id){console.error("Slide not found"); return;}
     if(id.className.indexOf("slide")===-1){console.error("Not a slide"); return;}
     let slides=document.getElementsByClassName("slide");
-    for(let i=0;i<slides.length;i++){
-        slides[i].className="slide invisible";
-    }
+    Array.from(slides).forEach(slide => {
+        slide.className="slide invisible";
+    });
     id.className="slide visible";
     I("modalContainer").innerHTML="";
 }
@@ -96,32 +96,7 @@ function showModal(message,buttons){
         console.error("Failed to generate modal: "+x);
     }
 }
-/*---FOCUS TRAP---*/
-let focusTrapEnabled=true
-const FOCUS_TRAP_MODE=1; //0=no trapping, 1=unfocus if not current slide/modal, 2=always force focus on an element inside current slide/modal if possible
-window.onblur=function(){focusTrapEnabled=false;}
-window.onfocus=function(){focusTrapEnabled=true;}
-function trapF(){
-    window.requestAnimationFrame(trapF);
-    if(FOCUS_TRAP_MODE===0||!focusTrapEnabled) return;
-    let modals=I("modalContainer");
-    if(modals===null) return;
-    let trapInside=null;
-    if(modals.childNodes.length===0){
-        if(document.activeElement===document.body) return;
-        trapInside=getCurrentSlide();
-        if(trapInside===null) return;
-    }else{
-        trapInside=modals.childNodes[modals.childNodes.length-1];
-    }
-    if(!trapInside.contains(document.activeElement)){
-        document.activeElement.blur();
-        if(FOCUS_TRAP_MODE===2){
-            try{trapInside.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="button"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), div.clickOverlay[tabIndex="0"]')[0].focus();}catch(e){trapInside.focus();}
-        }
-    }
-}
-window.requestAnimationFrame(trapF);
+
 /*---SOUND FX SYSTEM---*/
 let playSoundFx=null;
 let soundSystemStarted=false;
@@ -230,9 +205,9 @@ Player.prototype={
         const ages=RACES[this.race].ages
         let a=this.getAge();
         let i;
-        for(i=0;i<ages.length;i++){
-            if(a<ages[i]) return i;
-        }
+        Array.from(ages).forEach(age => {
+            if (a < age) return i;
+        });
         return i;
     },
     getAgeTierName:function(){
@@ -348,14 +323,15 @@ function populatePreviousGamesList(){
         if(!localStorage.previousGamesList) return;
         if(localStorage.ciarnuroRTVer!=="1") return;
         let games=JSON.parse(localStorage.previousGamesList);
-        for(let i=games.length-1;i>=0;i--){
-            try{
+        let i=0;
+        Array.from(games).forEach(game => {
+            try {
                 let e=document.createElement("div");
                 e.className="entry";
                 let c=document.createElement("div");
                 c.className="content";
-                let g=JSON.parse(localStorage[games[i]]);
-                c.textContent="Rapporto #"+(i+1);
+                let g=JSON.parse(localStorage[game]);
+                c.textContent="Rapporto #"+(++i);
                 let s=document.createElement("div");
                 s.className="small";
                 s.textContent=g.name;
@@ -381,11 +357,11 @@ function populatePreviousGamesList(){
                         };
                         toSlide("gameReport");
                     }
-                }(g,games[i]);
+                }(g,game);
                 e.appendChild(c);
                 list.appendChild(e);
-            }catch(t){console.error("Entry not generated for "+games[i]+": "+t);}
-        }
+            }catch(t){console.error("Entry not generated for "+game+": "+t);}
+        });
     }catch(t){console.error("Previous games list not loaded: "+t);}
 }
 function previousGamesToWelcome(){
@@ -532,8 +508,7 @@ function gameOptionsToPlayerManagement(){
 function populatePlayersAndTeamsList(){
     let list=I("players");
     list.innerHTML="";
-    for(let i=0;i<players.length;i++){
-        let p=players[i];
+    Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
         let x=document.createElement("img");
@@ -587,7 +562,7 @@ function populatePlayersAndTeamsList(){
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
-    }
+    });
     d=document.createElement("div");
     d.className="entry";
     x=document.createElement("img");
@@ -613,8 +588,7 @@ function populatePlayersAndTeamsList(){
     list.appendChild(d);
     list=I("teams");
     list.innerHTML="";
-    for(let i=0;i<teams.length;i++){
-        let t=teams[i];
+    Array.from(teams).forEach(t => {
         let d=document.createElement("div");
         d.className="entry";
         let x=document.createElement("img");
@@ -626,7 +600,7 @@ function populatePlayersAndTeamsList(){
         x.textContent=t.teamName;
         let s=document.createElement("div");
         s.className="small";
-        s.textContent=getPlayersByTeamId(t.teamId).length+" giocatori";
+        s.textContent=getPlayersByTeamId(t.teamId).length + " giocatori";
         x.appendChild(s);
         d.appendChild(x);
         x=document.createElement("div");
@@ -651,22 +625,25 @@ function populatePlayersAndTeamsList(){
                 showModal("Sei sicuro di voler rimuovere "+t.teamName+"?",[
                 {text:"Si",action:function(){
                     let p=getPlayersByTeamId(t.teamId);
-                    for(let i=0;i<p.length;i++){
-                        p[i].team=0;
-                    }
-                    teams.splice(teams.indexOf(t),1);
-                    populatePlayersAndTeamsList();
-                    return true;
-                }},
-                {text:"No",action:function(){
-                    return true;
-                }}]);
+                            p.array.forEach(e => {
+                                e.team=0
+                            });
+                            teams.splice(teams.indexOf(t), 1);
+                            populatePlayersAndTeamsList();
+                            return true;
+                        }
+                    },
+                    {
+                        text: "No", action: function () {
+                            return true;
+                        }
+                    }]);
             }
         }(t);
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
-    }
+    });
     d=document.createElement("div");
     d.className="entry";
     x=document.createElement("img");
@@ -731,12 +708,12 @@ function preparePlayerEditForm(player){
     x.textContent="Solo";
     x.value="solo";
     t.appendChild(x);
-    for(let i=0;i<teams.length;i++){
+    Array.from(teams).forEach(team => {
         x=document.createElement("option");
-        x.textContent=teams[i].teamName;
-        x.value=teams[i].teamId;
+        x.textContent=team.teamName;
+        x.value=team.teamId;
         t.appendChild(x);
-    }
+    });
     if(player===null){
         I("playerName").value="";
         I("characterName").value="";
@@ -796,10 +773,12 @@ function checkAndSavePlayer(){
         return;
     }
     if(fp){
-        for(let i=0;i<players.length;i++) players[i].firstPlayer=false;
+        Array.from(players).forEach(player => {
+            player.firstPlayer=false;
+        });
     }
-    if(playerBeingEdited===null){
-        let p=new Player(pn,cn,race,new Date(dob),team==="solo"?0:Number(team),fp);
+    if (playerBeingEdited === null) {
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -824,13 +803,13 @@ function playerManagementToGameOptions(){
 }
 function checkPlayerAges(){
     if(!ingamePlayerManagement){
-        for(let i=0;i<players.length;i++){
-            if(players[i].getAge()<0){
-                showModal(players[i].playerName+": il personaggio "+players[i].characterName+" ha età negativa in seguito a un cambio di data",[
+        Array.from(players).forEach((player, i) => {
+            if(player.getAge()<0){
+                showModal(player.playerName + ": il personaggio " + player.characterName + " ha età negativa in seguito a un cambio di data", [
                     {text:"Modifica",action:function(){
-                        preparePlayerEditForm(players[i]);
-                        toSlide("editPlayer");
-                        return true;
+                            preparePlayerEditForm(player);
+                            toSlide("editPlayer");
+                            return true;
                     }},
                     {text:"Rimuovi",action:function(){
                         players.splice(i,1);
@@ -841,7 +820,7 @@ function checkPlayerAges(){
                 ]);
                 return false;
             }
-        }
+        });
     }
     for(let i=0;i<players.length;i++){
         if(players[i].isOldEnoughToPlay()) return true;
@@ -862,9 +841,9 @@ function playerManagementToGame(){
         return;
     }
     if(!checkPlayerAges()) return;
-    for(let i=0;i<players.length;i++){
-        if(players[i].team!==0) players[i].alwaysPlayedSolo=false;
-    }
+    Array.from(players).forEach(player => {
+        if (player.team!== 0) player.alwaysPlayedSolo=false;
+    });
     if(ingamePlayerManagement){
         toSlide("endRound");
     }else{
@@ -939,9 +918,9 @@ function doPlayerSchedule(){
         }
     }
     //add the rest of the players by add order
-    for(let i=0;i<players.length;i++){
-        if(players[i]!=plist[0]) plist.push(players[i]);
-    }
+    Array.from(players).forEach(player => {
+        if (player!=plist[0]) plist.push(player);
+    });
     //group players by team, except solo players
     for(let i=0;i<plist.length;i++){
         if(plist[i].team!=0){ //if player is in a team, put the rest of the team after him, sorted by add order
@@ -978,10 +957,13 @@ function doPlayerSchedule(){
     }
 }
 function getCurrentScheduleEntry(){
-    for(let i=0;i<schedule.length;i++){
-        if(scheduleTPtr>=schedule[i].start&&scheduleTPtr<schedule[i].end) return schedule[i];
-    }
-    return null;
+    let result=null;
+    schedule.forEach(e => {
+        if (scheduleTPtr>=e.start && scheduleTPtr < e.end && result === null) {
+            result=e;
+        }
+    });
+    return result;
 }
 function getNextScheduleEntry(){
     for(let i=0;i<schedule.length-1;i++){
@@ -1190,7 +1172,9 @@ function stopGame(askConfirm){
         gameState=STATE_NOTPLAYING;
         playSoundFx="endGame";
         generateReport();
-        for(let i=0;i<players.length;i++) players[i].reset();
+        Array.from(players).forEach(player => {
+            player.reset();
+        });
         saveConfigToLocalStorage();
         toSlide("endGame");
     }
@@ -1237,55 +1221,53 @@ function generateReport(){
     LINE(report,"Elenco dei giocatori a fine partita: ",players.length===0?"Nessuno":null);
     let list=document.createElement("div");
     list.className="list";
-    for(let i=0;i<players.length;i++){
-        let p=players[i];
+    Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
         let x=document.createElement("img");
         x.className="icon";
-        x.src="pics/races/"+p.race+".png";
+        x.src ="pics/races/" + p.race + ".png";
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
-        x.textContent=p.playerName+" (giocato per "+msToHHMMSS(p.timePlayed)+")";
+        x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
         let s=document.createElement("div");
         s.className="small";
-        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        s.textContent=p.characterName + " (" + RACES[p.race].name + ", " + p.getAge() + " anni)";
         x.appendChild(s);
         s=document.createElement("div");
         s.className="small";
-        s.textContent=(p.team===0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        s.textContent=(p.team === 0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
-    }
+    });
     report.appendChild(list);
     report.appendChild(document.createElement("br"));
     LINE(report,"Elenco dei giocatori che non ce l'hanno fatta: ",removedPlayers.length===0?"Nessuno":null);
     list=document.createElement("div");
     list.className="list";
-    for(let i=0;i<removedPlayers.length;i++){
-        let p=removedPlayers[i];
+    Array.from(removedPlayers).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
         let x=document.createElement("img");
         x.className="icon";
-        x.src="pics/races/"+p.race+".png";
+        x.src="pics/races/" + p.race + ".png";
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
-        x.textContent=p.playerName+" (giocato per "+msToHHMMSS(p.timePlayed)+")";
+        x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
         let s=document.createElement("div");
         s.className="small";
-        s.textContent=p.characterName+" ("+RACES[p.race].name+", morto a "+p.getAge()+" anni)";
+        s.textContent=p.characterName + " (" + RACES[p.race].name + ", morto a " + p.getAge() + " anni)";
         x.appendChild(s);
-        s=document.createElement("div");
+        s = document.createElement("div");
         s.className="small";
-        s.textContent=(p.team===0?"Solo":getTeamById(p.team).teamName)+(p.alwaysPlayedSolo?" (sempre Solo)":"");
+        s.textContent=(p.team===0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
-    }
+    });
     report.appendChild(list);
     saveReportToLocalStorage("Partita del "+new Date().toISODate(),I("report").innerHTML);
 }
