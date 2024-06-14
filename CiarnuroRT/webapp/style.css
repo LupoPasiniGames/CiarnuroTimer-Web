@@ -409,3 +409,76 @@ div.banner{
         margin:auto;
     }
 } 
+
+/*---IMAGE RESOLUTION---*/
+@media all and (max-width: 900px){
+    .slide#welcome{
+        background-image:url('pics/lowspec/welcome.jpg')
+
+    }
+    .slide#gameOptions, .slide#playerManagement, .slide#editTeam, .slide#editPlayer, .slide#dateChange, .slide#dateChange2{
+        background-image:url('pics/lowspec/gameOptions.jpg');
+    }
+    .slide#ghostTime{
+        background-image: url('pics/lowspec/ghostTime.jpg');
+    }
+    .slide#combat{
+        background-image: url('pics/lowspec/combat.jpg');
+    }
+    .slide#endRound{
+        background-image: url('pics/lowspec/endRound.jpg');
+    }
+    .slide#endGame{
+        background-image: url('pics/lowspec/endGame.jpg');
+    }
+    .slide#previousGames, .slide#gameReport{
+        background-image: url('pics/lowspec/previousGames.jpg');
+    }
+}
+@media all and (min-width: 901px) and (max-width: 1800px){
+    .slide#welcome{
+        background-image:url('pics/backgrounds/welcome.jpg');
+    }
+    .slide#gameOptions, .slide#playerManagement, .slide#editTeam, .slide#editPlayer, .slide#dateChange, .slide#dateChange2{
+        background-image:url('pics/midspec/gameOptions.jpg');
+    }
+    .slide#ghostTime{
+        background-image: url('pics/midspec/ghostTime.jpg');
+    }
+    .slide#combat{
+        background-image: url('pics/midspec/combat.jpg');
+    
+    }
+    .slide#endRound{
+        background-image: url('pics/midspec/endRound.jpg');
+    }
+    .slide#endGame{
+        background-image: url('pics/midspec/endGame.jpg');
+    }
+    .slide#previousGames, .slide#gameReport{
+        background-image: url('pics/midspec/previousGames.jpg');
+    }
+}
+@media all and (min-width: 1801px){
+    .slide#welcome{
+        background-image:url('pics/ultraspec/welcome.jpg');
+    }
+    .slide#gameOptions, .slide#playerManagement, .slide#editTeam, .slide#editPlayer, .slide#dateChange, .slide#dateChange2{
+        background-image:url('pics/ultraspec/gameOptions.jpg');
+    }
+    .slide#ghostTime{
+        background-image: url('pics/ultraspec/ghostTime.jpg');
+    }
+    .slide#combat{
+        background-image: url('pics/ultraspec/combat.jpg');
+    }
+    .slide#endRound{
+        background-image: url('pics/ultraspec/endRound.jpg');
+    }
+    .slide#endGame{
+        background-image: url('pics/ultraspec/endGame.jpg');
+    }
+    .slide#previousGames, .slide#gameReport{
+        background-image: url('pics/ultraspec/previousGames.jpg');
+    }
+}

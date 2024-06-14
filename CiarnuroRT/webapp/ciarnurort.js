@@ -1065,13 +1065,30 @@ function initGame(){
     playSoundFx="gameStarted";
     doPlayerSchedule();
     randomizeGameTimerBackground();
+    resizeBackground() 
     I("gtDate").textContent=currentGameDate.toISODate();
     gameState=STATE_GAME;
     toSlide("gameTimer");
 }
+let random;
 function randomizeGameTimerBackground(){
-    I("gameTimer").style.backgroundImage="url('pics/backgrounds/game"+(~~(Math.random()*7)+1)+".jpg')";
+    random=(~~(Math.random()*7)+1);
 }
+function resizeBackground(){ //Resize the background of the timer screen
+    let backgroundImage;
+    if(window.innerWidth>900&&window.innerWidth<=1800){
+        backgroundImage="url('pics/midspec/game" + random + ".jpg')";
+    }else 
+        if(window.innerWidth<=900){
+            backgroundImageUrl="url('pics/lowspec/game" + random + ".jpg')";
+        }else{
+            if(window.innerWidth > 1800){
+                backgroundImage="url('pics/ultraspec/game"+random+".jpg')";
+            }
+        }
+    I("gameTimer").style.backgroundImage=backgroundImage;
+}
+window.addEventListener('resize',resizeBackground);
 function stopRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
     lastTickPlayer=null;
@@ -1162,6 +1179,7 @@ function nextRound(){
     gameState=STATE_GAME;
     I("gtDate").textContent=currentGameDate.toISODate();
     randomizeGameTimerBackground();
+    resizeBackground();
     toSlide("gameTimer");
 }
 function stopGame(askConfirm){
