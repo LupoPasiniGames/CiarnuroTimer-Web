@@ -786,6 +786,11 @@ function checkAndSavePlayer(){
             showModal("La data di nascita non è valida, il personaggio non è ancora nato",[{text:"Ok",action:function(){return true;}}]);
             return;
         }
+        if(currentGameDate.getFullYear()-d.getFullYear()<=4){
+            console.log('siiiiiii')
+            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
+            return;
+        }
         dob=d;
     }catch(t){
         showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
