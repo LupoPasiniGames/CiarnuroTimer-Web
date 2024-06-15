@@ -1106,6 +1106,18 @@ function nextPlayer(){
         scheduleTPtr=e.start;
     }else stopRound();
 }
+function pauseTimer() {
+    if(gameState!=STATE_GAME) return;
+    gameState=STATE_NOTPLAYING;
+    I("pauseBtn").value="Riprendi";
+    I("pauseBtn").onclick=resumeTimer;
+}
+function resumeTimer() {
+    if(gameState!=STATE_NOTPLAYING) return;
+    gameState=STATE_GAME;
+    I("pauseBtn").value="Pausa";
+    I("pauseBtn").onclick=pauseTimer;
+}
 function nextPlayerWithTime(){
     if(gameState!=STATE_GAME) return;
     var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
