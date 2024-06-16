@@ -786,34 +786,10 @@ function checkAndSavePlayer(){
             showModal("La data di nascita non è valida, il personaggio non è ancora nato",[{text:"Ok",action:function(){return true;}}]);
             return;
         }
-        if(currentGameDate.getFullYear()-d.getFullYear()<=4 && race === "umani"){
+        if(currentGameDate.getFullYear()-d.getFullYear()<= RACES[race].ages[0]){
             showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
             return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=6 && race === "Ivosiani"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=6 && race === "krentoriani"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=14 && race === "sauniArcaici"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=15 && race === "sauniEletti"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=18 && race === "Qüark"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=3 && race === "pravosianiGuerrieri"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=11 && race === "pravosianiGuidespirituali"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        } else if(currentGameDate.getFullYear()-d.getFullYear()<=12 && race === "veriSyviar"){
-            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
-            return;
-        }
+        } 
         dob=d;
     }catch(t){
         showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
