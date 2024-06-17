@@ -37,6 +37,7 @@ function toSlide(id){
     });
     id.className="slide visible";
     I("modalContainer").innerHTML="";
+    resizeImages();
 }
 function getCurrentSlide(){
     let s=document.getElementsByClassName("slide visible");
@@ -1065,7 +1066,7 @@ function initGame(){
     playSoundFx="gameStarted";
     doPlayerSchedule();
     randomizeGameTimerBackground();
-    resizeBackground() 
+    resizeBackground();
     I("gtDate").textContent=currentGameDate.toISODate();
     gameState=STATE_GAME;
     toSlide("gameTimer");
@@ -1077,17 +1078,71 @@ function randomizeGameTimerBackground(){
 function resizeBackground(){ //Resize the background of the timer screen
     let backgroundImage;
     if(window.innerWidth>900&&window.innerWidth<=1800){
-        backgroundImage="url('pics/midspec/game" + random + ".jpg')";
-    }else 
+        backgroundImage="url('pics/midspec/game" + random + ".webp')";
+    }else{ 
         if(window.innerWidth<=900){
-            backgroundImageUrl="url('pics/lowspec/game" + random + ".jpg')";
+        backgroundImage="url('pics/lowspec/game" + random + ".webp')";
         }else{
             if(window.innerWidth > 1800){
-                backgroundImage="url('pics/ultraspec/game"+random+".jpg')";
+                backgroundImage="url('pics/ultraspec/game"+random+".webp')";
             }
         }
+    }
     I("gameTimer").style.backgroundImage=backgroundImage;
 }
+function resizeImages(){
+        let identifier=getCurrentSlide().id;
+        if(window.innerWidth<=900){
+            if(identifier==='welcome'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/welcome.webp')";
+            }else if(['gameOptions','playerManagement','editTeam','editPlayer','dateChange','dateChange2'].includes(identifier)){ //if one of these slide is the id
+                I(identifier).style.backgroundImage="url('pics/lowspec/gameOptions.webp')";
+            }else if(identifier==='ghostTime'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/ghostTime.webp')";
+            }else if(identifier==='combat'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/combat.webp')";
+            }else if(identifier==='endRound'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/endRound.webp')";
+            }else if(identifier==='endGame'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/endGame.webp')";
+            }else if(['previousGames','gameReport'].includes(identifier)){
+                I(identifier).style.backgroundImage="url('pics/lowspec/previousGames.webp')";
+            }
+        }else if(window.innerWidth>900&&window.innerWidth<=1800){
+            if (identifier==='welcome'){
+                I(identifier).style.backgroundImage="url('pics/midspec/welcome.webp')";
+            }else if (['gameOptions', 'playerManagement', 'editTeam', 'editPlayer', 'dateChange', 'dateChange2'].includes(identifier)){
+                I(identifier).style.backgroundImage ="url('pics/midspec/gameOptions.webp')";
+            }else if (identifier==='ghostTime'){
+                I(identifier).style.backgroundImage="url('pics/midspec/ghostTime.webp')";
+            }else if (identifier==='combat'){
+                I(identifier).style.backgroundImage="url('pics/midspec/combat.webp')";
+            }else if(identifier==='endRound'){
+                I(identifier).style.backgroundImage="url('pics/midspec/endRound.webp')";
+            }else if(identifier==='endGame'){
+                I(identifier).style.backgroundImage="url('pics/midspec/endGame.webp')";
+            }else if(['previousGames','gameReport'].includes(identifier)){
+                I(identifier).style.backgroundImage="url('pics/midspec/previousGames.webp')";
+            }
+        }else if(window.innerWidth>1800){
+            if(identifier==='welcome'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/welcome.webp')";
+            }else if(['gameOptions','playerManagement','editTeam','editPlayer','dateChange','dateChange2'].includes(identifier)){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/gameOptions.webp')";
+            }else if(identifier==='ghostTime'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/ghostTime.webp')";
+            }else if(identifier==='combat'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/combat.webp')";
+            }else if(identifier==='endRound'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/endRound.webp')";
+            }else if(identifier==='endGame'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/endGame.webp')";
+            }else if(['previousGames','gameReport'].includes(identifier)){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/previousGames.webp')";
+            }
+        }
+}
+window.addEventListener('resize',resizeImages);
 window.addEventListener('resize',resizeBackground);
 function stopRound(){
     if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
@@ -1100,6 +1155,7 @@ function stopRound(){
         I("endRoundNumber").textContent=currentRound;
         gameState=STATE_ENDROUND;
         toSlide("endRound");
+        
     }
 }
 function nextPlayer(){
