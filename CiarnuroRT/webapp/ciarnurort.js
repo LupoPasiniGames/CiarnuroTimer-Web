@@ -1065,11 +1065,11 @@ function initGame(){
     removedPlayers=[];
     playSoundFx="gameStarted";
     doPlayerSchedule();
-    randomizeGameTimerBackground();
-    resizeBackground();
     I("gtDate").textContent=currentGameDate.toISODate();
     gameState=STATE_GAME;
     toSlide("gameTimer");
+    randomizeGameTimerBackground();
+    resizeBackground();
 }
 let random;
 function randomizeGameTimerBackground(){
@@ -1087,8 +1087,8 @@ function resizeBackground(){ //Resize the background of the timer screen
                 backgroundImage="url('pics/ultraspec/game"+random+".webp')";
             }
         }
+    I("gameTimer").style.backgroundImage=backgroundImage;    
     }
-    I("gameTimer").style.backgroundImage=backgroundImage;
 }
 function resizeImages(){
         let identifier=getCurrentSlide().id;
