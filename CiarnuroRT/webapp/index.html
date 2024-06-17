@@ -17,10 +17,10 @@
                 Attiva JavaScript, cappello di stagnola!
             </noscript>
         </div>
-        <div class="slide invisible" id="welcome" style="background-image:url('pics/backgrounds/welcome.jpg')">
+        <div class="slide invisible" id="welcome">
             <div class="full">
                 <div class="content">
-                    <img src="pics/logo.png" alt="Logo" style="display:block;width:100%;height:auto;"/>
+                    <img srcset="pics/lowspec/logo.webp 900w, pics/midspec/logo.webp 1800w, pics/ultraspec/logo.webp 2500w", alt="Logo" style="display:block;width:100%;height:auto;"/>
                     <div class="centered">
                         <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
                     </div>
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <div class="slide invisible" id="gameOptions" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="gameOptions">
             <div class="upper">
                 <div class="content">
                     <div class="title">Nuova partita</div>
@@ -44,7 +44,7 @@
                 <input type="button" value="Indietro" onclick="gameOptionsToWelcomeScreen()"/><input type="button" value="Avanti" onclick="gameOptionsToPlayerManagement()" />
             </div>
         </div>
-        <div class="slide invisible" id="playerManagement" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="playerManagement">
             <div class="upper">
                 <div class="content">
                     <div class="title">Squadre</div>
@@ -58,7 +58,7 @@
                 <input type="button" value="Indietro" id="playerManagementToGameOptions" onclick="playerManagementToGameOptions()" /><input type="button" value="Conferma" onclick="playerManagementToGame()" />
             </div>
         </div>
-        <div class="slide invisible" id="editTeam" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="editTeam">
             <div class="upper">
                 <div class="content">
                     <div class="title">Dettagli squadra</div>
@@ -72,7 +72,7 @@
                 <input type="button" value="Annulla" onclick="cancelTeamEdit()"/><input type="button" value="Conferma" onclick="checkAndSaveTeam()" />
             </div>
         </div>
-        <div class="slide invisible" id="editPlayer" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="editPlayer">
             <div class="upper">
                 <div class="content">
                     <div class="title">Dettagli giocatore</div>
@@ -141,7 +141,7 @@
                 <input type="button" value="Termina turno" onclick="stopRound()"/>
             </div>
         </div>
-        <div class="slide invisible" id="ghostTime" style="background-image:url('pics/backgrounds/ghostTime.jpg')">
+        <div class="slide invisible" id="ghostTime">
             <div class="upper">
                 <div class="content">
                     <div class="title">Tempo fantasma</div>
@@ -154,7 +154,7 @@
                 <input type="button" value="Fine tempo fantasma" onclick="endGhostTime()"/>
             </div>
         </div>
-        <div class="slide invisible" id="combat" style="background-image:url('pics/backgrounds/combat.jpg')">
+        <div class="slide invisible" id="combat">
             <div class="upper">
                 <div class="content">
                     <div class="title">Combattimento <span id="combatTypeTitle"></span></div>
@@ -170,7 +170,7 @@
                 <input type="button" value="Fine combattimento" onclick="endCombat()"/>
             </div>
         </div>
-        <div class="slide invisible" id="endRound" style="background-image:url('pics/backgrounds/endRound.jpg')">
+        <div class="slide invisible" id="endRound">
             <div class="upper">
                 <div class="content">
                     <div class="title">Fine turno <span id="endRoundNumber"></span></div>
@@ -186,7 +186,7 @@
                 <input type="button" value="Termina partita" onclick="stopGame(true)"/><input type="button" value="Prossimo turno" onclick="nextRound()"/>
             </div>
         </div>
-        <div class="slide invisible" id="dateChange" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="dateChange">
             <div class="upper">
                 <div class="content">
                     <div class="title">Scorri tempo</div>
@@ -200,7 +200,7 @@
                 <input type="button" value="Annulla" onclick="cancelChangeDate()"/><input type="button" value="Conferma" onclick="checkAndChangeDate()" />
             </div>
         </div>
-        <div class="slide invisible" id="dateChange2" style="background-image:url('pics/backgrounds/gameOptions.jpg')">
+        <div class="slide invisible" id="dateChange2">
             <div class="upper">
                 <div class="content">
                     <div class="title">Scorri tempo</div>
@@ -212,7 +212,7 @@
                 <input type="button" value="Continua" onclick="dateChangeToEndRound()" />
             </div>
         </div>
-        <div class="slide invisible" id="endGame" style="background-image:url('pics/backgrounds/endGame.jpg')">
+        <div class="slide invisible" id="endGame">
             <div class="upper">
                 <div class="content">
                     <div class="title">Fine partita</div>
@@ -223,7 +223,7 @@
                 <input type="button" value="Continua" onclick="endGameToWelcome()" />
             </div>
         </div>
-        <div class="slide invisible" id="previousGames" style="background-image:url('pics/backgrounds/previousGames.jpg')">
+        <div class="slide invisible" id="previousGames">
             <div class="upper">
                 <div class="content">
                     <div class="title">Partite precedenti</div>
@@ -234,7 +234,7 @@
                 <input type="button" value="Indietro" onclick="previousGamesToWelcome()" />
             </div>
         </div>
-        <div class="slide invisible" id="gameReport" style="background-image:url('pics/backgrounds/previousGames.jpg')">
+        <div class="slide invisible" id="gameReport">
             <div class="upper">
                 <div class="content">
                     <div class="title" id="reportName"></div>
