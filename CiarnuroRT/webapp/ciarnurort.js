@@ -768,6 +768,10 @@ function checkAndSavePlayer(){
             showModal("La data di nascita non è valida, il personaggio non è ancora nato",[{text:"Ok",action:function(){return true;}}]);
             return;
         }
+        if(currentGameDate.getFullYear()-d.getFullYear()<= RACES[race].ages[0]){
+            showModal("La data di nascita non è valida, il personaggio non può giocare prima della tenera età",[{text:"Ok",action:function(){return true;}}]);
+            return;
+        } 
         dob=d;
     }catch(t){
         showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
@@ -1349,4 +1353,3 @@ function generateReport(){
 }
 function init(){
     toSlide("welcome");
-}
