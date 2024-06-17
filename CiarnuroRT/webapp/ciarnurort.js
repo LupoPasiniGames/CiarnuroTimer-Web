@@ -1236,9 +1236,9 @@ function nextRound(){
     doPlayerSchedule();
     gameState=STATE_GAME;
     I("gtDate").textContent=currentGameDate.toISODate();
+    toSlide("gameTimer");
     randomizeGameTimerBackground();
     resizeBackground();
-    toSlide("gameTimer");
 }
 function stopGame(askConfirm){
     if(gameState!=STATE_ENDROUND) return;
