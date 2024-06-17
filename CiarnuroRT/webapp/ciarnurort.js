@@ -1077,14 +1077,16 @@ function randomizeGameTimerBackground(){
 }
 function resizeBackground(){ //Resize the background of the timer screen
     let backgroundImage;
-    if(window.innerWidth>900&&window.innerWidth<=1800){
-        backgroundImage="url('pics/midspec/game" + random + ".webp')";
-    }else{ 
-        if(window.innerWidth<=900){
-        backgroundImage="url('pics/lowspec/game" + random + ".webp')";
-        }else{
-            if(window.innerWidth > 1800){
-                backgroundImage="url('pics/ultraspec/game"+random+".webp')";
+    if(getCurrentSlide().id==='gameTimer'){
+        if(window.innerWidth>900&&window.innerWidth<=1800){
+            backgroundImage="url('pics/midspec/game" + random + ".webp')";
+        }else{ 
+            if(window.innerWidth<=900){
+            backgroundImage="url('pics/lowspec/game" + random + ".webp')";
+            }else{
+                if(window.innerWidth > 1800){
+                    backgroundImage="url('pics/ultraspec/game"+random+".webp')";
+                }
             }
         }
     I("gameTimer").style.backgroundImage=backgroundImage;    
