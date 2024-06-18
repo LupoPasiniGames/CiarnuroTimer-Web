@@ -253,7 +253,7 @@ function Team(teamName){
 }
 function getTeamById(id){
     for(let i=0;i<teams.length;i++) if(teams[i].teamId===id) return teams[i];
-    return null;
+    return -1;
 }
 /*---MAIN IMPLEMENTATION---*/
 function saveConfigToLocalStorage(){
@@ -1191,9 +1191,13 @@ function stopRound(){
 function nextPlayer(){
     if(gameState!=STATE_GAME) return;
     let e=getNextScheduleEntry();
-    if(e!=null){
-        scheduleTPtr=e.start;
-    }else stopRound();
+    let c=getCurrentScheduleEntry();
+    if(e===null){
+        stopRound();
+        return;
+    }
+    if(c.player.team!=0&&getTeamById(c.player.team).teamName===getTeamById(e.player.team).teamName) return;
+    scheduleTPtr=e.start;
 }
 function nextPlayerWithTime(){
     if(gameState!=STATE_GAME) return;
