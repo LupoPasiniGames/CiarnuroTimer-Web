@@ -26,6 +26,7 @@ html,body{
     color:#FFFFFF;
     text-shadow:0.05rem 0.05rem 0.125rem #000000;
     font-family:'Open Sans',sans-serif;
+    user-select: none;
 }
 #loadOverlay{
     position:fixed;
@@ -35,6 +36,7 @@ html,body{
 }
 *{
     box-sizing:border-box;
+    -webkit-user-drag: none;
 }
 ::-moz-focus-inner { 
   border: 0;
