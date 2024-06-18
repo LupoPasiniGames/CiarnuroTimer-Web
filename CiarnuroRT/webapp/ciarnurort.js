@@ -136,21 +136,21 @@ function initSoundSystem(){
 }
 /*---BASIC GAME STUFF---*/
 const MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
-const ROUNDDURATION_MIN=10, ROUNDDURATION_MAX=1000, ROUNDDURATION_STEP=5, ROUNDDURATION_DEFAULT=10;
+const ROUNDDURATION_MIN=10, ROUNDDURATION_MAX=30, ROUNDDURATION_STEP=5, ROUNDDURATION_DEFAULT=10;
 let currentGameDate=null,roundDuration=ROUNDDURATION_DEFAULT,maxRounds=MAXROUNDS_DEFAULT;
 const RACES={
     "umani":{
         name:"Umani",
-        ages:[4,13,26,50,80,136]
+        ages:[5,13,26,50,88,137]
     },
-    "krentoriani":{
+     "krentoriani":{
         name:"Krentoriani",
-        ages:[6,15,22,56,72,102]
+        ages:[3,7,15,49,65,88]
     },
     "sauniArcaici":{
         name:"Sauni arcaici",
         ages:[14,20,39,68,94,123]
-    },
+     },
     "sauniEletti":{
         name:"Sauni eletti",
         ages:[15,22,41,76,105,140]
@@ -161,7 +161,7 @@ const RACES={
     },
     "pravosianiGuerrieri":{
         name:"Pravosiani guerrieri",
-        ages:[3,7,12,37,53,69]
+        ages:[3,9,19,55,72,101]
     },
     "pravosianiGuidespirituali":{
         name:"Pravosiani guide spirituali",
@@ -169,11 +169,27 @@ const RACES={
     },
     "veriSyviar":{
         name:"Veri Syviar",
-        ages:[12,25,73,189,220,252]
+        ages:[12,27,79,199,253,302]
     },
     "ivosiani":{
         name:"Ivosiani",
-        ages:[6,15,22,56,72,102]
+        ages:[10,25,71,162,211,253]
+    },
+    "draudzart":{
+        name:"Draudzart",
+        ages:[2,5,12,42,71,94]
+    },
+    "skity":{
+        name:"Skity",
+        ages:[6,9,13,37,49,66]
+    },
+    "nakkiri":{
+        name:"Nàkkiri",
+        ages:[18,32,46,70,87,116]
+    },
+    "makriani":{
+        name:"Makriani",
+        ages:[3,6,16,36,51,77]
     }
 };
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
@@ -845,7 +861,15 @@ function playerManagementToGame(){
         ]:[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    if(!checkPlayerAges()) return;
+    let first=false;
+    Array.from(players).forEach(player=> {
+        if(player.firstPlayer==true) first=true;
+    });
+    if(!first){
+        showModal("Nessuno è specificato come primo giocatore",[{text:"Ok",action:function(){return true;}}]);
+        return;  
+    }
+if(!checkPlayerAges()) return;
     Array.from(players).forEach(player => {
         if (player.team!== 0) player.alwaysPlayedSolo=false;
     });
