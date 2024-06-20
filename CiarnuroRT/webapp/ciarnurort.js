@@ -141,61 +141,74 @@ let currentGameDate=null,roundDuration=ROUNDDURATION_DEFAULT,maxRounds=MAXROUNDS
 const RACES={
     "umani":{
         name:"Umani",
-        ages:[5,13,26,50,88,137]
+        ages:[5,13,26,50,88,137],
+        sexes:["M","F"]
     },
      "krentoriani":{
         name:"Krentoriani",
-        ages:[3,7,15,49,65,88]
+        ages:[3,7,15,49,65,88],
+        sexes:["M","F"]
     },
     "sauniArcaici":{
         name:"Sauni arcaici",
-        ages:[14,20,39,68,94,123]
+        ages:[14,20,39,68,94,123],
+        sexes:["M","F"]
      },
     "sauniEletti":{
         name:"Sauni eletti",
-        ages:[15,22,41,76,105,140]
+        ages:[15,22,41,76,105,140],
+        sexes:["M","F"]
     },
     "quark":{
         name:"Qüark",
-        ages:[18,73,138,259,302,352]
+        ages:[18,73,138,259,302,352],
+        sexes:["M","F"]
     },
     "pravosianiGuerrieri":{
         name:"Pravosiani guerrieri",
-        ages:[3,9,19,55,72,101]
+        ages:[3,9,19,55,72,101],
+        sexes:["M","F"]
     },
     "pravosianiGuidespirituali":{
         name:"Pravosiani guide spirituali",
-        ages:[11,22,59,169,197,242]
+        ages:[11,22,59,169,197,242],
+        sexes:["A"]
     },
     "veriSyviar":{
         name:"Veri Syviar",
-        ages:[12,27,79,199,253,302]
+        ages:[12,27,79,199,253,302],
+        sexes:["A"]
     },
     "ivosiani":{
         name:"Ivosiani",
-        ages:[10,25,71,162,211,253]
+        ages:[10,25,71,162,211,253],
+        sexes:["A"]
     },
     "draudzart":{
         name:"Draudzart",
-        ages:[2,5,12,42,71,94]
+        ages:[2,5,12,42,71,94],
+        sexes:["M","F"]
     },
     "skity":{
         name:"Skity",
-        ages:[6,9,13,37,49,66]
+        ages:[6,9,13,37,49,66],
+        sexes:["M","F"]
     },
     "nakkiri":{
         name:"Nàkkiri",
-        ages:[18,32,46,70,87,116]
+        ages:[18,32,46,70,87,116],
+        sexes:["M","F"]
     },
     "makriani":{
         name:"Makriani",
-        ages:[3,6,16,36,51,77]
+        ages:[3,6,16,36,51,77],
+        sexes:["M","F"]
     }
 };
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
 let players=[], removedPlayers=[];
 let playerIdCtr=1;
-function Player(playerName,characterName,race,dob,team,firstPlayer){
+function Player(playerName,characterName,race,dob,team,firstPlayer,sex){
     this.playerId=playerIdCtr++;
     this.playerName=playerName;
     this.characterName=characterName;
@@ -203,6 +216,7 @@ function Player(playerName,characterName,race,dob,team,firstPlayer){
     this.dob=dob;
     this.team=team;
     this.firstPlayer=firstPlayer;
+    this.sex=sex;
     this.alwaysPlayedSolo=true;
     this.timePlayed=0;
     this.deathAge=-1;
@@ -238,6 +252,24 @@ Player.prototype={
         this.alwaysPlayedSolo=true;
         this.timePlayed=0;
         this.deathAge=-1;
+    }
+}
+function updateSex(){
+    let currentSex=I("sex").value;
+   
+    while(I("sex").firstChild){
+        I("sex").removeChild(I("sex").firstChild);
+    }
+    RACES[raceSelect.value].sexes.forEach(option => {
+        let newOption=document.createElement("option");
+        newOption.value=option;
+        newOption.text=option==="M"?"Maschio":option==="F"?"Femmina":"Assessuato";
+        I("sex").appendChild(newOption);
+    });
+    if([I("sex").options].some(option => option.value===currentSex)){
+        I("sex").value=currentSex;
+    }else{
+        I("sex").value=I("sex").options[0].value;
     }
 }
 function getPlayersByTeamId(id){
@@ -281,7 +313,8 @@ function saveConfigToLocalStorage(){
                 race:players[i].race,
                 dob:players[i].dob.toISODate(),
                 team:players[i].team,
-                firstPlayer:players[i].firstPlayer
+                firstPlayer:players[i].firstPlayer,
+                sex:players[i].sex
             }
         }
         localStorage.ciarnuro=JSON.stringify(state);
@@ -307,7 +340,7 @@ function loadConfigFromLocalStorage(){
         players=[];
         for(let i=0;i<state.players.length;i++){
             let p=state.players[i];
-            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer);
+            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex);
             n.playerId=Number(p.playerId);
             players.push(n);
         }
@@ -530,7 +563,7 @@ function populatePlayersAndTeamsList(){
         d.className="entry";
         let x=document.createElement("img");
         x.className="icon"+(p.firstPlayer?" important":"");
-        x.src="pics/races/"+p.race+".png";
+        x.src="pics/races/" + p.race +""+p.sex+ ".png";
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
@@ -741,6 +774,8 @@ function preparePlayerEditForm(player){
         I("dob").disabled=undefined;
         I("race").disabled=undefined;
         I("firstPlayer").value="n";
+        updateSex();
+        I("sex").disabled=undefined;
     }else{
         I("playerName").value=player.playerName;
         I("characterName").value=player.characterName;
@@ -748,19 +783,24 @@ function preparePlayerEditForm(player){
         I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
         I("firstPlayer").value=player.firstPlayer;
+        updateSex(player.sex);
+        I("sex").value=player.sex;
         if(ingamePlayerManagement){
             I("dob").disabled="true";
             I("race").disabled="true";
+            I("sex").disabled="true";
         }else{
             I("dob").disabled=undefined;
             I("race").disabled=undefined;
+            I("sex").disabled=undefined;
         }
         I("firstPlayer").value=player.firstPlayer?"y":"n";
     }
+    I("race").addEventListener("change",updateSex);
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y";
+    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value;
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -799,7 +839,7 @@ function checkAndSavePlayer(){
         });
     }
     if (playerBeingEdited === null) {
-        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp);
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -807,12 +847,14 @@ function checkAndSavePlayer(){
         if(!ingamePlayerManagement){
             playerBeingEdited.dob=dob;
             playerBeingEdited.race=race;
+            playerBeingEdited.sex=sex;
         }
         playerBeingEdited.team=team==="solo"?0:Number(team);
         playerBeingEdited.firstPlayer=fp;
     }
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
+
 }
 function cancelPlayerEdit(){
     if(getCurrentSlide().id!=="editPlayer") return;
@@ -1334,14 +1376,24 @@ function generateReport(){
         d.className="entry";
         let x=document.createElement("img");
         x.className="icon";
-        x.src ="pics/races/" + p.race + ".png";
+        x.src ="pics/races/" + p.race +""+p.sex+ ".png";
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
         x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
         let s=document.createElement("div");
         s.className="small";
-        s.textContent=p.characterName + " (" + RACES[p.race].name + ", " + p.getAge() + " anni)";
+        let sesso;
+        if(p.sex==="A"){
+            sesso="Assessuato";
+        }else{
+            if(p.sex==="M"){
+                sesso="Maschio";
+            }else{
+                sesso="Femmina";
+            }
+        }
+        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+ ", " + p.getAge() + " anni)";
         x.appendChild(s);
         s=document.createElement("div");
         s.className="small";
@@ -1360,14 +1412,24 @@ function generateReport(){
         d.className="entry";
         let x=document.createElement("img");
         x.className="icon";
-        x.src="pics/races/" + p.race + ".png";
+        x.src="pics/races/" + p.race +""+p.sex+ ".png";
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
         x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
         let s=document.createElement("div");
         s.className="small";
-        s.textContent=p.characterName + " (" + RACES[p.race].name + ", morto a " + p.getAge() + " anni)";
+        let sesso;
+        if(p.sex==="A"){
+            sesso="Assessuato";
+        }else{
+            if(p.sex==="M"){
+                sesso="Maschio";
+            }else{
+                sesso="Femmina";
+            }
+        }
+        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+ ", morto a " + p.getAge() + " anni)";
         x.appendChild(s);
         s = document.createElement("div");
         s.className="small";
