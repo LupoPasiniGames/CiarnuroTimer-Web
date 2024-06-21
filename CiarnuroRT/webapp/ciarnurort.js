@@ -142,67 +142,103 @@ const RACES={
     "umani":{
         name:"Umani",
         ages:[5,13,26,50,88,137],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
      "krentoriani":{
         name:"Krentoriani",
         ages:[3,7,15,49,65,88],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "sauniArcaici":{
         name:"Sauni arcaici",
         ages:[14,20,39,68,94,123],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
      },
     "sauniEletti":{
         name:"Sauni eletti",
         ages:[15,22,41,76,105,140],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "quark":{
         name:"Qüark",
         ages:[18,73,138,259,302,352],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "pravosianiGuerrieri":{
         name:"Pravosiani guerrieri",
         ages:[3,9,19,55,72,101],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "pravosianiGuidespirituali":{
         name:"Pravosiani guide spirituali",
         ages:[11,22,59,169,197,242],
-        sexes:["A"]
+        sexes:{
+            "a":{displayName:"Assessuato"}
+        }
     },
     "veriSyviar":{
         name:"Veri Syviar",
         ages:[12,27,79,199,253,302],
-        sexes:["A"]
+        sexes:{
+            "a":{displayName:"Assessuato"}
+        }
     },
     "ivosiani":{
         name:"Ivosiani",
         ages:[10,25,71,162,211,253],
-        sexes:["A"]
+        sexes:{
+            "a":{displayName:"Assessuato"}
+        }
     },
     "draudzart":{
         name:"Draudzart",
         ages:[2,5,12,42,71,94],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "skity":{
         name:"Skity",
         ages:[6,9,13,37,49,66],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "nakkiri":{
         name:"Nàkkiri",
         ages:[18,32,46,70,87,116],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     },
     "makriani":{
         name:"Makriani",
         ages:[3,6,16,36,51,77],
-        sexes:["M","F"]
+        sexes:{
+            "m":{displayName:"Maschio"},
+            "f":{displayName:"Femmina"}
+        }
     }
 };
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
@@ -260,12 +296,12 @@ function updateSex(){
     while(I("sex").firstChild){
         I("sex").removeChild(I("sex").firstChild);
     }
-    RACES[raceSelect.value].sexes.forEach(option => {
+    for(let key in RACES[raceSelect.value].sexes){
         let newOption=document.createElement("option");
-        newOption.value=option;
-        newOption.text=option==="M"?"Maschio":option==="F"?"Femmina":"Assessuato";
+        newOption.value=key;
+        newOption.text=RACES[raceSelect.value].sexes[key].displayName;
         I("sex").appendChild(newOption);
-    });
+    }
     if([I("sex").options].some(option => option.value===currentSex)){
         I("sex").value=currentSex;
     }else{
@@ -1384,10 +1420,10 @@ function generateReport(){
         let s=document.createElement("div");
         s.className="small";
         let sesso;
-        if(p.sex==="A"){
+        if(p.sex==="a"){
             sesso="Assessuato";
         }else{
-            if(p.sex==="M"){
+            if(p.sex==="m"){
                 sesso="Maschio";
             }else{
                 sesso="Femmina";
@@ -1420,10 +1456,10 @@ function generateReport(){
         let s=document.createElement("div");
         s.className="small";
         let sesso;
-        if(p.sex==="A"){
+        if(p.sex==="a"){
             sesso="Assessuato";
         }else{
-            if(p.sex==="M"){
+            if(p.sex==="m"){
                 sesso="Maschio";
             }else{
                 sesso="Femmina";
