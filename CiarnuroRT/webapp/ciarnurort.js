@@ -1072,6 +1072,12 @@ function getCurrentScheduleEntry(){
     });
     return result;
 }
+function getBeforeScheduleEntry(){
+    for(let i=1;i<schedule.length;i++){
+        if(scheduleTPtr>=schedule[i].start&&scheduleTPtr<schedule[i].end) return schedule[i-1];
+    }
+    return null;
+}
 function getNextScheduleEntry(){
     for(let i=0;i<schedule.length-1;i++){
         if(scheduleTPtr>=schedule[i].start&&scheduleTPtr<schedule[i].end) return schedule[i+1];
@@ -1120,19 +1126,28 @@ setInterval(function(){
         I("mainTimer").textContent=msToMMSS(roundDuration*60*1000-scheduleTPtr);
         I("roundTDuration").textContent=msToMMSS(roundDuration*60*1000);
         let e=getCurrentScheduleEntry();
-        if(e!=null){
+        let c=getBeforeScheduleEntry();
+	if(e!=null){
             if(e.player!=lastTickPlayer){
                 if(currentRound>1||scheduleTPtr!=tsdiff) playSoundFx="nextPlayer"; //don't play sound effect for first player of the first round because we're already playing gameStarted
                 flash();
                 I("senilityCheckRequired").style.display=e.player.isSenile()?"":"none";
                 if(e.player.team!=0){
                     I("teamTContainer").style.display="";
-                    I("teamTDuration").textContent=msToMMSS(e.teamTime);
+                    if(c!=null&&getTeamById(e.player.team).teamName===getTeamById(c.player.team).teamName){
+                        e.teamTime=c.teamTime; // for the same team 
+                    }else{
+                        e.teamTime=getPlayersByTeamId(e.player.team).length*timePerPlayerMs; //for new team
+                    }
                 }else I("teamTContainer").style.display="none";
                 I("playerAndCharacterName").textContent=e.player.playerName+" - "+e.player.characterName;
                 I("gtTeamName").textContent=e.player.team===0?"Solo":getTeamById(e.player.team).teamName;
             }
             I("playerTDuration").textContent=msToMMSS(e.end-scheduleTPtr);
+            if(e.player.team!=0){
+                e.teamTime-=tsdiff;
+                I("teamTDuration").textContent=msToMMSS(e.teamTime);
+            }
             e.player.timePlayed+=tsdiff;
             lastTickPlayer=e.player;
         }else{
