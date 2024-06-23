@@ -1097,16 +1097,18 @@ function msToHHMMSS(ms){
     ms%=HOUR;
     return (h<10?("0"+h):h)+":"+msToMMSS(ms);
 }
-const TICK_MS=100;
-const STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4;
-let gameState=STATE_NOTPLAYING;
-let currentRound=1;
-let prevTS=-1;
-let ghostTime=0,combatTime=0;
-const COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
-let combatType=COMBATTYPE_INPUT;
-let totalCombatTime=[0,0,0,0], totalPlayedTime=0;
-let lastTickPlayer=null;
+
+var TICK_MS=100;
+var STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4, STATE_PAUSE=5;
+var gameState=STATE_NOTPLAYING;
+var currentRound=1;
+var prevTS=-1;
+var ghostTime=0,combatTime=0;
+var COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
+var combatType=COMBATTYPE_INPUT;
+var totalCombatTime=[0,0,0,0], totalPlayedTime=0;
+var lastTickPlayer=null;
+
 setInterval(function(){
     let ts=Date.now(),tsdiff=0;
     if(prevTS===-1){
@@ -1117,6 +1119,9 @@ setInterval(function(){
         prevTS=ts;
     }
     if(gameState===STATE_NOTPLAYING){
+        return;
+    }
+    if(gameState===STATE_PAUSE) {
         return;
     }
     if(gameState===STATE_GAME){
@@ -1268,7 +1273,7 @@ function resizeImages(){
 window.addEventListener('resize',resizeImages);
 window.addEventListener('resize',resizeBackground);
 function stopRound(){
-    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
+    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
     lastTickPlayer=null;
     if(currentRound>=maxRounds){        
         gameState=STATE_ENDROUND;
@@ -1276,43 +1281,58 @@ function stopRound(){
     }else{
         playSoundFx="nextRound";
         I("endRoundNumber").textContent=currentRound;
+        resumeTimer();
         gameState=STATE_ENDROUND;
         toSlide("endRound");
         
     }
 }
 function nextPlayer(){
-    if(gameState!=STATE_GAME) return;
-    let e=getNextScheduleEntry();
-    let c=getCurrentScheduleEntry();
+    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
+    var e=getNextScheduleEntry();
+    var c=getCurrentScheduleEntry();
     if(e===null){
         stopRound();
         return;
     }
+    if (gameState == STATE_PAUSE) resumeTimer();
     if(c.player.team!=0&&getTeamById(c.player.team).teamName===getTeamById(e.player.team).teamName) return;
     scheduleTPtr=e.start;
 }
-function nextPlayerWithTime(){
+function pauseTimer() {
     if(gameState!=STATE_GAME) return;
-    let c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
+    gameState=STATE_PAUSE;
+    I("pauseBtn").value="Riprendi";
+    I("pauseBtn").onclick=resumeTimer;
+}
+function resumeTimer() {
+    if(gameState!=STATE_PAUSE&&gameState!=STATE_GHOSTTIME&&gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
+    gameState=STATE_GAME;
+    I("pauseBtn").value="Pausa";
+    I("pauseBtn").onclick=pauseTimer;
+}
+function nextPlayerWithTime(){
+    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
+    var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
     if(c!=null&&e!=null){
         c.end=e.start=scheduleTPtr;
+        if (gameState == STATE_PAUSE) resumeTimer();
     } else stopRound();
 }
 function beginGhostTime(){
-    if(gameState!=STATE_GAME) return;
+    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
     playSoundFx="ghostTime";
     gameState=STATE_GHOSTTIME;
     toSlide("ghostTime");
 }
 function endGhostTime(){
-    if(gameState!=STATE_GHOSTTIME) return;
-    gameState=STATE_GAME;
+    if(gameState!=STATE_GHOSTTIME&&gameState!=STATE_PAUSE) return;
+    resumeTimer();
     playSoundFx="ghostTimeEnd";
     toSlide("gameTimer");
 }
 function beginCombat(){
-    if(gameState!=STATE_GAME) return;
+    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
     gameState=STATE_COMBAT_INPUT;
     playSoundFx="combat";
     combatType=0;
@@ -1330,8 +1350,8 @@ function setCombatType(type){
 }
 function endCombat(){
     if(gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
-    gameState=STATE_GAME;
     playSoundFx="combatEnd";
+    resumeTimer();
     toSlide("gameTimer");
 }
 function senilityCheckPassed(){
@@ -1350,7 +1370,7 @@ function senilityCheckFailed(){
     nextPlayer();
 }
 function nextRound(){
-    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND) return;
+    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
     if(players.length===0){
         showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -1366,7 +1386,7 @@ function nextRound(){
     resizeBackground();
 }
 function stopGame(askConfirm){
-    if(gameState!=STATE_ENDROUND) return;
+    if(gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
     if(askConfirm){
         showModal("Vuoi terminare la partita?",[{text:"Si",action:function(){stopGame();return true}},{text:"No",action:function(){return true}}]);
     }else{
