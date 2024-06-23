@@ -1098,16 +1098,16 @@ function msToHHMMSS(ms){
     return (h<10?("0"+h):h)+":"+msToMMSS(ms);
 }
 
-var TICK_MS=100;
-var STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4, STATE_PAUSE=5;
-var gameState=STATE_NOTPLAYING;
-var currentRound=1;
-var prevTS=-1;
-var ghostTime=0,combatTime=0;
-var COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
-var combatType=COMBATTYPE_INPUT;
-var totalCombatTime=[0,0,0,0], totalPlayedTime=0;
-var lastTickPlayer=null;
+const TICK_MS=100;
+const STATE_NOTPLAYING=0,STATE_GAME=1,STATE_GHOSTTIME=2,STATE_COMBAT_INPUT=30,STATE_COMBAT_RUNNING=31,STATE_ENDROUND=4, STATE_PAUSE=5;
+let gameState=STATE_NOTPLAYING;
+let currentRound=1;
+let prevTS=-1;
+let ghostTime=0,combatTime=0;
+const COMBATTYPE_INPUT=0,COMBATTYPE_NARRATIVE=1,COMBATTYPE_TACTICAL=2,COMBATTYPE_BOTH=3;
+let combatType=COMBATTYPE_INPUT;
+let totalCombatTime=[0,0,0,0], totalPlayedTime=0;
+let lastTickPlayer=null;
 
 setInterval(function(){
     let ts=Date.now(),tsdiff=0;
