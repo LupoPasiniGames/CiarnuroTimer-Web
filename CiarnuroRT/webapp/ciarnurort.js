@@ -244,7 +244,7 @@ const RACES={
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
 let players=[], removedPlayers=[];
 let playerIdCtr=1;
-function Player(playerName,characterName,race,dob,team,firstPlayer,sex){
+function Player(playerName,characterName,race,dob,team,firstPlayer,sex,gender,exGender){
     this.playerId=playerIdCtr++;
     this.playerName=playerName;
     this.characterName=characterName;
@@ -253,6 +253,8 @@ function Player(playerName,characterName,race,dob,team,firstPlayer,sex){
     this.team=team;
     this.firstPlayer=firstPlayer;
     this.sex=sex;
+    this.gender=gender;
+    this.exGender=exGender; //exGender= explanation of gender
     this.alwaysPlayedSolo=true;
     this.timePlayed=0;
     this.deathAge=-1;
@@ -350,7 +352,9 @@ function saveConfigToLocalStorage(){
                 dob:players[i].dob.toISODate(),
                 team:players[i].team,
                 firstPlayer:players[i].firstPlayer,
-                sex:players[i].sex
+                sex:players[i].sex,
+                gender:players[i].gender,
+                exGender:players[i].exGender
             }
         }
         localStorage.ciarnuro=JSON.stringify(state);
@@ -376,7 +380,7 @@ function loadConfigFromLocalStorage(){
         players=[];
         for(let i=0;i<state.players.length;i++){
             let p=state.players[i];
-            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex);
+            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex,p.gender,p.exGender);
             n.playerId=Number(p.playerId);
             players.push(n);
         }
@@ -812,6 +816,8 @@ function preparePlayerEditForm(player){
         I("firstPlayer").value="n";
         updateSex();
         I("sex").disabled=undefined;
+        I("gender").value="";
+        I("exGender").value="";
     }else{
         I("playerName").value=player.playerName;
         I("characterName").value=player.characterName;
@@ -819,8 +825,10 @@ function preparePlayerEditForm(player){
         I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
         I("firstPlayer").value=player.firstPlayer;
+        I("gender").value=player.gender;
         updateSex(player.sex);
         I("sex").value=player.sex;
+        I("exGender").value=player.exGender;
         if(ingamePlayerManagement){
             I("dob").disabled="true";
             I("race").disabled="true";
@@ -836,7 +844,7 @@ function preparePlayerEditForm(player){
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value;
+    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value,gen=I("gender").value.trim(),eg=I("exGender").value.trim();
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -848,6 +856,10 @@ function checkAndSavePlayer(){
     if(dob.isBlank()){
         showModal("La data di nascita non può essere vuota",[{text:"Ok",action:function(){return true;}}]);
         return;
+    }
+    if(!gen.isBlank()&&eg.isBlank()){
+        showModal("La spiegazione del gender non può essere vuota",[{text:"Ok",action:function(){return true;}}]);
+        return;    
     }
     try{
         let d=new Date(dob);
@@ -875,11 +887,13 @@ function checkAndSavePlayer(){
         });
     }
     if (playerBeingEdited === null) {
-        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex);
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex,gen,eg);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
         playerBeingEdited.characterName=cn;
+        playerBeingEdited.gender=gen;
+        playerBeingEdited.exGender=eg;
         if(!ingamePlayerManagement){
             playerBeingEdited.dob=dob;
             playerBeingEdited.race=race;
@@ -1429,7 +1443,7 @@ function generateReport(){
                 sesso="Femmina";
             }
         }
-        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+ ", " + p.getAge() + " anni)";
+        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+" "+p.gender+", "+ p.getAge() + " anni)";
         x.appendChild(s);
         s=document.createElement("div");
         s.className="small";
@@ -1465,7 +1479,7 @@ function generateReport(){
                 sesso="Femmina";
             }
         }
-        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+ ", morto a " + p.getAge() + " anni)";
+        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+" "+p.gender+ ", morto a " + p.getAge() + " anni)";
         x.appendChild(s);
         s = document.createElement("div");
         s.className="small";
