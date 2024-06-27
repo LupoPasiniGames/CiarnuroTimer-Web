@@ -595,12 +595,17 @@ function gameOptionsToPlayerManagement(){
         toSlide("playerManagement");
     }
 }
+
 function populatePlayersAndTeamsList(){
+    let i = 0;
     let list=I("players");
     list.innerHTML="";
     Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
+        if (i%2 === 0) {
+            d.id = "playerEven";
+        }
         let x=document.createElement("img");
         x.className="icon"+(p.firstPlayer?" important":"");
         x.src="pics/races/" + p.race +""+p.sex+ ".png";
@@ -652,6 +657,7 @@ function populatePlayersAndTeamsList(){
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
+        i = i + 1;
     });
     d=document.createElement("div");
     d.className="entry";
@@ -758,6 +764,7 @@ function populatePlayersAndTeamsList(){
     d.appendChild(x);
     list.appendChild(d);
 }
+
 let ingamePlayerManagement=false;
 let teamBeingEdited=null;
 function prepareTeamEditForm(team){
