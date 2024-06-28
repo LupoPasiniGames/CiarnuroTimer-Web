@@ -244,7 +244,7 @@ const RACES={
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
 let players=[], removedPlayers=[];
 let playerIdCtr=1;
-function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,explanationExSex){
+function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,explanationExSex,antiAging,frozenAge,yearsAntiAging){
     this.playerId=playerIdCtr++;
     this.playerName=playerName;
     this.characterName=characterName;
@@ -255,14 +255,31 @@ function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,exp
     this.sex=sex;
     this.exsex=exsex; //expressive sex
     this.explanationExSex=explanationExSex; //explanationExSex= explanation of expressive sex
+    this.antiAging=antiAging;
     this.alwaysPlayedSolo=true;
     this.timePlayed=0;
     this.deathAge=-1;
+    this.frozenAge=frozenAge;
+    this.yearsAntiAging=yearsAntiAging;
 }
 Player.prototype={
     constructor:Player,
     getAge:function(){
-        return this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
+        if(this.antiAging){
+            if(this.frozenAge===null){
+                this.frozenAge=this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
+            }
+            this.yearsAntiAging=(new Date(currentGameDate-this.dob).getFullYear()-1970)-this.frozenAge;
+            if(this.yearsAntiAging<0){
+                this.frozenAge=this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge; //If I go back in time (before get the item), I reset the age to normal but the player still has the anti-aging object
+            }
+            return this.frozenAge;
+        }else{
+            this.frozenAge=null;
+            this.yearsAntiAging=0;
+            return this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
+
+        }
     },
     isOldEnoughToPlay:function(){
         return this.getAge()>=RACES[this.race].ages[0];
@@ -354,7 +371,10 @@ function saveConfigToLocalStorage(){
                 firstPlayer:players[i].firstPlayer,
                 sex:players[i].sex,
                 exsex:players[i].exsex,
-                explanationExSex:players[i].explanationExSex
+                explanationExSex:players[i].explanationExSex,
+                antiAging:players[i].antiAging,
+                frozenAge: players[i].frozenAge,
+                yearsAntiAging: players[i].yearsAntiAging
             }
         }
         localStorage.ciarnuro=JSON.stringify(state);
@@ -380,7 +400,7 @@ function loadConfigFromLocalStorage(){
         players=[];
         for(let i=0;i<state.players.length;i++){
             let p=state.players[i];
-            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex,p.exsex,p.explanationExSex);
+            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex,p.exsex,p.explanationExSex,p.antiAging,p.frozenAge,p.yearsAntiAging);
             n.playerId=Number(p.playerId);
             players.push(n);
         }
@@ -818,6 +838,8 @@ function preparePlayerEditForm(player){
         I("sex").disabled=undefined;
         I("exsex").value="";
         I("explanationExSex").value="";
+        I("antiAging").value="n";
+        I("antiAging").value="n";
     }else{
         I("playerName").value=player.playerName;
         I("characterName").value=player.characterName;
@@ -829,6 +851,7 @@ function preparePlayerEditForm(player){
         updateSex(player.sex);
         I("sex").value=player.sex;
         I("explanationExSex").value=player.explanationExSex;
+        I("antiAging").value=player.antiAging;
         if(ingamePlayerManagement){
             I("dob").disabled="true";
             I("race").disabled="true";
@@ -839,12 +862,13 @@ function preparePlayerEditForm(player){
             I("sex").disabled=undefined;
         }
         I("firstPlayer").value=player.firstPlayer?"y":"n";
+        I("antiAging").value=player.antiAging?"y":"n";
     }
     I("race").addEventListener("change",updateSex);
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim();
+    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim(),ag=I("antiAging").value==="y";
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -887,7 +911,7 @@ function checkAndSavePlayer(){
         });
     }
     if (playerBeingEdited === null) {
-        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex,es,ees);
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex,es,ees,ag);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -901,6 +925,7 @@ function checkAndSavePlayer(){
         }
         playerBeingEdited.team=team==="solo"?0:Number(team);
         playerBeingEdited.firstPlayer=fp;
+        playerBeingEdited.antiAging=ag;
     }
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
@@ -1484,6 +1509,10 @@ function generateReport(){
         s.className="small";
         s.textContent=(p.team === 0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
         x.appendChild(s);
+        s=document.createElement("div");
+        s.className="small";
+        s.textContent=("Anni con oggetto anti-invecchiamento: "+p.yearsAntiAging);
+        x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
     });
@@ -1519,6 +1548,10 @@ function generateReport(){
         s = document.createElement("div");
         s.className="small";
         s.textContent=(p.team===0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
+        x.appendChild(s);
+        s=document.createElement("div");
+        s.className="small";
+        s.textContent=("Anni con oggetto anti-invecchiamento: "+p.yearsAntiAging);
         x.appendChild(s);
         d.appendChild(x);
         list.appendChild(d);
