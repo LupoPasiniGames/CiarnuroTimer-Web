@@ -1049,6 +1049,8 @@ function checkAndChangeDate(){
         }else{
             let prevAges=[];
             for(let i=0;i<players.length;i++){
+                if(players[i].antiAging){
+                    players[i].yearsAntiAging+=d-currentGameDate;
                 }
                 prevAges[i]=players[i].getAgeTier();
             }
