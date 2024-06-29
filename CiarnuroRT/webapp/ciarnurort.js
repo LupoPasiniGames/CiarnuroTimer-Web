@@ -265,20 +265,16 @@ function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,exp
 Player.prototype={
     constructor:Player,
     getAge:function(){
+        if(this.yearsAntiAging==null) this.yearsAntiAging=0;
         if(this.antiAging){
-            if(this.frozenAge===null){
-                this.frozenAge=this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
+            if(this.frozenAge==null){
+                this.frozenAge=this.deathAge===-1?((new Date(currentGameDate-this.dob).getFullYear()-1970)-this.yearsAntiAging):this.deathAge;
             }
             this.yearsAntiAging=(new Date(currentGameDate-this.dob).getFullYear()-1970)-this.frozenAge;
-            if(this.yearsAntiAging<0){
-                this.frozenAge=this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge; //If I go back in time (before get the item), I reset the age to normal but the player still has the anti-aging object
-            }
             return this.frozenAge;
         }else{
             this.frozenAge=null;
-            this.yearsAntiAging=0;
-            return this.deathAge===-1?(new Date(currentGameDate-this.dob).getFullYear()-1970):this.deathAge;
-
+            return this.deathAge===-1?((new Date(currentGameDate-this.dob).getFullYear()-1970)-this.yearsAntiAging):this.deathAge;
         }
     },
     isOldEnoughToPlay:function(){
@@ -347,6 +343,7 @@ function saveConfigToLocalStorage(){
     try{
         const state={
             currentGameDate:currentGameDate.toISODate(),
+            endGameDate:currentGameDate.toISODate(),
             roundDuration:roundDuration,
             maxRounds:maxRounds,
             teams:[],
@@ -387,6 +384,7 @@ function loadConfigFromLocalStorage(){
         if(localStorage.ciarnuroRTVer!=="1") return;
         let state=JSON.parse(localStorage.ciarnuro);
         currentGameDate=new Date(state.currentGameDate);
+        endGameDate=new Date(state.endGameDate);
         roundDuration=Number(state.roundDuration);
         maxRounds=Number(state.maxRounds);
         teams=[];
@@ -407,19 +405,55 @@ function loadConfigFromLocalStorage(){
         playerIdCtr=Number(state.playerIdCtr);
     }catch(t){console.error("Config not loaded: "+t);}
 }
-function newGame(){
+let campaign;
+function continueCampaign(){
     if(getCurrentSlide().id!=="welcome") return;
     initSoundSystem();
+    campaign=1;
     leaveConfirmRequired=true;
     I("report").innerHTML="";
     loadConfigFromLocalStorage();
     I("maxRounds").value=maxRounds;
     I("roundDuration").value=roundDuration;
     if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
+    changeTitle();
     checkMaxRounds();
     checkRoundDuration();
     checkStartDate(false);
     toSlide("gameOptions");
+}
+function newCampaign(){
+    if(getCurrentSlide().id!=="welcome") return;
+    initSoundSystem();
+    campaign=0;
+    leaveConfirmRequired=true;
+    I("report").innerHTML="";
+    loadConfigFromLocalStorage();
+    I("maxRounds").value=maxRounds;
+    I("roundDuration").value=roundDuration;
+    if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
+    changeTitle();
+    checkMaxRounds();
+    checkRoundDuration();
+    checkStartDate(false);
+    resetPlayersAndTeams();
+    toSlide("gameOptions");
+}
+function changeTitle(){
+    let di=document.getElementById("modalita");
+    if(campaign){
+        di.textContent="Continua campagna";
+    }else{
+        di.textContent="Nuova Campagna";
+    }
+}
+function resetPlayersAndTeams(){
+    players=[];
+    playerIdCtr=1;
+    teams=[];
+    teamIdCtr=1;
+    populatePlayersAndTeamsList();
+    saveConfigToLocalStorage();
 }
 function welcomeToPreviousGames(){
     if(getCurrentSlide().id!=="welcome") return;
@@ -588,7 +622,11 @@ function checkStartDate(showError){
     try{
         let d=new Date(I("startDate").value);
         if(!(d instanceof Date)||isNaN(d)) throw "";
-        return true;
+        if(d-endGameDate<0 && campaign==1){
+            showModal("La data inserita è nel passato",[{text:"Ok",action:function(){return true}}]);
+            return false;
+        }
+        return true
     }catch(e){
         if(showError){
             showModal("La data di inizio non è valida",[{text:"Ok",action:function(){I("startDate").focus();return true;}}]);
@@ -1011,6 +1049,7 @@ function checkAndChangeDate(){
         }else{
             let prevAges=[];
             for(let i=0;i<players.length;i++){
+                }
                 prevAges[i]=players[i].getAgeTier();
             }
             currentGameDate=d;

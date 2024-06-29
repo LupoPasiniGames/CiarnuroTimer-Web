@@ -22,7 +22,7 @@
                 <div class="content">
                     <img srcset="pics/lowspec/logo.webp 900w, pics/midspec/logo.webp 1800w, pics/ultraspec/logo.webp 2500w", alt="Logo" style="display:block;width:100%;height:auto;"/>
                     <div class="centered">
-                        <input type="button" id="startBtn" onclick="newGame()" value="Nuova partita" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/>
+                        <input type="button" id="startBtn" onclick="continueCampaign()" value="Continua campagna" /><input type="button" onclick="welcomeToPreviousGames()" value="Statistiche"/><input type="button" id="startBtn" onclick="newCampaign()" value="Nuova campagna" />
                     </div>
                     <div class="centered" style="margin:2em auto;font-size:0.75em"><a target="_blank" href="https://github.com/LupoPasiniGames/CiarnuroTimer-Web">Versione 1.2-it</a></div>
                 </div>
@@ -31,7 +31,7 @@
         <div class="slide invisible" id="gameOptions">
             <div class="upper">
                 <div class="content">
-                    <div class="title">Nuova partita</div>
+                    <div class="title" id="modalita">Nuova campagna</div>
                     <form action="javascript:gameOptionsToPlayerManagement()">
                         <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/><input type="button" class="small" value="Reset" onclick="resetRoundDuration()"/></div></div>
                         <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/><input type="button" class="small" value="Reset" onclick="resetMaxRounds()"/></div></div>
