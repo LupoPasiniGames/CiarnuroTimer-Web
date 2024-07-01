@@ -959,6 +959,13 @@ function playerManagementToGame(){
     let first=false;
     Array.from(players).forEach(player=> {
         if(player.firstPlayer==true) first=true;
+        if(player.firstPlayer==true&&player.team){
+            let element = document.getElementById("teamButton");
+            element.style.visibility = "visible";
+            element = document.getElementById("soloButton");
+            element.style.visibility = "hidden";
+            element.style.display = "none";
+        }
     });
     if(!first){
         showModal("Nessuno è specificato come primo giocatore",[{text:"Ok",action:function(){return true;}}]);
@@ -1329,6 +1336,14 @@ function resumeTimer() {
     I("pauseBtn").onclick=pauseTimer;
 }
 function nextPlayerWithTime(){
+    if(!(getNextScheduleEntry.team)){
+        let element = document.getElementById("soloButton");
+        element.style.visibility = "visible";
+        element.style.display = "block";
+        element = document.getElementById("teamButton");
+        element.style.visibility = "hidden";
+        element.style.display = "none";
+    }
     if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
     var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();
     if(c!=null&&e!=null){
