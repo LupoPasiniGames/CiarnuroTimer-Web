@@ -128,8 +128,12 @@
                             <div class="timerName">Turno</div>
                         </div>
                     </div>
-                    <div class="centered" style="margin-top:2em">
-                        <input type="button" value="Prossimo giocatore" onclick="nextPlayer()"/><input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
+                    <div class="centered" id="soloButton" style="margin-top:2em">
+                        <input type="button" id="nextPlayer" value="Prossimo giocatore" onclick="nextPlayer()"/><input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
+                        <input type="button" value="Pausa" id="pauseBtn" onclick="pauseTimer()"/>
+                    </div>
+                    <div class="centered" id="teamButton" style="margin-top:2em">
+                        <input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
                         <input type="button" value="Pausa" id="pauseBtn" onclick="pauseTimer()"/>
                     </div>
                     <div class="centered">

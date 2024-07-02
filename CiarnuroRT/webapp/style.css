@@ -416,3 +416,11 @@ div.banner{
     background-color: rgba(128, 128, 128, 0.4);
     z-index: -1; 
 }
+
+#soloButton{
+    visibility: visible;
+}
+
+#teamButton{
+    visibility: hidden;
+}
