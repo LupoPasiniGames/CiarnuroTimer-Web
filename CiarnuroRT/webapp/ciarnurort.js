@@ -671,7 +671,7 @@ function populatePlayersAndTeamsList(){
     x.onclick=function(){
         if(getCurrentSlide().id!=="playerManagement") return;
         preparePlayerEditForm(null);
-        toSlide("editPlayer");
+        toSlide("editPlayerRace");
     };
     x.onkeypress=function(e){
         if(e.keyCode===13) x.onclick(); //pressed enter
@@ -1547,4 +1547,3 @@ function generateReport(){
 function init(){
     toSlide("welcome");
 }
-
