@@ -1547,3 +1547,4 @@ function generateReport(){
 function init(){
     toSlide("welcome");
 }
+
