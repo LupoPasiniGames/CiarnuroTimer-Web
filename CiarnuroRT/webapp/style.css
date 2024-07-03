@@ -424,3 +424,87 @@ div.banner{
 #teamButton{
     visibility: hidden;
 }
+
+.raceButton{
+    height: 10rem;
+    width: 10rem;
+    border-radius: 0.2rem;
+}
+
+#humanButton{
+    background-image: url(pics/races/umaniF.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#kretoButton{
+    background-image: url(pics/races/krentorianiM.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#sauniElButton{
+    background-image: url(pics/races/sauniElettiF.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#quarkButton{
+    background-image: url(pics/races/quarkM.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#pravoGuiButton{
+    background-image: url(pics/races/pravosianiGuidespiritualiA.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#invoButton{
+    background-image: url(pics/races/ivosianiA.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#skityButton{
+    background-image: url(pics/races/skityF.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#makrianiButton{
+    background-image: url(pics/races/makrianiM.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#sauniArcButton{
+    background-image: url(pics/races/sauniArcaiciF.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#pravoWarButton{
+    background-image: url(pics/races/pravosianiGuerrieriM.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#veriButton{
+    background-image: url(pics/races/veriSyviarA.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#draudButton{
+    background-image: url(pics/races/draudzartF.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#nakkiriButton{
+    background-image: url(pics/races/nakkiriM.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
