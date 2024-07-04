@@ -1563,6 +1563,8 @@ function createRaceButtons(){
     c.appendChild(t);
     let i = 0;
     Object.entries(RACES).forEach(([key, p]) => {
+        let buttonContainer = document.createElement("div");
+        buttonContainer.className = "raceButtonContainer";
         let x = document.createElement("input");
         x.type="button";
         x.className="raceButton";
@@ -1581,7 +1583,19 @@ function createRaceButtons(){
         }
         x.style.backgroundRepeat = "no-repeat";
         x.style.backgroundSize = "cover";
-        c.appendChild(x);
+        buttonContainer.appendChild(x);
+        let text = document.createElement("span");
+        text.innerText = p.name; 
+        text.style.display = "block";
+        text.style.textAlign = "center";
+        text.style.fontFamily = "'Xolonium', sans-serif";
+        buttonContainer.appendChild(text);
+        c.appendChild(buttonContainer);
         i = i + 1;
+    });
+    let raceButtonContainers = document.querySelectorAll('.raceButtonContainer');
+    raceButtonContainers.forEach(container => {
+        container.style.display = "inline-block"; 
+        container.style.marginRight = "10px";
     });
 }
