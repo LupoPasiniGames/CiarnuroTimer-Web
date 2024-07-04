@@ -672,6 +672,7 @@ function populatePlayersAndTeamsList(){
         if(getCurrentSlide().id!=="playerManagement") return;
         preparePlayerEditForm(null);
         toSlide("editPlayerRace");
+        createRaceButtons();
     };
     x.onkeypress=function(e){
         if(e.keyCode===13) x.onclick(); //pressed enter
@@ -1546,4 +1547,41 @@ function generateReport(){
 }
 function init(){
     toSlide("welcome");
+}
+
+function createRaceButtons(){
+    let s = document.getElementById("editPlayerRace");
+    let u = document.createElement("div");
+    u.className = "upper";
+    s.appendChild(u);
+    let c = document.createElement("div");
+    c.className = "content";
+    u.appendChild(c);
+    let t = document.createElement("div");
+    t.className = "title";
+    t.innerText = "Scegli la razza";
+    c.appendChild(t);
+    let i = 0;
+    Object.entries(RACES).forEach(([key, p]) => {
+        let x = document.createElement("input");
+        x.type="button";
+        x.className="raceButton";
+        x.onclick = function(){
+            raceSelect.value = key;
+            toSlide("editPlayer");
+        };
+        if("a" in p.sexes){
+            x.style.backgroundImage = 'url(pics/races/'+key+'A.png)';
+        }else{
+            if(i%2 == 0){
+                x.style.backgroundImage = 'url(pics/races/'+key+'M.png)';
+            }else{
+                x.style.backgroundImage = 'url(pics/races/'+key+'F.png)';
+            }
+        }
+        x.style.backgroundRepeat = "no-repeat";
+        x.style.backgroundSize = "cover";
+        c.appendChild(x);
+        i = i + 1;
+    });
 }
