@@ -429,15 +429,33 @@ function newCampaign(){
     leaveConfirmRequired=true;
     I("report").innerHTML="";
     loadConfigFromLocalStorage();
-    I("maxRounds").value=maxRounds;
-    I("roundDuration").value=roundDuration;
-    if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
-    changeTitle();
-    checkMaxRounds();
-    checkRoundDuration();
-    checkStartDate(false);
-    resetPlayersAndTeams();
-    toSlide("gameOptions");
+    if(players.length>0){
+        showModal("Iniziare nuova campagna?",[
+            {text:"Si",action:function(){
+                I("maxRounds").value=maxRounds;
+                I("roundDuration").value=roundDuration;
+                if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
+                changeTitle();
+                checkMaxRounds();
+                checkRoundDuration();
+                checkStartDate(false);
+                resetPlayersAndTeams();
+                toSlide("gameOptions");
+                return true;
+            }},
+            {text:"No",action:function(){return true;}}
+        ]);
+    }else{
+        I("maxRounds").value=maxRounds;
+        I("roundDuration").value=roundDuration;
+        if(currentGameDate!=null) I("startDate").value=currentGameDate.toISODate();
+        changeTitle();
+        checkMaxRounds();
+        checkRoundDuration();
+        checkStartDate(false);
+        resetPlayersAndTeams();
+        toSlide("gameOptions");   
+    }
 }
 function changeTitle(){
     let di=document.getElementById("modalita");
