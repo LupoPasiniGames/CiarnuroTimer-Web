@@ -747,7 +747,8 @@ function populatePlayersAndTeamsList(){
     x.onclick=function(){
         if(getCurrentSlide().id!=="playerManagement") return;
         preparePlayerEditForm(null);
-        toSlide("editPlayer");
+        toSlide("editPlayerRace");
+        createRaceButtons();
     };
     x.onkeypress=function(e){
         if(e.keyCode===13) x.onclick(); //pressed enter
@@ -1638,4 +1639,55 @@ function generateReport(){
 }
 function init(){
     toSlide("welcome");
+}
+
+function createRaceButtons(){
+    let s = document.getElementById("editPlayerRace");
+    let u = document.createElement("div");
+    u.className = "upper";
+    s.appendChild(u);
+    let c = document.createElement("div");
+    c.className = "content";
+    u.appendChild(c);
+    let t = document.createElement("div");
+    t.className = "title";
+    t.innerText = "Scegli la razza";
+    c.appendChild(t);
+    let i = 0;
+    Object.entries(RACES).forEach(([key, p]) => {
+        let buttonContainer = document.createElement("div");
+        buttonContainer.className = "raceButtonContainer";
+        let x = document.createElement("input");
+        x.type="button";
+        x.className="raceButton";
+        x.onclick = function(){
+            raceSelect.value = key;
+            toSlide("editPlayer");
+        };
+        if("a" in p.sexes){
+            x.style.backgroundImage = 'url(pics/races/'+key+'A.png)';
+        }else{
+            if(i%2 == 0){
+                x.style.backgroundImage = 'url(pics/races/'+key+'M.png)';
+            }else{
+                x.style.backgroundImage = 'url(pics/races/'+key+'F.png)';
+            }
+        }
+        x.style.backgroundRepeat = "no-repeat";
+        x.style.backgroundSize = "cover";
+        buttonContainer.appendChild(x);
+        let text = document.createElement("span");
+        text.innerText = p.name; 
+        text.style.display = "block";
+        text.style.textAlign = "center";
+        text.style.fontFamily = "'Xolonium', sans-serif";
+        buttonContainer.appendChild(text);
+        c.appendChild(buttonContainer);
+        i = i + 1;
+    });
+    let raceButtonContainers = document.querySelectorAll('.raceButtonContainer');
+    raceButtonContainers.forEach(container => {
+        container.style.display = "inline-block"; 
+        container.style.marginRight = "10px";
+    });
 }

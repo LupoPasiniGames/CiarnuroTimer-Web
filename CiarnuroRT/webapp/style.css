@@ -424,3 +424,13 @@ div.banner{
 #teamButton{
     visibility: hidden;
 }
+
+.raceButton{
+    height: 10rem;
+    width: 10rem;
+    border-radius: 0.2rem;
+}
+
+#editPlayerRace{
+    background-image: url(pics/backgrounds/game2.jpg);
+}
