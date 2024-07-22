@@ -35,7 +35,7 @@
                     <form action="javascript:gameOptionsToPlayerManagement()">
                         <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/><input type="button" class="small" value="Reset" onclick="resetRoundDuration()"/></div></div>
                         <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/><input type="button" class="small" value="Reset" onclick="resetMaxRounds()"/></div></div>
-                        <div class="entry"><div class="entryName">Data di inizio</div><input type="date" id="startDate" class="entryValue" value="2062-01-01" min="0000-01-01" max="9999-01-01"/></div>
+                        <div class="entry"><div class="entryName">Data di inizio</div><input type="text" id="startDate" class="entryDate" pattern="\d{4}-\d{2}-\d{2}" value="2062-01-01" min="0000-01-01" max="9999-01-01" onchange="inputDateToCalendarStart()"/> <input type="date" id="calendarStartDate" class="entryDatePicker" value="2062-01-01" onchange="inputDateToTextStart()"></div>
                         <input type="submit" tabIndex="4" style="display:none" />
                     </form>
                 </div>
@@ -79,7 +79,7 @@
                     <form action="javascript:checkAndSavePlayer()">
                         <div class="entry"><div class="entryName">Nome giocatore</div><input type="text" class="entryValue" id="playerName" value=""/></div>
                         <div class="entry"><div class="entryName">Nome personaggio</div><input type="text" class="entryValue" id="characterName" value=""/></div>
-                        <div class="entry"><div class="entryName">Data di nascita</div><input type="date" class="entryValue" id="dob" value=""/></div>
+                        <div class="entry"><div class="entryName">Data di nascita</div><input type="text" id="dob" class="entryDate" pattern="\d{4}-\d{2}-\d{2}" value="" onchange="inputDateToCalendarDob()"/> <input type="date" id="calendarDob" class="entryDatePicker" value="" onchange="inputDateToTextDob()"></div>
                         <div class="entry"><div class="entryName">Specie</div><select class="entryValue" id="race"></select></div>
                         <script type="text/javascript">
                             var raceSelect=I("race");
@@ -201,7 +201,7 @@
                 <div class="content">
                     <div class="title">Scorri tempo</div>
                     <form action="javascript:checkAndChangeDate()">
-                        <div class="entry"><div class="entryName">Nuova data</div><input type="date" min="0000-01-01" max="9999-01-01" class="entryValue" id="newDate" value=""/></div>
+                        <div class="entry"><div class="entryName">Nuova data</div><input type="text" min="0000-01-01" max="9999-01-01" id="newDate" class="entryDate" pattern="\d{4}-\d{2}-\d{2}" value="" onchange="inputDateToCalendarNew()"/> <input type="date" id="calendarNew" class="entryDatePicker" value="" onchange="inputDateToTextNew()"></div>
                         <input type="submit" style="display:none" />
                     </form>
                 </div>
