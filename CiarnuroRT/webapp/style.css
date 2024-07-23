@@ -168,14 +168,8 @@ form > div.entry > *.entryValue{
     display:inline-block;
     right:0; width:70%;
 }
-form > div.entry > *.entryDate{
-    display:inline-block;
-    right:0; width:65%;
-}
-form > div.entry > *.entryDatePicker{
-    display:inline-block;
-    right:0; width:auto;
-    bottom:0;
+form > div.entry > *.entryValue > *.entryDatePickerInvisible{
+    display:none;
 }
 @media all and (max-width: 40rem){
     form > div.entry > div.entryName,form > div.entry > *.entryValue{
@@ -240,12 +234,6 @@ input[type="button"]:focus{
 input[type="button"]:active{
     background:#808080;
     border-bottom:0.2em solid #8080FF;
-}
-input::-webkit-datetime-edit{
-    display:none;
-}
-input::-moz-datetime-edit{
-    display:none;
 }
 input[type="date"]{
     position:relative;
