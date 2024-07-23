@@ -635,6 +635,36 @@ function resetRoundDuration(){
     if(getCurrentSlide().id!=="gameOptions") return;
     I("roundDuration").value=ROUNDDURATION_DEFAULT;
 }
+function inputDateToTextStart(){
+    let calendar=document.getElementById("calendarStartDate");
+    let startDate=document.getElementById("startDate");
+    startDate.value=calendar.value;
+}
+function inputDateToCalendarStart(){
+    let calendar=document.getElementById("calendarStartDate");
+    let startDate=document.getElementById("startDate");
+    calendar.value=startDate.value;
+}
+function inputDateToTextDob(){
+    let calendar=document.getElementById("calendarDob");
+    let dob=document.getElementById("dob");
+    dob.value=calendar.value;
+}
+function inputDateToCalendarDob(){
+    let calendar=document.getElementById("calendarDob");
+    let dob=document.getElementById("dob");
+    calendar.value=dob.value;
+}
+function inputDateToTextNew(){
+    let calendar=document.getElementById("calendarNew");
+    let newDate=document.getElementById("newDate");
+    newDate.value=calendar.value;
+}
+function inputDateToCalendarNew(){
+    let calendar=document.getElementById("calendarNew");
+    let newDate=document.getElementById("newDate");
+    calendar.value=newDate.value;
+}
 function checkStartDate(showError){
     if(getCurrentSlide().id!=="gameOptions") return false;
     try{

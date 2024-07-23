@@ -168,6 +168,10 @@ form > div.entry > *.entryValue{
     display:inline-block;
     right:0; width:70%;
 }
+form > div.entry > *.entryValue > *.entryDatePickerInvisible{
+    position:absolute;
+    visibility:hidden;
+}
 @media all and (max-width: 40rem){
     form > div.entry > div.entryName,form > div.entry > *.entryValue{
         display:block;
@@ -231,6 +235,10 @@ input[type="button"]:focus{
 input[type="button"]:active{
     background:#808080;
     border-bottom:0.2em solid #8080FF;
+}
+input[type="date"]{
+    position:relative;
+    padding-bottom:12px;
 }
 /*---LISTS---*/
 div.list > div.entry{
