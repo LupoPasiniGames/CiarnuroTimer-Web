@@ -169,7 +169,8 @@ form > div.entry > *.entryValue{
     right:0; width:70%;
 }
 form > div.entry > *.entryValue > *.entryDatePickerInvisible{
-    display:none;
+    position:absolute;
+    visibility:hidden;
 }
 @media all and (max-width: 40rem){
     form > div.entry > div.entryName,form > div.entry > *.entryValue{
