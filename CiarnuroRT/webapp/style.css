@@ -244,6 +244,9 @@ input[type="button"]:active{
 input::-webkit-datetime-edit{
     display:none;
 }
+input::-moz-datetime-edit{
+    display:none;
+}
 input[type="date"]{
     position:relative;
     padding-bottom:12px;
