@@ -670,6 +670,7 @@ function checkStartDate(showError){
     try{
         let d=new Date(I("startDate").value);
         if(!(d instanceof Date)||isNaN(d)) throw "";
+        if(typeof endGameDate === "undefined") return true
         if(d-endGameDate<0 && campaign==1){
             showModal("La data inserita è nel passato",[{text:"Ok",action:function(){return true}}]);
             return false;
