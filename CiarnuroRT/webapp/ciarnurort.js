@@ -137,13 +137,8 @@ function initSoundSystem(){
 }
 function soundFxToggle(){
     soundFxOn=!soundFxOn;
-    if(soundFxOn){
-        I("initialSoundToggle").checked=true;
-        I("endroundSoundToggle").checked=true;
-    } else {
-        I("initialSoundToggle").checked=false;
-        I("endroundSoundToggle").checked=false;
-    }
+    I("initialSoundToggle").checked=soundFxOn;
+    I("endroundSoundToggle").checked=soundFxOn;
 }
 /*---BASIC GAME STUFF---*/
 const MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
