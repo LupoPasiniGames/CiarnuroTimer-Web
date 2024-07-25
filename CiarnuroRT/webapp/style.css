@@ -165,18 +165,20 @@ form > div.entry > div.entryName{
     text-align:left;
 }
 form > div.entry > *.entryValue{
-    display:inline-block;
+    display:inline-flex;
     right:0; width:70%;
+    align-items:baseline;
 }
 form > div.entry > *.entryValue > *.entryDatePickerInvisible{
     position:absolute;
     visibility:hidden;
+    width:0;
 }
 @media all and (max-width: 40rem){
     form > div.entry > div.entryName,form > div.entry > *.entryValue{
-        display:block;
         width:100%;
         margin:0;
+        justify-content:center;
     }
 }
 form > div.actions{
@@ -194,10 +196,13 @@ input[type="text"],input[type="date"],select{
     border-radius:0 0 0.2em 0.2em;
     padding:0.5em 1em;
     transition: border 0.1s linear;
+    width:100%;
+    height:2.5rem;
 }
 input[type="text"]:active,input[type="text"]:focus,input[type="date"]:active,input[type="date"]:focus,select:focus{
     border-bottom:0.2em solid #8080FF;
     background:rgba(64,64,64,1);
+    z-index:99;
 }
 input[type="text"]:disabled,input[type="date"]:disabled,select:disabled{
     background:rgba(96,96,96,1);
@@ -227,6 +232,9 @@ input[type="button"]{
 input[type="button"].small{
     min-width:3em;
     padding:0.7em 1em;
+}
+input[type="button"].attached{
+    margin:0;
 }
 input[type="button"]:focus{
     background:#404040;

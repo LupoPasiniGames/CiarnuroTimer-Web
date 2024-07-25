@@ -714,7 +714,6 @@ function populatePlayersAndTeamsList(){
     Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
-        d.id = "playerEven";
         let x=document.createElement("img");
         x.className="icon"+(p.firstPlayer?" important":"");
         x.src="pics/races/" + p.race +""+p.sex+ ".png";
