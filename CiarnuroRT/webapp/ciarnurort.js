@@ -138,7 +138,6 @@ function initSoundSystem(){
 function soundFxToggle(){
     soundFxOn=!soundFxOn;
     I("initialSoundToggle").checked=soundFxOn;
-    I("endroundSoundToggle").checked=soundFxOn;
 }
 /*---BASIC GAME STUFF---*/
 const MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
@@ -676,6 +675,7 @@ function checkStartDate(showError){
     try{
         let d=new Date(I("startDate").value);
         if(!(d instanceof Date)||isNaN(d)) throw "";
+        if(typeof endGameDate === "undefined") return true
         if(d-endGameDate<0 && campaign==1){
             showModal("La data inserita è nel passato",[{text:"Ok",action:function(){return true}}]);
             return false;
@@ -714,7 +714,6 @@ function populatePlayersAndTeamsList(){
     Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
-        d.id = "playerEven";
         let x=document.createElement("img");
         x.className="icon"+(p.firstPlayer?" important":"");
         x.src="pics/races/" + p.race +""+p.sex+ ".png";

@@ -35,7 +35,7 @@
                     <form action="javascript:gameOptionsToPlayerManagement()">
                         <div class="entry"><div class="entryName">Durata turno (minuti)</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decRoundDuration()"/><input type="text" id="roundDuration" style="width:5em" value="LOAD" onblur="checkRoundDuration()"/><input type="button" class="small" value="+" onclick="incRoundDuration()"/><input type="button" class="small" value="Reset" onclick="resetRoundDuration()"/></div></div>
                         <div class="entry"><div class="entryName">Limite turni</div><div class="entryValue"><input type="button" class="small" value="-" onclick="decMaxRounds()"/><input type="text" id="maxRounds" style="width:5em" value="LOAD" onblur="checkMaxRounds()"/><input type="button" class="small" value="+" onclick="incMaxRounds()"/><input type="button" class="small" value="Reset" onclick="resetMaxRounds()"/></div></div>
-                        <div class="entry"><div class="entryName">Data di inizio</div><div class="entryValue"><input type="text" id="startDate" pattern="\d{4}-\d{2}-\d{2}" value="2062-01-01" min="0000-01-01" max="9999-01-01" onchange="inputDateToCalendarStart()"/><input type="button" class="small" value="📅" onclick="calendarStartDate.showPicker()"/><input type="date" id="calendarStartDate" class="entryDatePickerInvisible" value="2062-01-01" onchange="inputDateToTextStart()" min="0000-01-01" max="9999-01-01"></div></div>
+                        <div class="entry"><div class="entryName">Data di inizio</div><div class="entryValue"><input type="text" id="startDate" pattern="\d{4}-\d{2}-\d{2}" value="2062-01-01" min="0000-01-01" max="9999-01-01" onchange="inputDateToCalendarStart()"/><input type="button" class="small attached" value="📅" onclick="calendarStartDate.showPicker()"/><input type="date" id="calendarStartDate" class="entryDatePickerInvisible" value="2062-01-01" onchange="inputDateToTextStart()" min="0000-01-01" max="9999-01-01"></div></div>
                         <div class="entry"><div class="entryName">Effetti sonori</div><div class="entryValue">
                             <label class="soundToggle">
                                 <input type="checkbox" checked="checked" id="initialSoundToggle" onclick="soundFxToggle()">
@@ -85,7 +85,7 @@
                     <form action="javascript:checkAndSavePlayer()">
                         <div class="entry"><div class="entryName">Nome giocatore</div><input type="text" class="entryValue" id="playerName" value=""/></div>
                         <div class="entry"><div class="entryName">Nome personaggio</div><input type="text" class="entryValue" id="characterName" value=""/></div>
-                        <div class="entry"><div class="entryName">Data di nascita</div><div class="entryValue"><input type="text" id="dob" class="entryDate" pattern="\d{4}-\d{2}-\d{2}" value="" onchange="inputDateToCalendarDob()" style="width:90.75%"/><input type="button" class="small" value="📅" onclick="calendarDob.showPicker()"/><input type="date" id="calendarDob" class="entryDatePickerInvisible" value="" onchange="inputDateToTextDob()"></div></div>
+                        <div class="entry"><div class="entryName">Data di nascita</div><div class="entryValue"><input type="text" id="dob" class="entryDate" pattern="\d{4}-\d{2}-\d{2}" value="" onchange="inputDateToCalendarDob()"/><input type="button" class="small attached" value="📅" onclick="calendarDob.showPicker()"/><input type="date" id="calendarDob" class="entryDatePickerInvisible" value="" onchange="inputDateToTextDob()"></div></div>
                         <div class="entry"><div class="entryName">Specie</div><select class="entryValue" id="race"></select></div>
                         <script type="text/javascript">
                             var raceSelect=I("race");
@@ -211,15 +211,6 @@
                     </div>
                     <div class="centered">
                         <input type="button" value="Gestione squadre e giocatori" onclick="endRoundToPlayerManagement()"/>
-                    </div>
-                    <br><br><br>
-                    <div class="centered">
-                        <div class="entry"><div class="entryName">Effetti sonori</div><div class="entryName">
-                            <label class="soundToggle">
-                                <input type="checkbox" checked="checked" id="endroundSoundToggle" onclick="soundFxToggle()">
-                                <span class="slider round"></span>
-                            </label>
-                        </div></div>
                     </div>
                 </div>
             </div>
