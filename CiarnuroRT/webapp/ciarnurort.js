@@ -99,6 +99,7 @@ function showModal(message,buttons){
 }
 
 /*---SOUND FX SYSTEM---*/
+let soundFxOn=true;
 let playSoundFx=null;
 let soundSystemStarted=false;
 let SOUND_FORMAT=null;
@@ -133,6 +134,11 @@ function initSoundSystem(){
         console.error("Browser doesn't support Web Audio API. Sound system disabled");
     }
     soundSystemStarted=true;
+}
+function soundFxToggle(){
+    soundFxOn=!soundFxOn;
+    I("initialSoundToggle").checked=soundFxOn;
+    I("endroundSoundToggle").checked=soundFxOn;
 }
 /*---BASIC GAME STUFF---*/
 const MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
@@ -1273,7 +1279,7 @@ setInterval(function(){
         let c=getBeforeScheduleEntry();
 	if(e!=null){
             if(e.player!=lastTickPlayer){
-                if(currentRound>1||scheduleTPtr!=tsdiff) playSoundFx="nextPlayer"; //don't play sound effect for first player of the first round because we're already playing gameStarted
+                if((currentRound>1||scheduleTPtr!=tsdiff)&&soundFxOn) playSoundFx="nextPlayer"; //don't play sound effect for first player of the first round because we're already playing gameStarted
                 flash();
                 I("senilityCheckRequired").style.display=e.player.isSenile()?"":"none";
                 if(e.player.team!=0){
@@ -1328,7 +1334,7 @@ function initGame(){
     combatTime=0;
     totalCombatTime=[0,0,0,0];
     removedPlayers=[];
-    playSoundFx="gameStarted";
+    if(soundFxOn)playSoundFx="gameStarted";
     doPlayerSchedule();
     I("gtDate").textContent=currentGameDate.toISODate();
     gameState=STATE_GAME;
@@ -1418,7 +1424,7 @@ function stopRound(){
         gameState=STATE_ENDROUND;
         stopGame();
     }else{
-        playSoundFx="nextRound";
+        if(soundFxOn) playSoundFx="nextRound";
         I("endRoundNumber").textContent=currentRound;
         resumeTimer();
         gameState=STATE_ENDROUND;
@@ -1468,20 +1474,20 @@ function nextPlayerWithTime(){
 }
 function beginGhostTime(){
     if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
-    playSoundFx="ghostTime";
+    if(soundFxOn) playSoundFx="ghostTime";
     gameState=STATE_GHOSTTIME;
     toSlide("ghostTime");
 }
 function endGhostTime(){
     if(gameState!=STATE_GHOSTTIME&&gameState!=STATE_PAUSE) return;
     resumeTimer();
-    playSoundFx="ghostTimeEnd";
+    if(soundFxOn) playSoundFx="ghostTimeEnd";
     toSlide("gameTimer");
 }
 function beginCombat(){
     if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
     gameState=STATE_COMBAT_INPUT;
-    playSoundFx="combat";
+    if(soundFxOn) playSoundFx="combat";
     combatType=0;
     combatTime=0;
     I("combatTypeButtonsContainer").style.display="";
@@ -1497,7 +1503,7 @@ function setCombatType(type){
 }
 function endCombat(){
     if(gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
-    playSoundFx="combatEnd";
+    if(soundFxOn) playSoundFx="combatEnd";
     resumeTimer();
     toSlide("gameTimer");
 }
@@ -1538,7 +1544,7 @@ function stopGame(askConfirm){
         showModal("Vuoi terminare la partita?",[{text:"Si",action:function(){stopGame();return true}},{text:"No",action:function(){return true}}]);
     }else{
         gameState=STATE_NOTPLAYING;
-        playSoundFx="endGame";
+        if(soundFxOn) playSoundFx="endGame";
         generateReport();
         Array.from(players).forEach(player => {
             player.reset();
