@@ -138,7 +138,6 @@ function initSoundSystem(){
 function soundFxToggle(){
     soundFxOn=!soundFxOn;
     I("initialSoundToggle").checked=soundFxOn;
-    I("endroundSoundToggle").checked=soundFxOn;
 }
 /*---BASIC GAME STUFF---*/
 const MAXROUNDS_MIN=10, MAXROUNDS_MAX=96, MAXROUNDS_STEP=1, MAXROUNDS_DEFAULT=10;
