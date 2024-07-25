@@ -1061,7 +1061,7 @@ function checkPlayerAges(){
     showModal("Tutti i giocatori sono troppo giovani per giocare",[{text:"Ok",action:function(){return true;}}]);
     return false;
 }
-function playerManagementToGame(){
+function playerManagementToPlayerOrder(){
     if(getCurrentSlide().id!=="playerManagement") return;
     if(players.length===0){
         showModal("Non ci sono giocatori",ingamePlayerManagement?[
@@ -1073,22 +1073,7 @@ function playerManagementToGame(){
         ]:[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    let first=false;
-    Array.from(players).forEach(player=> {
-        if(player.firstPlayer==true) first=true;
-        if(player.firstPlayer==true&&player.team){
-            let element = document.getElementById("teamButton");
-            element.style.visibility = "visible";
-            element = document.getElementById("soloButton");
-            element.style.visibility = "hidden";
-            element.style.display = "none";
-        }
-    });
-    if(!first){
-        showModal("Nessuno è specificato come primo giocatore",[{text:"Ok",action:function(){return true;}}]);
-        return;  
-    }
-if(!checkPlayerAges()) return;
+    if(!checkPlayerAges()) return;
     Array.from(players).forEach(player => {
         if (player.team!== 0) player.alwaysPlayedSolo=false;
     });
@@ -1096,9 +1081,73 @@ if(!checkPlayerAges()) return;
         toSlide("endRound");
     }else{
         saveConfigToLocalStorage();
+        const draggablePlayerList=I("draggablePlayerList");
+        while (draggablePlayerList.firstChild) {
+            draggablePlayerList.removeChild(draggablePlayerList.lastChild);
+        }
+        Array.from(players).forEach(player => {
+            let listElement=document.createElement("li");
+            listElement.textContent=player.characterName;
+            listElement.draggable=true;
+            listElement.classList.add("draggableLI");
+            draggablePlayerList.appendChild(listElement);
+        });
+        //DRAGGABLE FEATURE
+        let draggedItem=null;
+        draggablePlayerList.addEventListener("dragstart", (e) => {
+            draggedItem=e.target;
+            setTimeout(() => {
+                e.target.style.display="none";
+            }, 0);
+        });
+        draggablePlayerList.addEventListener("dragend", (e) => {
+            setTimeout(() => {
+                e.target.style.display="";
+                draggedItem=null;
+            }, 0);
+        });
+        draggablePlayerList.addEventListener( "dragover", (e) => {
+            e.preventDefault();
+            const afterElement=getDragAfterElement(draggablePlayerList, e.clientY);
+            const currentElement=document.querySelector(".dragging");
+            if (afterElement==null) {
+                draggablePlayerList.appendChild(draggedItem);
+            } else {
+                draggablePlayerList.insertBefore(draggedItem, afterElement);
+            }
+        });
+        const getDragAfterElement=(container, y) => {
+            const draggableElements=[...container.querySelectorAll("li:not(.dragging)"),];
+            return draggableElements.reduce((closest, child) => {
+                const box=child.getBoundingClientRect();
+                const offset=y-box.top-box.height/2;
+                if(offset<0&&offset>closest.offset){
+                    return {offset: offset, element: child,};
+                }else{
+                    return closest;
+                }},{
+                    offset: Number.NEGATIVE_INFINITY,
+                }
+            ).element;
+        };
+        toSlide("playerOrder");
+    }
+}
+
+function playerOrderToGame(){
+    if(getCurrentSlide().id!=="playerOrder") return;
+    if(ingamePlayerManagement){
+        toSlide("endRound");
+    }else{
+        saveConfigToLocalStorage();
+        //I have to implement here the system which take the player order from the interface and put it in the schedule
         initGame();
         toSlide("gameTimer");
     }
+}
+function playerOrderToPlayerManagement(){
+    if(getCurrentSlide().id!=="playerOrder") return;
+    toSlide("playerManagement");
 }
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISODate();
@@ -1569,7 +1618,6 @@ function endGameToWelcome(){
     leaveConfirmRequired=false;
     toSlide("welcome");
 }
-
 function generateReport(){
     let report=I("report");
     let LINE=function(parent,name,value){

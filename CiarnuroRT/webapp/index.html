@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class="lower">
-                <input type="button" value="Indietro" id="playerManagementToGameOptions" onclick="playerManagementToGameOptions()" /><input type="button" value="Conferma" onclick="playerManagementToGame()" />
+                <input type="button" value="Indietro" id="playerManagementToGameOptions" onclick="playerManagementToGameOptions()" /><input type="button" value="Conferma" onclick="playerManagementToPlayerOrder()" />
             </div>
         </div>
         <div class="slide invisible" id="editTeam">
@@ -111,7 +111,23 @@
                 </div>
             </div>
             <div class="lower">
-                <input type="button" value="Annulla" onclick="cancelPlayerEdit()"/><input type="button" value="Conferma" onclick="checkAndSavePlayer()" />
+                <input type="button" value="Annulla" onclick="cancelPlayerEdit()"/><input type="button" value="Conferma" onclick="checkAndSavePlayer()()" />
+            </div>
+        </div>
+        <div class="slide invisible" id="playerOrder">
+            <div class="upper">
+                <div class="content">
+                    <div class="title">Inserire ordine giocatori</div>
+                    <div style="display:flex; justify-content:center;">
+                        <div class="centered" style="width:50%">
+                            <ul id="draggablePlayerList" class="draggableUL">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="lower">
+                <input type="button" value="Indietro" onclick="playerOrderToPlayerManagement()"/><input type="button" value="Conferma" onclick="playerOrderToGame()" />
             </div>
         </div>
         <div class="slide invisible" id="gameTimer">
