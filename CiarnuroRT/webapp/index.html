@@ -100,7 +100,6 @@
                             raceSelect.value=raceSelect.childNodes[0].value;
                         </script>
                         <div class="entry"><div class="entryName">Squadra</div><select class="entryValue" id="team" value="solo"><option value="solo">Solo</option></select></div>
-                        <div class="entry"><div class="entryName">Primo giocatore</div><select class="entryValue" id="firstPlayer" value="y"><option value="y">Si</option><option value="n">No</option></select></div>
                         <input type="submit" style="display:none" />
                         <div class="entry"><div class="entryName">Sesso biologico</div><select class="entryValue" id="sex"></select></div>
                         <div class="entry"><div class="entryName">Sesso espressivo</div><input type="text" class="entryValue" id="exsex" value=""/></div>
@@ -127,7 +126,7 @@
                 </div>
             </div>
             <div class="lower">
-                <input type="button" value="Indietro" onclick="playerOrderToPlayerManagement()"/><input type="button" value="Conferma" onclick="playerOrderToGame()" />
+                <input type="button" id="btnBackPlayerOrder" value="Indietro"/><input type="button" id="btnConfirmPlayerOrder" value="Conferma"/>
             </div>
         </div>
         <div class="slide invisible" id="gameTimer">
@@ -215,7 +214,7 @@
                 </div>
             </div>
             <div class="lower">
-                <input type="button" value="Termina partita" onclick="stopGame(true)"/><input type="button" value="Prossimo turno" onclick="nextRound()"/>
+                <input type="button" value="Termina partita" onclick="stopGame(true)"/><input type="button" value="Prossimo turno" onclick="endRoundToPlayerOrder()"/>
             </div>
         </div>
         <div class="slide invisible" id="dateChange">

@@ -249,14 +249,13 @@ const RACES={
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
 let players=[], removedPlayers=[];
 let playerIdCtr=1;
-function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,explanationExSex,antiAging,frozenAge,yearsAntiAging){
+function Player(playerName,characterName,race,dob,team,sex,exsex,explanationExSex,antiAging,frozenAge,yearsAntiAging){
     this.playerId=playerIdCtr++;
     this.playerName=playerName;
     this.characterName=characterName;
     this.race=race;
     this.dob=dob;
     this.team=team;
-    this.firstPlayer=firstPlayer;
     this.sex=sex;
     this.exsex=exsex; //expressive sex
     this.explanationExSex=explanationExSex; //explanationExSex= explanation of expressive sex
@@ -370,7 +369,6 @@ function saveConfigToLocalStorage(){
                 race:players[i].race,
                 dob:players[i].dob.toISODate(),
                 team:players[i].team,
-                firstPlayer:players[i].firstPlayer,
                 sex:players[i].sex,
                 exsex:players[i].exsex,
                 explanationExSex:players[i].explanationExSex,
@@ -403,7 +401,7 @@ function loadConfigFromLocalStorage(){
         players=[];
         for(let i=0;i<state.players.length;i++){
             let p=state.players[i];
-            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex,p.exsex,p.explanationExSex,p.antiAging,p.frozenAge,p.yearsAntiAging);
+            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.sex,p.exsex,p.explanationExSex,p.antiAging,p.frozenAge,p.yearsAntiAging);
             n.playerId=Number(p.playerId);
             players.push(n);
         }
@@ -715,7 +713,7 @@ function populatePlayersAndTeamsList(){
         let d=document.createElement("div");
         d.className="entry";
         let x=document.createElement("img");
-        x.className="icon"+(p.firstPlayer?" important":"");
+        x.className="icon";
         x.src="pics/races/" + p.race +""+p.sex+ ".png";
         d.appendChild(x);
         x=document.createElement("div");
@@ -924,10 +922,8 @@ function preparePlayerEditForm(player){
         I("dob").value="";
         I("team").value="solo";
         I("race").value=I("race").childNodes[0].value;
-        I("firstPlayer").value="n";
         I("dob").disabled=undefined;
         I("race").disabled=undefined;
-        I("firstPlayer").value="n";
         updateSex();
         I("sex").disabled=undefined;
         I("exsex").value="";
@@ -940,7 +936,6 @@ function preparePlayerEditForm(player){
         I("dob").value=player.dob.toISODate();
         I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
-        I("firstPlayer").value=player.firstPlayer;
         I("exsex").value=player.exsex;
         updateSex(player.sex);
         I("sex").value=player.sex;
@@ -955,14 +950,13 @@ function preparePlayerEditForm(player){
             I("race").disabled=undefined;
             I("sex").disabled=undefined;
         }
-        I("firstPlayer").value=player.firstPlayer?"y":"n";
         I("antiAging").value=player.antiAging?"y":"n";
     }
     I("race").addEventListener("change",updateSex);
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim(),ag=I("antiAging").value==="y";
+    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim(),ag=I("antiAging").value==="y";
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -999,13 +993,8 @@ function checkAndSavePlayer(){
         showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    if(fp){
-        Array.from(players).forEach(player => {
-            player.firstPlayer=false;
-        });
-    }
     if (playerBeingEdited === null) {
-        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex,es,ees,ag);
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team),sex,es,ees,ag);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -1018,7 +1007,6 @@ function checkAndSavePlayer(){
             playerBeingEdited.sex=sex;
         }
         playerBeingEdited.team=team==="solo"?0:Number(team);
-        playerBeingEdited.firstPlayer=fp;
         playerBeingEdited.antiAging=ag;
     }
     populatePlayersAndTeamsList();
@@ -1080,66 +1068,68 @@ function playerManagementToPlayerOrder(){
         toSlide("endRound");
     }else{
         saveConfigToLocalStorage();
-        const draggablePlayerList=I("draggablePlayerList");
-        while (draggablePlayerList.firstChild) {
-            draggablePlayerList.removeChild(draggablePlayerList.lastChild);
-        }
-        Array.from(players).forEach(player => {
-            let listElement=document.createElement("li");
-            listElement.textContent=player.characterName;
-            listElement.draggable=true;
-            listElement.classList.add("draggableLI");
-            draggablePlayerList.appendChild(listElement);
-        });
-        //DRAGGABLE FEATURE
-        let draggedItem=null;
-        draggablePlayerList.addEventListener("dragstart", (e) => {
-            draggedItem=e.target;
-            setTimeout(() => {
-                e.target.style.display="none";
-            }, 0);
-        });
-        draggablePlayerList.addEventListener("dragend", (e) => {
-            setTimeout(() => {
-                e.target.style.display="";
-                draggedItem=null;
-            }, 0);
-        });
-        draggablePlayerList.addEventListener( "dragover", (e) => {
-            e.preventDefault();
-            const afterElement=getDragAfterElement(draggablePlayerList, e.clientY);
-            const currentElement=document.querySelector(".dragging");
-            if (afterElement==null) {
-                draggablePlayerList.appendChild(draggedItem);
-            } else {
-                draggablePlayerList.insertBefore(draggedItem, afterElement);
-            }
-        });
-        const getDragAfterElement=(container, y) => {
-            const draggableElements=[...container.querySelectorAll("li:not(.dragging)"),];
-            return draggableElements.reduce((closest, child) => {
-                const box=child.getBoundingClientRect();
-                const offset=y-box.top-box.height/2;
-                if(offset<0&&offset>closest.offset){
-                    return {offset: offset, element: child,};
-                }else{
-                    return closest;
-                }},{
-                    offset: Number.NEGATIVE_INFINITY,
-                }
-            ).element;
-        };
+        draggableListSystem();
+        I("btnBackPlayerOrder").onclick=playerOrderToPlayerManagement;
+        I("btnConfirmPlayerOrder").onclick=playerOrderToGame;
         toSlide("playerOrder");
     }
 }
-
+function draggableListSystem(){
+    const draggablePlayerList=I("draggablePlayerList");
+    while (draggablePlayerList.firstChild) {
+        draggablePlayerList.removeChild(draggablePlayerList.lastChild);
+    }
+    Array.from(players).forEach(player => {
+        let listElement=document.createElement("li");
+        listElement.textContent=player.characterName;
+        listElement.draggable=true;
+        listElement.classList.add("draggableLI");
+        draggablePlayerList.appendChild(listElement);
+    });
+    let draggedItem=null;
+    draggablePlayerList.addEventListener("dragstart", (e) => {
+        draggedItem=e.target;
+        setTimeout(() => {
+            e.target.style.display="none";
+        }, 0);
+    });
+    draggablePlayerList.addEventListener("dragend", (e) => {
+        setTimeout(() => {
+            e.target.style.display="";
+            draggedItem=null;
+        }, 0);
+    });
+    draggablePlayerList.addEventListener( "dragover", (e) => {
+        e.preventDefault();
+        const afterElement=getDragAfterElement(draggablePlayerList, e.clientY);
+        const currentElement=document.querySelector(".dragging");
+        if (afterElement==null) {
+            draggablePlayerList.appendChild(draggedItem);
+        } else {
+            draggablePlayerList.insertBefore(draggedItem, afterElement);
+        }
+    });
+    const getDragAfterElement=(container, y) => {
+        const draggableElements=[...container.querySelectorAll("li:not(.dragging)"),];
+        return draggableElements.reduce((closest, child) => {
+            const box=child.getBoundingClientRect();
+            const offset=y-box.top-box.height/2;
+            if(offset<0&&offset>closest.offset){
+                return {offset: offset, element: child,};
+            }else{
+                return closest;
+            }},{
+                offset: Number.NEGATIVE_INFINITY,
+            }
+        ).element;
+    };
+}
 function playerOrderToGame(){
     if(getCurrentSlide().id!=="playerOrder") return;
     if(ingamePlayerManagement){
         toSlide("endRound");
     }else{
         saveConfigToLocalStorage();
-        //I have to implement here the system which take the player order from the interface and put it in the schedule
         initGame();
         toSlide("gameTimer");
     }
@@ -1147,6 +1137,33 @@ function playerOrderToGame(){
 function playerOrderToPlayerManagement(){
     if(getCurrentSlide().id!=="playerOrder") return;
     toSlide("playerManagement");
+}
+function endRoundToPlayerOrder(){
+    if(getCurrentSlide().id!=="endRound") return;
+    if(gameState!=STATE_ENDROUND) return;
+    if(players.length===0){
+        showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
+        return;
+    }
+    if(!checkPlayerAges()) return;
+    draggableListSystem()
+    I("btnBackPlayerOrder").onclick=playerOrderToEndRound;
+    I("btnConfirmPlayerOrder").onclick=playerOrderToGameNextRound;
+    toSlide("playerOrder");
+}
+function playerOrderToGameNextRound(){
+    currentRound++;
+    combatTime=0;
+    doPlayerSchedule();
+    gameState=STATE_GAME;
+    I("gtDate").textContent=currentGameDate.toISODate();
+    toSlide("gameTimer")
+    randomizeGameTimerBackground();
+    resizeBackground();
+}
+function playerOrderToEndRound(){
+    if(getCurrentSlide().id!=="playerOrder") return;
+    toSlide("endRound");
 }
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISODate();
@@ -1209,17 +1226,14 @@ let scheduleTPtr=0;
 function doPlayerSchedule(){
     scheduleTPtr=0;
     let plist=[];
-    //put first player at the beginning of plist
-    for(let i=0;i<players.length;i++){
-        if(players[i].firstPlayer){
-            plist.push(players[i]);
-            break;
-        }
+    let draggablePlayerList=I("draggablePlayerList");
+    for (let i=0;i<draggablePlayerList.childNodes.length;i++){
+        Array.from(players).forEach(player => {
+            if(player.characterName===draggablePlayerList.childNodes[i].textContent){
+                plist.push(player);
+            }
+        });
     }
-    //add the rest of the players by add order
-    Array.from(players).forEach(player => {
-        if (player!=plist[0]) plist.push(player);
-    });
     //group players by team, except solo players
     for(let i=0;i<plist.length;i++){
         if(plist[i].team!=0){ //if player is in a team, put the rest of the team after him, sorted by add order
@@ -1425,6 +1439,8 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/lowspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/lowspec/endGame.webp')";
+            }else if(identifier==='playerOrder'){
+                I(identifier).style.backgroundImage="url('pics/lowspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/lowspec/previousGames.webp')";
             }
@@ -1441,6 +1457,8 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/midspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/midspec/endGame.webp')";
+            }else if(identifier==='playerOrder'){
+                I(identifier).style.backgroundImage="url('pics/midspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/midspec/previousGames.webp')";
             }
@@ -1457,6 +1475,8 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/endGame.webp')";
+            }else if(identifier==='playerOrder'){
+                I(identifier).style.backgroundImage="url('pics/ultraspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/previousGames.webp')";
             }
@@ -1568,22 +1588,6 @@ function senilityCheckFailed(){
         removedPlayers.push(e.player);
     }
     nextPlayer();
-}
-function nextRound(){
-    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
-    if(players.length===0){
-        showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
-        return;
-    }
-    if(!checkPlayerAges()) return;
-    currentRound++;
-    combatTime=0;
-    doPlayerSchedule();
-    gameState=STATE_GAME;
-    I("gtDate").textContent=currentGameDate.toISODate();
-    toSlide("gameTimer");
-    randomizeGameTimerBackground();
-    resizeBackground();
 }
 function stopGame(askConfirm){
     if(gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
