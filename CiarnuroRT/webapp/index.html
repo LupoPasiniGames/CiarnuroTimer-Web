@@ -116,8 +116,8 @@
         <div class="slide invisible" id="gameTimer">
             <div class="upper">
                 <div class="content">
-                    <div class="title">Turno <span id="roundNumber"></span> - <span id="gtDate"></span></div>
-                    <div class="banner"><span id="playerAndCharacterName"></span><br/><span id="gtTeamName"></span></div>
+                    <div class="title">Turno di gioco <span id="roundNumber"></span> - <span id="gtDate"></span></div>
+                    <div class="banner" id="playerInfo"><img id="profilePic" class="icon"/><br><span id="playerAndCharacterName"></span><br/><span id="gtTeamName"></span></div>
                     <div class="mainTimerContainer">
                         <div class="timer" id="mainTimer">00:00</div>
                     </div>
@@ -135,18 +135,16 @@
                             <div class="timerName">Turno</div>
                         </div>
                     </div>
-                    <div class="centered" id="soloButton" style="margin-top:2em">
+                    <div class="centered" id="soloButton" style="margin-top:1em">
                         <input type="button" id="nextPlayer" value="Prossimo giocatore" onclick="nextPlayer()"/><input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
-                        <input type="button" value="Pausa" id="pauseBtn" onclick="pauseTimer()"/>
+                        <input type="button" value="Pausa" id="pauseBtn" onclick="pauseTimer()"/><br>
+                        <input type="button" value="Tempo fantasma" onclick="beginGhostTime()"/><input type="button" value="Combattimento" onclick="beginCombat()"/>
                     </div>
-                    <div class="centered" id="teamButton" style="margin-top:2em">
+                    <div class="centered" id="teamButton" style="margin-top:1em">
                         <input type="button" value="Passa turno" onclick="nextPlayerWithTime()" />
                         <input type="button" value="Pausa" id="pauseBtn" onclick="pauseTimer()"/>
                     </div>
-                    <div class="centered">
-                        <input type="button" value="Tempo fantasma" onclick="beginGhostTime()"/><input type="button" value="Combattimento" onclick="beginCombat()"/>
-                    </div>
-                    <div class="banner" id="senilityCheckRequired" class="centered" style="margin-top:2em">
+                    <div class="banner" id="senilityCheckRequired" class="centered" style="margin-top:1em">
                         Deve eseguire test di senilità<br/>
                         <input type="button" value="Passato" onclick="senilityCheckPassed()"/><input type="button" value="Fallito" onclick="senilityCheckFailed()"/>
                     </div>

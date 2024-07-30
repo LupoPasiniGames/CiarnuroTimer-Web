@@ -1388,6 +1388,8 @@ setInterval(function(){
                         e.teamTime=getPlayersByTeamId(e.player.team).length*timePerPlayerMs; //for new team
                     }
                 }else I("teamTContainer").style.display="none";
+                let profilePic=document.getElementById('profilePic');
+                profilePic.src="pics/races/" + e.player.race +""+e.player.sex+ ".png";
                 I("playerAndCharacterName").textContent=e.player.playerName+" - "+e.player.characterName;
                 I("gtTeamName").textContent=e.player.team===0?"Solo":getTeamById(e.player.team).teamName;
             }
