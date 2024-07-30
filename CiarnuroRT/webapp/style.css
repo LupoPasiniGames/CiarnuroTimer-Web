@@ -36,7 +36,6 @@ html,body{
 }
 *{
     box-sizing:border-box;
-    -webkit-user-drag: none;
 }
 ::-moz-focus-inner { 
   border: 0;
@@ -308,15 +307,37 @@ div.list > div.entry{
 	word-wrap:break-word;
 	position:relative;
 }
+ul.list > li > div.entry{
+    display:flex;
+	align-items:center;
+	min-height:6rem;
+	width:100%;
+	border-bottom:1px solid #CCCCCC;
+	color:#FFFFFF;
+	overflow:hidden;
+	word-wrap:break-word;
+	position:relative;
+}
 div.list > div.entry > div.rightButtons{
 	position:relative;
 	width:5em;
 	left:1.5em;
 	text-align:right;
 }
+ul.list > li > div.entry > div.rightButtons{
+    position:relative;
+	width:5em;
+	text-align:right;
+}
 div.list > div.entry > div.content{
 	position:relative;
 	width:calc(100% - 10em);
+	left:1.5em;
+	line-height:1.25em;
+}
+ul.list > li > div.entry > div.content{
+	position:relative;
+	width:calc(100% - 12.5em);
 	left:1.5em;
 	line-height:1.25em;
 }
@@ -327,8 +348,12 @@ div.list > div.entry > img.icon{
 	width:3em;
 	border:0.2rem solid #404040;
 }
-div.list > div.entry > img.icon.important{
-    border:0.21rem solid #FFFF80;
+ul.list > li > div.entry > img.icon{
+	position:relative;
+	left:0.5em;
+	height:3em;
+	width:3em;
+	border:0.2rem solid #404040;
 }
 div.list > div.entry > div.clickOverlay{
 	position:absolute;
@@ -337,7 +362,17 @@ div.list > div.entry > div.clickOverlay{
 	border:none;
 	transition:border 0.1s linear;
 }
+ul.list > li > div.entry > div.clickOverlay{
+	position:absolute;
+	top:0; left:0; width:100%; height:100%;
+	cursor:pointer;
+	border:none;
+	transition:border 0.1s linear;
+}
 div.list > div.entry > div.clickOverlay:focus{
+    border:0.20rem solid #8080FF;
+}
+ul.list > li > div.entry > div.clickOverlay:focus{
     border:0.20rem solid #8080FF;
 }
 div.list > div.entry > div.rightButtons > a.button{
@@ -350,10 +385,29 @@ div.list > div.entry > div.rightButtons > a.button{
 	border:0.20rem solid #404040;
 	transition:border 0.1s linear;
 }
+ul.list > li > div.entry > div.rightButtons > a.button{
+	display:inline-block;
+	width:2.3em;
+	height:2.3em;
+    margin-left:0.2em;
+	vertical-align:middle;
+	cursor:pointer;
+	border:0.20rem solid #404040;
+	transition:border 0.1s linear;
+}
 div.list > div.entry > div.rightButtons > a.button:focus{
     border:0.22rem solid #8080FF;
 }
+ul.list > li > div.entry > div.rightButtons > a.button:focus{
+    border:0.22rem solid #8080FF;
+}
 div.list > div.entry > div.rightButtons > a.button.edit{
+    background:url('pics/edit.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
+ul.list > li > div.entry > div.rightButtons > a.button.edit{
     background:url('pics/edit.png');
 	background-repeat:no-repeat;
 	background-size:100% 100%;
@@ -365,9 +419,30 @@ div.list > div.entry > div.rightButtons > a.button.remove{
 	background-size:100% 100%;
 	background-position:50% 50%;	
 }
+ul.list > li > div.entry > div.rightButtons > a.button.remove{
+    background:url('pics/remove.png');
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:50% 50%;	
+}
 div.list > div.entry > div.content > div.small{
     font-size:0.85em;
     color:#FFFFFFAA;
+}
+ul.list > li > div.entry > div.content > div.small{
+    font-size:0.85em;
+    color:#FFFFFFAA;
+}
+/*---DRAGGABLE LIST---*/
+.draggableUL{
+    list-style-type:none;
+    padding:0;
+}
+.draggableLI{
+    background-color:rgba(64,64,64,0.7);
+    padding:0.75rem;
+    margin:0.5rem;
+    cursor:grab;
 }
 /*---MODALS---*/
 div.modal{

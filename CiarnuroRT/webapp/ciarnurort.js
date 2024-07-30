@@ -249,14 +249,13 @@ const RACES={
 const AGE_NAMES=["Genesi/Infanzia","Tenera età","Giovinezza","Matura","Avanzata","Tarda età","Esegue test di senilità"];
 let players=[], removedPlayers=[];
 let playerIdCtr=1;
-function Player(playerName,characterName,race,dob,team,firstPlayer,sex,exsex,explanationExSex,antiAging,frozenAge,yearsAntiAging){
+function Player(playerName,characterName,race,dob,team,sex,exsex,explanationExSex,antiAging,frozenAge,yearsAntiAging){
     this.playerId=playerIdCtr++;
     this.playerName=playerName;
     this.characterName=characterName;
     this.race=race;
     this.dob=dob;
     this.team=team;
-    this.firstPlayer=firstPlayer;
     this.sex=sex;
     this.exsex=exsex; //expressive sex
     this.explanationExSex=explanationExSex; //explanationExSex= explanation of expressive sex
@@ -370,7 +369,6 @@ function saveConfigToLocalStorage(){
                 race:players[i].race,
                 dob:players[i].dob.toISODate(),
                 team:players[i].team,
-                firstPlayer:players[i].firstPlayer,
                 sex:players[i].sex,
                 exsex:players[i].exsex,
                 explanationExSex:players[i].explanationExSex,
@@ -403,7 +401,7 @@ function loadConfigFromLocalStorage(){
         players=[];
         for(let i=0;i<state.players.length;i++){
             let p=state.players[i];
-            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.firstPlayer,p.sex,p.exsex,p.explanationExSex,p.antiAging,p.frozenAge,p.yearsAntiAging);
+            let n=new Player(p.playerName,p.characterName,p.race,new Date(p.dob),Number(p.team),p.sex,p.exsex,p.explanationExSex,p.antiAging,p.frozenAge,p.yearsAntiAging);
             n.playerId=Number(p.playerId);
             players.push(n);
         }
@@ -709,14 +707,26 @@ function gameOptionsToPlayerManagement(){
 }
 
 function populatePlayersAndTeamsList(){
-    let list=I("players");
-    list.innerHTML="";
+    let playersAndAdding=I("playersAndAdding");
+    let list=document.createElement("ul");
+    list.id="draggablePlayerList";
+    list.classList.add("list");
+    list.style="list-style-type:none;padding:0;";
+    playersAndAdding.innerHTML="";
     Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
+        d.draggable=false;
+        let y=document.createElement("img");
+        y.className="icon";
+        y.src="pics/dragIcon.png";
+        y.style="border:none";
+        y.draggable=false;
+        d.appendChild(y);
         let x=document.createElement("img");
-        x.className="icon"+(p.firstPlayer?" important":"");
+        x.className="icon";
         x.src="pics/races/" + p.race +""+p.sex+ ".png";
+        x.draggable=false;
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
@@ -764,8 +774,14 @@ function populatePlayersAndTeamsList(){
         }(p);
         x.appendChild(s);
         d.appendChild(x);
-        list.appendChild(d);
+        let listItem=document.createElement("li");
+        listItem.draggable=true;
+        listItem.style="cursor:grab;";
+        listItem.appendChild(d);
+        list.appendChild(listItem);
     });
+    draggableListSystem(list);
+    playersAndAdding.appendChild(list);
     d=document.createElement("div");
     d.className="entry";
     x=document.createElement("img");
@@ -788,7 +804,7 @@ function populatePlayersAndTeamsList(){
         if(e.keyCode===13) x.onclick(); //pressed enter
     }
     d.appendChild(x);
-    list.appendChild(d);
+    playersAndAdding.appendChild(d);
     list=I("teams");
     list.innerHTML="";
     Array.from(teams).forEach(t => {
@@ -896,6 +912,7 @@ function checkAndSaveTeam(){
     }else{
         teamBeingEdited.teamName=n;
     }
+    saveConfigToLocalStorage()
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
 }
@@ -924,10 +941,8 @@ function preparePlayerEditForm(player){
         I("dob").value="";
         I("team").value="solo";
         I("race").value=I("race").childNodes[0].value;
-        I("firstPlayer").value="n";
         I("dob").disabled=undefined;
         I("race").disabled=undefined;
-        I("firstPlayer").value="n";
         updateSex();
         I("sex").disabled=undefined;
         I("exsex").value="";
@@ -940,7 +955,6 @@ function preparePlayerEditForm(player){
         I("dob").value=player.dob.toISODate();
         I("team").value=player.team===0?"solo":player.team;
         I("race").value=player.race;
-        I("firstPlayer").value=player.firstPlayer;
         I("exsex").value=player.exsex;
         updateSex(player.sex);
         I("sex").value=player.sex;
@@ -955,14 +969,13 @@ function preparePlayerEditForm(player){
             I("race").disabled=undefined;
             I("sex").disabled=undefined;
         }
-        I("firstPlayer").value=player.firstPlayer?"y":"n";
         I("antiAging").value=player.antiAging?"y":"n";
     }
     I("race").addEventListener("change",updateSex);
 }
 function checkAndSavePlayer(){
     if(getCurrentSlide().id!=="editPlayer") return;
-    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,fp=I("firstPlayer").value==="y",sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim(),ag=I("antiAging").value==="y";
+    let pn=I("playerName").value.trim(),cn=I("characterName").value.trim(),dob=I("dob").value,team=I("team").value,race=I("race").value,sex=I("sex").value,es=I("exsex").value.trim(),ees=I("explanationExSex").value.trim(),ag=I("antiAging").value==="y";
     if(pn.isBlank()){
         showModal("Il nome del giocatore non può essere vuoto",[{text:"Ok",action:function(){return true;}}]);
         return;
@@ -999,13 +1012,8 @@ function checkAndSavePlayer(){
         showModal("La data di nascita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    if(fp){
-        Array.from(players).forEach(player => {
-            player.firstPlayer=false;
-        });
-    }
     if (playerBeingEdited === null) {
-        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team), fp,sex,es,ees,ag);
+        let p = new Player(pn, cn, race, new Date(dob), team === "solo" ? 0 : Number(team),sex,es,ees,ag);
         players.push(p);
     }else{
         playerBeingEdited.playerName=pn;
@@ -1018,9 +1026,9 @@ function checkAndSavePlayer(){
             playerBeingEdited.sex=sex;
         }
         playerBeingEdited.team=team==="solo"?0:Number(team);
-        playerBeingEdited.firstPlayer=fp;
         playerBeingEdited.antiAging=ag;
     }
+    saveConfigToLocalStorage()
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
 
@@ -1066,38 +1074,113 @@ function playerManagementToGame(){
         showModal("Non ci sono giocatori",ingamePlayerManagement?[
             {text:"Modifica",action:function(){return true;}},
             {text:"Ignora",action:function(){
+                prepareEndRoundPlayerList();
                 toSlide("endRound");
                 return true;
             }}
         ]:[{text:"Ok",action:function(){return true;}}]);
         return;
     }
-    let first=false;
-    Array.from(players).forEach(player=> {
-        if(player.firstPlayer==true) first=true;
-        if(player.firstPlayer==true&&player.team){
-            let element = document.getElementById("teamButton");
-            element.style.visibility = "visible";
-            element = document.getElementById("soloButton");
-            element.style.visibility = "hidden";
-            element.style.display = "none";
-        }
-    });
-    if(!first){
-        showModal("Nessuno è specificato come primo giocatore",[{text:"Ok",action:function(){return true;}}]);
-        return;  
-    }
-if(!checkPlayerAges()) return;
+    if(!checkPlayerAges()) return;
     Array.from(players).forEach(player => {
         if (player.team!== 0) player.alwaysPlayedSolo=false;
     });
     if(ingamePlayerManagement){
+        prepareEndRoundPlayerList();
         toSlide("endRound");
     }else{
-        saveConfigToLocalStorage();
-        initGame();
-        toSlide("gameTimer");
+        if(ingamePlayerManagement){
+            prepareEndRoundPlayerList();
+            toSlide("endRound");
+        }else{
+            saveConfigToLocalStorage();
+            initGame();
+            toSlide("gameTimer");
+        }
     }
+}
+function prepareEndRoundPlayerList(){
+    endRoundPlayerList=I("endRoundPlayerList");
+    let list=document.createElement("ul");
+    list.id="draggablePlayerListEndRound";
+    list.classList.add("list");
+    list.style="list-style-type:none;padding:0;";
+    endRoundPlayerList.innerHTML="";
+    Array.from(players).forEach(p => {
+        let d=document.createElement("div");
+        d.className="entry";
+        d.draggable=false;
+        let y=document.createElement("img");
+        y.className="icon";
+        y.src="pics/dragIcon.png";
+        y.style="border:none";
+        y.draggable=false;
+        d.appendChild(y);
+        let x=document.createElement("img");
+        x.className="icon";
+        x.src="pics/races/" + p.race +""+p.sex+ ".png";
+        x.draggable=false;
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.textContent=p.playerName;
+        let s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        x.appendChild(s);
+        s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
+        x.appendChild(s);
+        d.appendChild(x);
+        let listItem=document.createElement("li");
+        listItem.draggable=true;
+        listItem.style="cursor:grab;";
+        listItem.appendChild(d);
+        list.appendChild(listItem);
+    });
+    draggableListSystem(list);
+    endRoundPlayerList.appendChild(list);
+}
+function draggableListSystem(conteiner){
+    const draggablePlayerList=conteiner;
+    let draggedItem=null;
+    draggablePlayerList.addEventListener("dragstart", (e) => {
+        draggedItem=e.target;
+        setTimeout(() => {
+            e.target.style.display="none";
+        }, 0);
+    });
+    draggablePlayerList.addEventListener("dragend", (e) => {
+        setTimeout(() => {
+            e.target.style.display="";
+            draggedItem=null;
+        }, 0);
+    });
+    draggablePlayerList.addEventListener( "dragover", (e) => {
+        e.preventDefault();
+        const afterElement=getDragAfterElement(draggablePlayerList, e.clientY);
+        const currentElement=document.querySelector(".dragging");
+        if (afterElement==null) {
+            draggablePlayerList.appendChild(draggedItem);
+        } else {
+            draggablePlayerList.insertBefore(draggedItem, afterElement);
+        }
+    });
+    const getDragAfterElement=(container, y) => {
+        const draggableElements=[...container.querySelectorAll("li:not(.dragging)"),];
+        return draggableElements.reduce((closest, child) => {
+            const box=child.getBoundingClientRect();
+            const offset=y-box.top-box.height/2;
+            if(offset<0&&offset>closest.offset){
+                return {offset: offset, element: child,};
+            }else{
+                return closest;
+            }},{
+                offset: Number.NEGATIVE_INFINITY,
+            }
+        ).element;
+    };
 }
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISODate();
@@ -1138,6 +1221,7 @@ function checkAndChangeDate(){
             if(showAgeChangesScreen){
                 toSlide("dateChange2");
             }else{
+                prepareEndRoundPlayerList();
                 toSlide("endRound");
             }
         }
@@ -1145,6 +1229,17 @@ function checkAndChangeDate(){
         showModal("La data inserita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true}}]);
         return;
     }
+}
+function nextRound(){
+    if(gameState!=STATE_ENDROUND) return;
+    currentRound++;
+    combatTime=0;
+    doPlayerSchedule();
+    gameState=STATE_GAME;
+    I("gtDate").textContent=currentGameDate.toISODate();
+    toSlide("gameTimer")
+    randomizeGameTimerBackground();
+    resizeBackground();
 }
 function cancelChangeDate(){
     if(getCurrentSlide().id!=="dateChange") return;
@@ -1157,20 +1252,25 @@ function dateChangeToEndRound(){
 let schedule=[];
 let timePerPlayerMs=0;
 let scheduleTPtr=0;
+function getText(obj){
+    return obj.textContent ? obj.textContent : obj.innerText;
+}
 function doPlayerSchedule(){
     scheduleTPtr=0;
     let plist=[];
-    //put first player at the beginning of plist
-    for(let i=0;i<players.length;i++){
-        if(players[i].firstPlayer){
-            plist.push(players[i]);
-            break;
-        }
+    let draggablePlayerList;
+    if(gameState==STATE_ENDROUND){
+        draggablePlayerList=I("draggablePlayerListEndRound");
+    }else{
+        draggablePlayerList=I("draggablePlayerList");
     }
-    //add the rest of the players by add order
-    Array.from(players).forEach(player => {
-        if (player!=plist[0]) plist.push(player);
-    });
+    for (let i=0;i<draggablePlayerList.childNodes.length;i++){
+        Array.from(players).forEach(player => {
+            if(player.playerName===draggablePlayerList.childNodes[i].childNodes[0].childNodes[2].childNodes[0].textContent){
+                plist.push(player);
+            }
+        });
+    }
     //group players by team, except solo players
     for(let i=0;i<plist.length;i++){
         if(plist[i].team!=0){ //if player is in a team, put the rest of the team after him, sorted by add order
@@ -1426,6 +1526,7 @@ function stopRound(){
         I("endRoundNumber").textContent=currentRound;
         resumeTimer();
         gameState=STATE_ENDROUND;
+        prepareEndRoundPlayerList();
         toSlide("endRound");
         
     }
@@ -1520,22 +1621,6 @@ function senilityCheckFailed(){
     }
     nextPlayer();
 }
-function nextRound(){
-    if(gameState!=STATE_GAME&&gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
-    if(players.length===0){
-        showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
-        return;
-    }
-    if(!checkPlayerAges()) return;
-    currentRound++;
-    combatTime=0;
-    doPlayerSchedule();
-    gameState=STATE_GAME;
-    I("gtDate").textContent=currentGameDate.toISODate();
-    toSlide("gameTimer");
-    randomizeGameTimerBackground();
-    resizeBackground();
-}
 function stopGame(askConfirm){
     if(gameState!=STATE_ENDROUND&&gameState!=STATE_PAUSE) return;
     if(askConfirm){
@@ -1568,7 +1653,6 @@ function endGameToWelcome(){
     leaveConfirmRequired=false;
     toSlide("welcome");
 }
-
 function generateReport(){
     let report=I("report");
     let LINE=function(parent,name,value){
