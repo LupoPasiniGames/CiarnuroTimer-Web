@@ -707,14 +707,26 @@ function gameOptionsToPlayerManagement(){
 }
 
 function populatePlayersAndTeamsList(){
-    let list=I("players");
-    list.innerHTML="";
+    let playersAndAdding=I("playersAndAdding");
+    let list=document.createElement("ul");
+    list.id="draggablePlayerList";
+    list.classList.add("list");
+    list.style="list-style-type:none;padding:0;";
+    playersAndAdding.innerHTML="";
     Array.from(players).forEach(p => {
         let d=document.createElement("div");
         d.className="entry";
+        d.draggable=false;
+        let y=document.createElement("img");
+        y.className="icon";
+        y.src="pics/dragIcon.png";
+        y.style="border:none";
+        y.draggable=false;
+        d.appendChild(y);
         let x=document.createElement("img");
         x.className="icon";
         x.src="pics/races/" + p.race +""+p.sex+ ".png";
+        x.draggable=false;
         d.appendChild(x);
         x=document.createElement("div");
         x.className="content";
@@ -762,8 +774,14 @@ function populatePlayersAndTeamsList(){
         }(p);
         x.appendChild(s);
         d.appendChild(x);
-        list.appendChild(d);
+        let listItem=document.createElement("li");
+        listItem.draggable=true;
+        listItem.style="cursor:grab;";
+        listItem.appendChild(d);
+        list.appendChild(listItem);
     });
+    draggableListSystem(list);
+    playersAndAdding.appendChild(list);
     d=document.createElement("div");
     d.className="entry";
     x=document.createElement("img");
@@ -786,7 +804,7 @@ function populatePlayersAndTeamsList(){
         if(e.keyCode===13) x.onclick(); //pressed enter
     }
     d.appendChild(x);
-    list.appendChild(d);
+    playersAndAdding.appendChild(d);
     list=I("teams");
     list.innerHTML="";
     Array.from(teams).forEach(t => {
@@ -894,6 +912,7 @@ function checkAndSaveTeam(){
     }else{
         teamBeingEdited.teamName=n;
     }
+    saveConfigToLocalStorage()
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
 }
@@ -1009,6 +1028,7 @@ function checkAndSavePlayer(){
         playerBeingEdited.team=team==="solo"?0:Number(team);
         playerBeingEdited.antiAging=ag;
     }
+    saveConfigToLocalStorage()
     populatePlayersAndTeamsList();
     toSlide("playerManagement");
 
@@ -1048,12 +1068,13 @@ function checkPlayerAges(){
     showModal("Tutti i giocatori sono troppo giovani per giocare",[{text:"Ok",action:function(){return true;}}]);
     return false;
 }
-function playerManagementToPlayerOrder(){
+function playerManagementToGame(){
     if(getCurrentSlide().id!=="playerManagement") return;
     if(players.length===0){
         showModal("Non ci sono giocatori",ingamePlayerManagement?[
             {text:"Modifica",action:function(){return true;}},
             {text:"Ignora",action:function(){
+                prepareEndRoundPlayerList();
                 toSlide("endRound");
                 return true;
             }}
@@ -1065,27 +1086,64 @@ function playerManagementToPlayerOrder(){
         if (player.team!== 0) player.alwaysPlayedSolo=false;
     });
     if(ingamePlayerManagement){
+        prepareEndRoundPlayerList();
         toSlide("endRound");
     }else{
-        saveConfigToLocalStorage();
-        draggableListSystem();
-        I("btnBackPlayerOrder").onclick=playerOrderToPlayerManagement;
-        I("btnConfirmPlayerOrder").onclick=playerOrderToGame;
-        toSlide("playerOrder");
+        if(ingamePlayerManagement){
+            prepareEndRoundPlayerList();
+            toSlide("endRound");
+        }else{
+            saveConfigToLocalStorage();
+            initGame();
+            toSlide("gameTimer");
+        }
     }
 }
-function draggableListSystem(){
-    const draggablePlayerList=I("draggablePlayerList");
-    while (draggablePlayerList.firstChild) {
-        draggablePlayerList.removeChild(draggablePlayerList.lastChild);
-    }
-    Array.from(players).forEach(player => {
-        let listElement=document.createElement("li");
-        listElement.textContent=player.characterName;
-        listElement.draggable=true;
-        listElement.classList.add("draggableLI");
-        draggablePlayerList.appendChild(listElement);
+function prepareEndRoundPlayerList(){
+    endRoundPlayerList=I("endRoundPlayerList");
+    let list=document.createElement("ul");
+    list.id="draggablePlayerListEndRound";
+    list.classList.add("list");
+    list.style="list-style-type:none;padding:0;";
+    endRoundPlayerList.innerHTML="";
+    Array.from(players).forEach(p => {
+        let d=document.createElement("div");
+        d.className="entry";
+        d.draggable=false;
+        let y=document.createElement("img");
+        y.className="icon";
+        y.src="pics/dragIcon.png";
+        y.style="border:none";
+        y.draggable=false;
+        d.appendChild(y);
+        let x=document.createElement("img");
+        x.className="icon";
+        x.src="pics/races/" + p.race +""+p.sex+ ".png";
+        x.draggable=false;
+        d.appendChild(x);
+        x=document.createElement("div");
+        x.className="content";
+        x.textContent=p.playerName;
+        let s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+        x.appendChild(s);
+        s=document.createElement("div");
+        s.className="small";
+        s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
+        x.appendChild(s);
+        d.appendChild(x);
+        let listItem=document.createElement("li");
+        listItem.draggable=true;
+        listItem.style="cursor:grab;";
+        listItem.appendChild(d);
+        list.appendChild(listItem);
     });
+    draggableListSystem(list);
+    endRoundPlayerList.appendChild(list);
+}
+function draggableListSystem(conteiner){
+    const draggablePlayerList=conteiner;
     let draggedItem=null;
     draggablePlayerList.addEventListener("dragstart", (e) => {
         draggedItem=e.target;
@@ -1123,47 +1181,6 @@ function draggableListSystem(){
             }
         ).element;
     };
-}
-function playerOrderToGame(){
-    if(getCurrentSlide().id!=="playerOrder") return;
-    if(ingamePlayerManagement){
-        toSlide("endRound");
-    }else{
-        saveConfigToLocalStorage();
-        initGame();
-        toSlide("gameTimer");
-    }
-}
-function playerOrderToPlayerManagement(){
-    if(getCurrentSlide().id!=="playerOrder") return;
-    toSlide("playerManagement");
-}
-function endRoundToPlayerOrder(){
-    if(getCurrentSlide().id!=="endRound") return;
-    if(gameState!=STATE_ENDROUND) return;
-    if(players.length===0){
-        showModal("Non resta nessun giocatore",[{text:"Ok",action:function(){return true;}}]);
-        return;
-    }
-    if(!checkPlayerAges()) return;
-    draggableListSystem()
-    I("btnBackPlayerOrder").onclick=playerOrderToEndRound;
-    I("btnConfirmPlayerOrder").onclick=playerOrderToGameNextRound;
-    toSlide("playerOrder");
-}
-function playerOrderToGameNextRound(){
-    currentRound++;
-    combatTime=0;
-    doPlayerSchedule();
-    gameState=STATE_GAME;
-    I("gtDate").textContent=currentGameDate.toISODate();
-    toSlide("gameTimer")
-    randomizeGameTimerBackground();
-    resizeBackground();
-}
-function playerOrderToEndRound(){
-    if(getCurrentSlide().id!=="playerOrder") return;
-    toSlide("endRound");
 }
 function prepareDateChangeForm(){
     I("newDate").value=currentGameDate.toISODate();
@@ -1204,6 +1221,7 @@ function checkAndChangeDate(){
             if(showAgeChangesScreen){
                 toSlide("dateChange2");
             }else{
+                prepareEndRoundPlayerList();
                 toSlide("endRound");
             }
         }
@@ -1211,6 +1229,17 @@ function checkAndChangeDate(){
         showModal("La data inserita non è valida, usa il formato YYYY-MM-DD",[{text:"Ok",action:function(){return true}}]);
         return;
     }
+}
+function nextRound(){
+    if(gameState!=STATE_ENDROUND) return;
+    currentRound++;
+    combatTime=0;
+    doPlayerSchedule();
+    gameState=STATE_GAME;
+    I("gtDate").textContent=currentGameDate.toISODate();
+    toSlide("gameTimer")
+    randomizeGameTimerBackground();
+    resizeBackground();
 }
 function cancelChangeDate(){
     if(getCurrentSlide().id!=="dateChange") return;
@@ -1223,13 +1252,21 @@ function dateChangeToEndRound(){
 let schedule=[];
 let timePerPlayerMs=0;
 let scheduleTPtr=0;
+function getText(obj){
+    return obj.textContent ? obj.textContent : obj.innerText;
+}
 function doPlayerSchedule(){
     scheduleTPtr=0;
     let plist=[];
-    let draggablePlayerList=I("draggablePlayerList");
+    let draggablePlayerList;
+    if(gameState==STATE_ENDROUND){
+        draggablePlayerList=I("draggablePlayerListEndRound");
+    }else{
+        draggablePlayerList=I("draggablePlayerList");
+    }
     for (let i=0;i<draggablePlayerList.childNodes.length;i++){
         Array.from(players).forEach(player => {
-            if(player.characterName===draggablePlayerList.childNodes[i].textContent){
+            if(player.playerName===draggablePlayerList.childNodes[i].childNodes[0].childNodes[2].childNodes[0].textContent){
                 plist.push(player);
             }
         });
@@ -1439,8 +1476,6 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/lowspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/lowspec/endGame.webp')";
-            }else if(identifier==='playerOrder'){
-                I(identifier).style.backgroundImage="url('pics/lowspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/lowspec/previousGames.webp')";
             }
@@ -1457,8 +1492,6 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/midspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/midspec/endGame.webp')";
-            }else if(identifier==='playerOrder'){
-                I(identifier).style.backgroundImage="url('pics/midspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/midspec/previousGames.webp')";
             }
@@ -1475,8 +1508,6 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/endRound.webp')";
             }else if(identifier==='endGame'){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/endGame.webp')";
-            }else if(identifier==='playerOrder'){
-                I(identifier).style.backgroundImage="url('pics/ultraspec/gameOptions.webp')";
             }else if(['previousGames','gameReport'].includes(identifier)){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/previousGames.webp')";
             }
@@ -1495,6 +1526,7 @@ function stopRound(){
         I("endRoundNumber").textContent=currentRound;
         resumeTimer();
         gameState=STATE_ENDROUND;
+        prepareEndRoundPlayerList();
         toSlide("endRound");
         
     }
