@@ -247,6 +247,25 @@ input[type="date"]{
     position:relative;
     padding-bottom:12px;
 }
+input[type="checkbox"] {
+    width: 1.5em;
+    height: 1.5em;
+    margin: 0.5em;
+    background: rgba(64, 64, 64, 0.7);
+    border: none;
+    border-radius: 0.1rem;
+    box-shadow: 0 0.1em 0.4em 0.1em rgba(64, 64, 64, 0.2);
+    backdrop-filter: blur(0.35em);
+    cursor: pointer;
+    transition: background 0.1s linear, border 0.1s linear;
+}
+input[type="checkbox"]:checked {
+    background: #8080FF;
+}
+input[type="checkbox"]:focus {
+    background:#404040;
+    border-bottom:0.2em solid #8080FF;
+}
 .soundToggle {
   position: relative;
   display: inline-block;
