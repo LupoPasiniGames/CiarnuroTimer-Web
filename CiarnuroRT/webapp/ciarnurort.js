@@ -1388,8 +1388,11 @@ setInterval(function(){
                         e.teamTime=getPlayersByTeamId(e.player.team).length*timePerPlayerMs; //for new team
                     }
                 }else I("teamTContainer").style.display="none";
-                I("playerAndCharacterName").textContent=e.player.playerName+" - "+e.player.characterName;
-                I("gtTeamName").textContent=e.player.team===0?"Solo":getTeamById(e.player.team).teamName;
+                let profilePic=document.getElementById('profilePic');
+                profilePic.src="pics/races/" + e.player.race +""+e.player.sex+ ".png";
+                I("playerAndCharacterName").innerHTML=e.player.playerName+"<span style='font-style:italic;display:block;'>"+e.player.characterName+"</span >";
+                I("gtTeamName").textContent=e.player.team===0?"sta agendo da solo":"è un membro della squadra "+getTeamById(e.player.team).teamName;
+                I("teamTimerName").textContent="Squadra "+getTeamById(e.player.team).teamName;
             }
             I("playerTDuration").textContent=msToMMSS(e.end-scheduleTPtr);
             if(e.player.team!=0){
@@ -1560,9 +1563,6 @@ function nextPlayerWithTime(){
         let element = document.getElementById("soloButton");
         element.style.visibility = "visible";
         element.style.display = "block";
-        element = document.getElementById("teamButton");
-        element.style.visibility = "hidden";
-        element.style.display = "none";
     }
     if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
     var c=getCurrentScheduleEntry(),e=getNextScheduleEntry();

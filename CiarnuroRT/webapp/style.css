@@ -294,7 +294,14 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
-
+div.banner > img.icon{
+	position:relative;
+	left:0.5em;
+    border-radius:50%;
+	height:4em;
+	width:4em;
+	border:0.2rem solid #404040;
+}
 /*---LISTS---*/
 div.list > div.entry{
     display:flex;
@@ -540,6 +547,19 @@ div.banner{
     font-size:1.4em;
     margin-bottom:1em;
     font-weight:bold;
+}
+div.pInfo{
+    text-align:center;
+    font-size:1.4em;
+    margin-bottom: 0.2em;
+}
+div.pInfo > img.icon{
+    position:relative;
+    left:0.5em;
+    border-radius:50%;
+    height:4em;
+    width:4em;
+    border:0.2rem solid #404040;
 }
 /*---"RESPONSIVE" WELCOME SCREEN---*/
 @media all and (max-width: 50rem){
