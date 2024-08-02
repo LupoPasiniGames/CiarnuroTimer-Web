@@ -1390,7 +1390,7 @@ setInterval(function(){
                 }else I("teamTContainer").style.display="none";
                 let profilePic=document.getElementById('profilePic');
                 profilePic.src="pics/races/" + e.player.race +""+e.player.sex+ ".png";
-                I("playerAndCharacterName").innerHTML=e.player.playerName+"<br>"+"<span style='font-style:italic;'>"+e.player.characterName+"</span >";
+                I("playerAndCharacterName").innerHTML=e.player.playerName+"<span style='font-style:italic;display:block;'>"+e.player.characterName+"</span >";
                 I("gtTeamName").textContent=e.player.team===0?"sta agendo da solo":"è un membro della squadra "+getTeamById(e.player.team).teamName;
                 I("teamTimerName").textContent="Squadra "+getTeamById(e.player.team).teamName;
             }
