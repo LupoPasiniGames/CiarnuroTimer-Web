@@ -1544,7 +1544,6 @@ function nextPlayer(){
         return;
     }
     if (gameState == STATE_PAUSE) resumeTimer();
-    if(c.player.team!=0&&getTeamById(c.player.team).teamName===getTeamById(e.player.team).teamName) return;
     scheduleTPtr=e.start;
 }
 function pauseTimer() {
@@ -1595,6 +1594,7 @@ function beginCombat(){
     combatTime=0;
     I("combatTypeButtonsContainer").style.display="";
     I("combatTypeTitle").textContent="";
+    I("combatTimeTimer").textContent="00:00";
     toSlide("combat");
 }
 function setCombatType(type){
@@ -1686,6 +1686,18 @@ function stopGame(askConfirm){
         generateReport();
         Array.from(players).forEach(player => {
             player.reset();
+            if(removedPlayers.includes(player)){
+                for(let i=0;i<players.length;i++){
+                    if(players[i]===player){
+                        players.splice(i,1);
+                    }
+                }
+                for(let i=0;i<removedPlayers.length;i++){
+                    if(removedPlayers[i]===player){
+                        removedPlayers.splice(i,1);
+                    }
+                }
+            }
         });
         saveConfigToLocalStorage();
         toSlide("endGame");
