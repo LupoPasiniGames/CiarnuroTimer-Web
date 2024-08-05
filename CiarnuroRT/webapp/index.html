@@ -181,6 +181,18 @@
                 <input type="button" value="Fine combattimento" onclick="endCombat()"/>
             </div>
         </div>
+        <div class="slide invisible" id="combatEnding">
+            <div class="upper">
+                <div class="content">
+                    <div class="title">Fine combattimento <span id="endCombatTypeTitle"></span></div>
+                    Selezionare i giocatori morti durante il combattimento:
+                    <div id="endCombatPlayerSelection" class="list"></div>
+                </div>
+            </div>
+            <div class="lower">
+                <input type="button" value="conferma" onclick="deadPlayers()"/>
+            </div>
+        </div>
         <div class="slide invisible" id="endRound">
             <div class="upper">
                 <div class="content">

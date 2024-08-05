@@ -714,71 +714,73 @@ function populatePlayersAndTeamsList(){
     list.style="list-style-type:none;padding:0;";
     playersAndAdding.innerHTML="";
     Array.from(players).forEach(p => {
-        let d=document.createElement("div");
-        d.className="entry";
-        d.draggable=false;
-        let y=document.createElement("img");
-        y.className="icon";
-        y.src="pics/dragIcon.png";
-        y.style="border:none";
-        y.draggable=false;
-        d.appendChild(y);
-        let x=document.createElement("img");
-        x.className="icon";
-        x.src="pics/races/" + p.race +""+p.sex+ ".png";
-        x.draggable=false;
-        d.appendChild(x);
-        x=document.createElement("div");
-        x.className="content";
-        x.textContent=p.playerName;
-        let s=document.createElement("div");
-        s.className="small";
-        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
-        x.appendChild(s);
-        s=document.createElement("div");
-        s.className="small";
-        s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
-        x.appendChild(s);
-        d.appendChild(x);
-        x=document.createElement("div");
-        x.className="rightButtons";
-        s=document.createElement("a");
-        s.className="button edit";
-        s.tabIndex=0;
-        s.onclick=function(p){
-            return function(){
-                if(getCurrentSlide().id!=="playerManagement") return;
-                preparePlayerEditForm(p);
-                toSlide("editPlayer");     
-            }
-        }(p);
-        x.appendChild(s);
-        s=document.createElement("a");
-        s.className="button remove";
-        s.tabIndex=0;
-        s.onclick=function(p){
-            return function(){
-                if(getCurrentSlide().id!=="playerManagement") return;
-                showModal("Sei sicuro di voler rimuovere "+p.playerName+"?",[
-                {text:"Si",action:function(){
-                    players.splice(players.indexOf(p),1);
-                    p.die();
-                    if(ingamePlayerManagement) removedPlayers.push(p);
-                    populatePlayersAndTeamsList();
-                    return true;
-                }},
-                {text:"No",action:function(){
-                    return true;
-                }}]);
-            }
-        }(p);
-        x.appendChild(s);
-        d.appendChild(x);
-        let listItem=document.createElement("li");
-        listItem.draggable=true;
-        listItem.style="cursor:grab;";
-        listItem.appendChild(d);
-        list.appendChild(listItem);
+        if(!removedPlayers.includes(p)){
+            let d=document.createElement("div");
+            d.className="entry";
+            d.draggable=false;
+            let y=document.createElement("img");
+            y.className="icon";
+            y.src="pics/dragIcon.png";
+            y.style="border:none";
+            y.draggable=false;
+            d.appendChild(y);
+            let x=document.createElement("img");
+            x.className="icon";
+            x.src="pics/races/" + p.race +""+p.sex+ ".png";
+            x.draggable=false;
+            d.appendChild(x);
+            x=document.createElement("div");
+            x.className="content";
+            x.textContent=p.playerName;
+            let s=document.createElement("div");
+            s.className="small";
+            s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+            x.appendChild(s);
+            s=document.createElement("div");
+            s.className="small";
+            s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
+            x.appendChild(s);
+            d.appendChild(x);
+            x=document.createElement("div");
+            x.className="rightButtons";
+            s=document.createElement("a");
+            s.className="button edit";
+            s.tabIndex=0;
+            s.onclick=function(p){
+                return function(){
+                    if(getCurrentSlide().id!=="playerManagement") return;
+                    preparePlayerEditForm(p);
+                    toSlide("editPlayer");     
+                }
+            }(p);
+            x.appendChild(s);
+            s=document.createElement("a");
+            s.className="button remove";
+            s.tabIndex=0;
+            s.onclick=function(p){
+                return function(){
+                    if(getCurrentSlide().id!=="playerManagement") return;
+                    showModal("Sei sicuro di voler rimuovere "+p.playerName+"?",[
+                    {text:"Si",action:function(){
+                        players.splice(players.indexOf(p),1);
+                        p.die();
+                        if(ingamePlayerManagement) removedPlayers.push(p);
+                        populatePlayersAndTeamsList();
+                        return true;
+                    }},
+                    {text:"No",action:function(){
+                        return true;
+                    }}]);
+                }
+            }(p);
+            x.appendChild(s);
+            d.appendChild(x);
+            let listItem=document.createElement("li");
+            listItem.draggable=true;
+            listItem.style="cursor:grab;";
+            listItem.appendChild(d);
+            list.appendChild(listItem);
+        }
     });
     draggableListSystem(list);
     playersAndAdding.appendChild(list);
@@ -1107,37 +1109,39 @@ function prepareEndRoundPlayerList(){
     list.style="list-style-type:none;padding:0;";
     endRoundPlayerList.innerHTML="";
     Array.from(players).forEach(p => {
-        let d=document.createElement("div");
-        d.className="entry";
-        d.draggable=false;
-        let y=document.createElement("img");
-        y.className="icon";
-        y.src="pics/dragIcon.png";
-        y.style="border:none";
-        y.draggable=false;
-        d.appendChild(y);
-        let x=document.createElement("img");
-        x.className="icon";
-        x.src="pics/races/" + p.race +""+p.sex+ ".png";
-        x.draggable=false;
-        d.appendChild(x);
-        x=document.createElement("div");
-        x.className="content";
-        x.textContent=p.playerName;
-        let s=document.createElement("div");
-        s.className="small";
-        s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
-        x.appendChild(s);
-        s=document.createElement("div");
-        s.className="small";
-        s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
-        x.appendChild(s);
-        d.appendChild(x);
-        let listItem=document.createElement("li");
-        listItem.draggable=true;
-        listItem.style="cursor:grab;";
-        listItem.appendChild(d);
-        list.appendChild(listItem);
+        if(!removedPlayers.includes(p)){
+            let d=document.createElement("div");
+            d.className="entry";
+            d.draggable=false;
+            let y=document.createElement("img");
+            y.className="icon";
+            y.src="pics/dragIcon.png";
+            y.style="border:none";
+            y.draggable=false;
+            d.appendChild(y);
+            let x=document.createElement("img");
+            x.className="icon";
+            x.src="pics/races/" + p.race +""+p.sex+ ".png";
+            x.draggable=false;
+            d.appendChild(x);
+            x=document.createElement("div");
+            x.className="content";
+            x.textContent=p.playerName;
+            let s=document.createElement("div");
+            s.className="small";
+            s.textContent=p.characterName+" ("+RACES[p.race].name+", "+p.getAge()+" anni)";
+            x.appendChild(s);
+            s=document.createElement("div");
+            s.className="small";
+            s.textContent=p.team===0?"Solo":getTeamById(p.team).teamName;
+            x.appendChild(s);
+            d.appendChild(x);
+            let listItem=document.createElement("li");
+            listItem.draggable=true;
+            listItem.style="cursor:grab;";
+            listItem.appendChild(d);
+            list.appendChild(listItem);
+        }
     });
     draggableListSystem(list);
     endRoundPlayerList.appendChild(list);
@@ -1473,7 +1477,7 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/lowspec/gameOptions.webp')";
             }else if(identifier==='ghostTime'){
                 I(identifier).style.backgroundImage="url('pics/lowspec/ghostTime.webp')";
-            }else if(identifier==='combat'){
+            }else if(identifier==='combat'||identifier=='combatEnding'){
                 I(identifier).style.backgroundImage="url('pics/lowspec/combat.webp')";
             }else if(identifier==='endRound'){
                 I(identifier).style.backgroundImage="url('pics/lowspec/endRound.webp')";
@@ -1489,7 +1493,7 @@ function resizeImages(){
                 I(identifier).style.backgroundImage ="url('pics/midspec/gameOptions.webp')";
             }else if (identifier==='ghostTime'){
                 I(identifier).style.backgroundImage="url('pics/midspec/ghostTime.webp')";
-            }else if (identifier==='combat'){
+            }else if (identifier==='combat'||identifier=='combatEnding'){
                 I(identifier).style.backgroundImage="url('pics/midspec/combat.webp')";
             }else if(identifier==='endRound'){
                 I(identifier).style.backgroundImage="url('pics/midspec/endRound.webp')";
@@ -1505,7 +1509,7 @@ function resizeImages(){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/gameOptions.webp')";
             }else if(identifier==='ghostTime'){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/ghostTime.webp')";
-            }else if(identifier==='combat'){
+            }else if(identifier==='combat'||identifier=='combatEnding'){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/combat.webp')";
             }else if(identifier==='endRound'){
                 I(identifier).style.backgroundImage="url('pics/ultraspec/endRound.webp')";
@@ -1535,7 +1539,7 @@ function stopRound(){
     }
 }
 function nextPlayer(){
-    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE) return;
+    if(gameState!=STATE_GAME&&gameState!=STATE_PAUSE&&gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
     var e=getNextScheduleEntry();
     var c=getCurrentScheduleEntry();
     if(e===null){
@@ -1543,7 +1547,6 @@ function nextPlayer(){
         return;
     }
     if (gameState == STATE_PAUSE) resumeTimer();
-    if(c.player.team!=0&&getTeamById(c.player.team).teamName===getTeamById(e.player.team).teamName) return;
     scheduleTPtr=e.start;
 }
 function pauseTimer() {
@@ -1591,6 +1594,7 @@ function beginCombat(){
     combatTime=0;
     I("combatTypeButtonsContainer").style.display="";
     I("combatTypeTitle").textContent="";
+    I("combatTimeTimer").textContent="00:00";
     toSlide("combat");
 }
 function setCombatType(type){
@@ -1603,6 +1607,57 @@ function setCombatType(type){
 function endCombat(){
     if(gameState!=STATE_COMBAT_INPUT&&gameState!=STATE_COMBAT_RUNNING) return;
     if(soundFxOn) playSoundFx="combatEnd";
+    I("endCombatTypeTitle").textContent=combatType===COMBATTYPE_NARRATIVE?"Narrato":combatType===COMBATTYPE_TACTICAL?"Tattico":"Tattico e Narrato";
+    let endCombatPlayerSelection=I("endCombatPlayerSelection");
+    endCombatPlayerSelection.innerHTML="";
+    Array.from(players).forEach(player => {
+        if(!removedPlayers.includes(player)){
+            let d=document.createElement("div");
+            d.className="entry";
+            let y=document.createElement("input");
+            y.type="checkbox";
+            d.appendChild(y);
+            let x=document.createElement("img");
+            x.className="icon";
+            x.src="pics/races/" + player.race +""+player.sex+ ".png";
+            d.appendChild(x);
+            x=document.createElement("div");
+            x.className="content";
+            x.textContent=player.playerName;
+            let s=document.createElement("div");
+            s.className="small";
+            s.textContent=player.characterName+" ("+RACES[player.race].name+", "+player.getAge()+" anni)";
+            x.appendChild(s);
+            s=document.createElement("div");
+            s.className="small";
+            s.textContent=player.team===0?"Solo":getTeamById(player.team).teamName;
+            x.appendChild(s);
+            d.appendChild(x);
+            endCombatPlayerSelection.appendChild(d);
+        }
+    });
+    toSlide("combatEnding");
+}
+function deadPlayers(){
+    let endCombatPlayerSelection=I("endCombatPlayerSelection");
+    for(let i=0; i<endCombatPlayerSelection.childNodes.length; i++){
+        if(endCombatPlayerSelection.childNodes[i].childNodes[0].checked){
+            Array.from(players).forEach(player => {
+                if(player.playerName===endCombatPlayerSelection.childNodes[i].childNodes[2].childNodes[0].textContent){
+                    player.die();
+                    removedPlayers.push(player);
+                    for(let i=0; i<schedule.length; i++){
+                        if(schedule[i].player==player&&getCurrentScheduleEntry().player!=player){
+                            schedule.splice(i, 1);
+                        }
+                    }
+                    if(getCurrentScheduleEntry().player==player){
+                        nextPlayer();
+                    }
+                }
+            });
+        }
+    }
     resumeTimer();
     toSlide("gameTimer");
 }
@@ -1631,6 +1686,18 @@ function stopGame(askConfirm){
         generateReport();
         Array.from(players).forEach(player => {
             player.reset();
+            if(removedPlayers.includes(player)){
+                for(let i=0;i<players.length;i++){
+                    if(players[i]===player){
+                        players.splice(i,1);
+                    }
+                }
+                for(let i=0;i<removedPlayers.length;i++){
+                    if(removedPlayers[i]===player){
+                        removedPlayers.splice(i,1);
+                    }
+                }
+            }
         });
         saveConfigToLocalStorage();
         toSlide("endGame");
@@ -1672,45 +1739,64 @@ function generateReport(){
     LINE(report,"Turni giocati: ",currentRound+" / "+maxRounds);
     LINE(report,"Durata partita: ",msToHHMMSS(totalPlayedTime));
     LINE(report,"Tempo fantasma: ",msToHHMMSS(ghostTime));
-    LINE(report,"Tempo in combattimento (Narrato, Tattico, Entrambi, Totale): ",msToHHMMSS(totalCombatTime[COMBATTYPE_NARRATIVE])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_TACTICAL])+" + "+msToHHMMSS(totalCombatTime[COMBATTYPE_BOTH])+" = "+msToHHMMSS(totalCombatTime[0]));
-    report.appendChild(document.createElement("br"));
+    let combatreportTitle=document.createElement("span");
+    combatreportTitle.className="bold";
+    combatreportTitle.textContent="Tempo di combattimento:";
+    report.appendChild(combatreportTitle);
+    let combatList=document.createElement("ul");
+    let singleCombat=document.createElement("li");
+    singleCombat.textContent="Narrato: "+msToHHMMSS(totalCombatTime[COMBATTYPE_NARRATIVE]);
+    combatList.appendChild(singleCombat);
+    singleCombat=document.createElement("li");
+    singleCombat.textContent="Tattico: "+msToHHMMSS(totalCombatTime[COMBATTYPE_TACTICAL]);
+    combatList.appendChild(singleCombat);
+    singleCombat=document.createElement("li");
+    singleCombat.textContent="Entrambi: "+msToHHMMSS(totalCombatTime[COMBATTYPE_BOTH]);
+    combatList.appendChild(singleCombat);
+    singleCombat=document.createElement("li");
+    singleCombat.textContent="Totale: "+msToHHMMSS(totalCombatTime[0]);
+    combatList.appendChild(singleCombat);
+    combatList.style="margin-top:0.2em;margin-bottom:0.5em;";
+    report.appendChild(combatList);
     LINE(report,"Elenco dei giocatori a fine partita: ",players.length===0?"Nessuno":null);
     let list=document.createElement("div");
     list.className="list";
     Array.from(players).forEach(p => {
-        let d=document.createElement("div");
-        d.className="entry";
-        let x=document.createElement("img");
-        x.className="icon";
-        x.src ="pics/races/" + p.race +""+p.sex+ ".png";
-        d.appendChild(x);
-        x=document.createElement("div");
-        x.className="content";
-        x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
-        let s=document.createElement("div");
-        s.className="small";
-        let sesso;
-        if(p.sex==="a"){
-            sesso="Assessuato";
-        }else{
-            if(p.sex==="m"){
-                sesso="Maschio";
+        if(!removedPlayers.includes(p)){
+            let d=document.createElement("div");
+            d.className="entry";
+            let x=document.createElement("img");
+            x.className="icon";
+            x.src ="pics/races/" + p.race +""+p.sex+ ".png";
+            d.appendChild(x);
+            x=document.createElement("div");
+            x.className="content";
+            x.textContent=p.playerName + " (giocato per " + msToHHMMSS(p.timePlayed) + ")";
+            let s=document.createElement("div");
+            s.className="small";
+            let sesso;
+            if(p.sex==="a"){
+                sesso="Assessuato";
             }else{
-                sesso="Femmina";
+                if(p.sex==="m"){
+                    sesso="Maschio";
+                }else{
+                    sesso="Femmina";
+                }
             }
+            s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+" "+p.exsex+", "+ p.getAge() + " anni)";
+            x.appendChild(s);
+            s=document.createElement("div");
+            s.className="small";
+            s.textContent=(p.team === 0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
+            x.appendChild(s);
+            s=document.createElement("div");
+            s.className="small";
+            s.textContent=("Anni con oggetto anti-invecchiamento: "+p.yearsAntiAging);
+            x.appendChild(s);
+            d.appendChild(x);
+            list.appendChild(d);
         }
-        s.textContent=p.characterName + " (" + RACES[p.race].name +" "+sesso+" "+p.exsex+", "+ p.getAge() + " anni)";
-        x.appendChild(s);
-        s=document.createElement("div");
-        s.className="small";
-        s.textContent=(p.team === 0 ? "Solo" : getTeamById(p.team).teamName) + (p.alwaysPlayedSolo ? " (sempre Solo)" : "");
-        x.appendChild(s);
-        s=document.createElement("div");
-        s.className="small";
-        s.textContent=("Anni con oggetto anti-invecchiamento: "+p.yearsAntiAging);
-        x.appendChild(s);
-        d.appendChild(x);
-        list.appendChild(d);
     });
     report.appendChild(list);
     report.appendChild(document.createElement("br"));
